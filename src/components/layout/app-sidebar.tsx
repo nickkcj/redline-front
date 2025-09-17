@@ -78,7 +78,7 @@ export function AppSidebar() {
               <span className="text-primary-foreground font-bold text-sm">V</span>
             </div>
             <span className="text-sm font-semibold group-data-[collapsible=icon]:hidden">
-              Vaultly
+              App Name
             </span>
           </div>
 
@@ -111,7 +111,7 @@ export function AppSidebar() {
 
       <SidebarContent className="overflow-x-hidden">
         <SidebarGroup className="py-0">
-          <div className="h-9 flex items-center px-3">
+          <div className="h-9 flex items-center ">
             <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
               Navegação
             </SidebarGroupLabel>

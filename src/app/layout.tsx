@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Vaultly",
-  description: "Secure document sharing platform",
+  title: "[App Name] | Dooor",
+  description: "A Dooor product to start your Dooor product",
 };
 
 export default function RootLayout({
