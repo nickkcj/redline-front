@@ -14,7 +14,8 @@ import {
   Link2,
   Menu,
   Home,
-  MessageCircle
+  MessageCircle,
+  Bot
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTheme } from "next-themes"
@@ -44,6 +45,7 @@ import {
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: Home },
+  { name: "AI Chat", href: "/ai-chat", icon: Bot },
   { name: "Data Rooms", href: "/rooms", icon: FolderOpen },
   { name: "Documents", href: "/documents", icon: FileText },
   { name: "Share Links", href: "/accesses", icon: Link2 },
