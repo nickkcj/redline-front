@@ -13,7 +13,8 @@ import {
   ScrollText,
   Link2,
   Menu,
-  Home
+  Home,
+  MessageCircle
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTheme } from "next-themes"
@@ -49,6 +50,10 @@ const navigation = [
   { name: "Audit Logs", href: "/audit", icon: ScrollText },
 ]
 
+const actions = [
+  { name: "Chat", action: "openChat", icon: MessageCircle },
+]
+
 export function AppSidebar() {
   const pathname = usePathname()
   const router = useRouter()
@@ -57,6 +62,12 @@ export function AppSidebar() {
 
   const handleNavigation = (href: string) => {
     if (pathname !== href) router.push(href)
+  }
+
+  const handleAction = (action: string) => {
+    if (action === "openChat") {
+      window.dispatchEvent(new CustomEvent("open-chat"))
+    }
   }
 
   return (
@@ -123,6 +134,32 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     onClick={() => handleNavigation(item.href)}
                     isActive={pathname === item.href}
+                    tooltip={item.name}
+                    className="group-data-[collapsible=icon]:justify-center"
+                  >
+                    <item.icon className="h-4 w-4 shrink-0" />
+                    <span className="group-data-[collapsible=icon]:hidden">
+                      {item.name}
+                    </span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup className="py-0">
+          <div className="h-9 flex items-center">
+            <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
+              Ações
+            </SidebarGroupLabel>
+          </div>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {actions.map((item) => (
+                <SidebarMenuItem key={item.name}>
+                  <SidebarMenuButton
+                    onClick={() => handleAction(item.action)}
                     tooltip={item.name}
                     className="group-data-[collapsible=icon]:justify-center"
                   >
