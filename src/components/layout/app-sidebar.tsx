@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import { useCommandPaletteContext } from "@/contexts/command-palette-context"
+import { useAuthContext } from "@/contexts/auth-context"
 import {
   Moon,
   Sun,
@@ -64,6 +65,7 @@ export function AppSidebar() {
   const router = useRouter()
   const { theme, setTheme } = useTheme()
   const { openPalette } = useCommandPaletteContext()
+  const { logout } = useAuthContext()
   const [isHoveringHeader, setIsHoveringHeader] = useState(false)
 
   const handleNavigation = (href: string) => {
@@ -75,6 +77,17 @@ export function AppSidebar() {
       window.dispatchEvent(new CustomEvent("open-chat"))
     } else if (action === "openCommand") {
       openPalette()
+    }
+  }
+
+  const handleLogout = async () => {
+    try {
+      await logout()
+      router.push('/login')
+    } catch (error) {
+      console.error('Logout failed:', error)
+      // Even if logout API fails, redirect to login
+      router.push('/login')
     }
   }
 
@@ -238,7 +251,7 @@ export function AppSidebar() {
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
                   Sair
                 </DropdownMenuItem>

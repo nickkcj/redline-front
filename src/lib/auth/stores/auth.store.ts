@@ -5,9 +5,21 @@ type TokenSubscriber = () => void;
 class TokenStore {
   private static instance: TokenStore;
   private subscribers: Set<TokenSubscriber> = new Set();
-  private readonly ACCESS_TOKEN_KEY = 'vaultly_access_token';
+  private readonly ACCESS_TOKEN_KEY = 'access_token';
   private readonly REFRESH_TOKEN_KEY = 'vaultly_refresh_token';
   private readonly EXPIRES_AT_KEY = 'vaultly_expires_at';
+  private readonly USER_KEY = 'user_token';
+
+  constructor() {
+    // Listen for storage changes to detect external updates
+    if (typeof window !== 'undefined') {
+      window.addEventListener('storage', (e) => {
+        if (e.key === this.ACCESS_TOKEN_KEY) {
+          this.notifySubscribers();
+        }
+      });
+    }
+  }
 
   static getInstance(): TokenStore {
     if (!TokenStore.instance) {
@@ -58,13 +70,15 @@ class TokenStore {
 
   isAuthenticated(): boolean {
     const accessToken = this.getAccessToken();
-    const refreshToken = this.getRefreshToken();
 
-    if (!accessToken || !refreshToken) return false;
+    // Simple check for access token (like candor-front)
+    return !!accessToken;
+  }
 
-    // If access token is expired but we have refresh token, still consider authenticated
-    // as we can refresh the token
-    return !this.isTokenExpired() || !!refreshToken;
+  getUser(): any | null {
+    if (!this.isClient()) return null;
+    const userData = localStorage.getItem(this.USER_KEY);
+    return userData ? JSON.parse(userData) : null;
   }
 
   clear(): void {
@@ -73,6 +87,7 @@ class TokenStore {
     localStorage.removeItem(this.ACCESS_TOKEN_KEY);
     localStorage.removeItem(this.REFRESH_TOKEN_KEY);
     localStorage.removeItem(this.EXPIRES_AT_KEY);
+    localStorage.removeItem(this.USER_KEY);
 
     this.notifySubscribers();
   }
@@ -83,6 +98,11 @@ class TokenStore {
     return () => {
       this.subscribers.delete(callback);
     };
+  }
+
+  // Manual trigger for notifications (to be called when tokens are saved externally)
+  triggerUpdate(): void {
+    this.notifySubscribers();
   }
 
   private notifySubscribers(): void {

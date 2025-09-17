@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useAuthContext } from "@/contexts/auth-context";
+import { useGoogleOAuth } from "@/hooks/use-google-oauth";
 
 const nameSchema = z.string()
   .min(2, "Name must be at least 2 characters")
@@ -56,8 +57,9 @@ export function RegisterForm({ onSuccess, onLoginClick }: RegisterFormProps) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [registrationData, setRegistrationData] = useState<RegisterData | null>(null);
   const [isResending, setIsResending] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
-  const { registerStep1, registerConfirm, isLoading, error, clearError } = useAuthContext();
+  const { registerStep1, registerConfirm, googleLogin, isLoading, error, clearError } = useAuthContext();
 
   // Step 1 form
   const registerForm = useForm<RegisterData>({
@@ -76,6 +78,23 @@ export function RegisterForm({ onSuccess, onLoginClick }: RegisterFormProps) {
     defaultValues: {
       code: "",
     },
+  });
+
+  // Google OAuth
+  const { signIn: googleSignIn } = useGoogleOAuth({
+    onSuccess: async (idToken) => {
+      try {
+        await googleLogin({ idToken });
+        onSuccess?.();
+      } catch (error) {
+        console.error('Google login failed:', error);
+      }
+    },
+    onError: (error) => {
+      console.error('Google OAuth error:', error);
+      setIsGoogleLoading(false);
+    },
+    onLoadingChange: setIsGoogleLoading,
   });
 
   const handleRegisterSubmit = async (data: RegisterData) => {
@@ -139,6 +158,11 @@ export function RegisterForm({ onSuccess, onLoginClick }: RegisterFormProps) {
 
   const handleCompletedLogin = () => {
     onSuccess?.();
+  };
+
+  const handleGoogleLogin = () => {
+    clearError();
+    googleSignIn();
   };
 
   const getErrorActions = () => {
@@ -303,7 +327,7 @@ export function RegisterForm({ onSuccess, onLoginClick }: RegisterFormProps) {
               </div>
             </div>
 
-            <Button type="submit" className="w-full h-9" disabled={isLoading}>
+            <Button type="submit" className="w-full h-9" disabled={isLoading || isGoogleLoading}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -312,6 +336,16 @@ export function RegisterForm({ onSuccess, onLoginClick }: RegisterFormProps) {
               ) : (
                 "Create account"
               )}
+            </Button>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full h-9"
+              disabled={isLoading || isGoogleLoading}
+              onClick={handleGoogleLogin}
+            >
+              {isGoogleLoading ? "Loading Google..." : "Sign up with Google"}
             </Button>
 
             <div className="text-center">

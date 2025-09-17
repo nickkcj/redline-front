@@ -1,48 +1,85 @@
 import { apiClient } from '@/lib/api/client/base.client';
 import {
-  LoginStep1Request,
-  LoginStep1Response,
-  LoginCompleteRequest,
-  LoginCompleteResponse,
-  RegisterStep1Request,
-  RegisterStep1Response,
-  RegisterConfirmRequest,
-  GoogleLoginRequest,
-  ForgotPasswordRequest,
-  ResetPasswordRequest,
+  LoginRequestDto,
+  LoginInitResponseDto,
+  LoginCompleteRequestDto,
+  LoginCompleteResponseDto,
+  RegisterRequestDto,
+  RegisterResponseDto,
+  RegisterConfirmRequestDto,
+  RegisterConfirmResponseDto,
+  GoogleLoginDto,
+  GoogleLoginResponseDto,
+  ForgotPasswordRequestDto,
+  ForgotPasswordResponseDto,
+  ResetPasswordRequestDto,
+  ResetPasswordResponseDto,
+  RefreshDto,
+  RefreshResponseDto,
   UserInfoDto,
   TokenData,
 } from '@/lib/types/auth.types';
 
 class AuthService {
-  async loginStep1(data: LoginStep1Request): Promise<LoginStep1Response> {
-    return apiClient.post<LoginStep1Response>('/auth/login', data, {
+  private isDevelopment = process.env.NODE_ENV === 'development';
+
+  async loginStep1(data: LoginRequestDto): Promise<LoginInitResponseDto> {
+    try {
+      return await apiClient.post<LoginInitResponseDto>('/auth/login', data, {
+        skipAuth: true,
+      });
+    } catch (error: any) {
+      // If API is not available in development, use mock
+      if (this.isDevelopment && (error?.code === 'NETWORK_ERROR' || error?.statusCode === 404)) {
+        console.warn('API not available, using mock data for development');
+        return this.mockLoginStep1(data);
+      }
+      throw error;
+    }
+  }
+
+  async loginComplete(data: LoginCompleteRequestDto): Promise<LoginCompleteResponseDto> {
+    try {
+      return await apiClient.post<LoginCompleteResponseDto>('/auth/login/complete', data, {
+        skipAuth: true,
+      });
+    } catch (error: any) {
+      // If API is not available in development, use mock
+      if (this.isDevelopment && (error?.code === 'NETWORK_ERROR' || error?.statusCode === 404)) {
+        console.warn('API not available, using mock data for development');
+        return this.mockLoginComplete(data);
+      }
+      throw error;
+    }
+  }
+
+  async registerStep1(data: RegisterRequestDto): Promise<RegisterResponseDto> {
+    return apiClient.post<RegisterResponseDto>('/auth/register', data, {
       skipAuth: true,
     });
   }
 
-  async loginComplete(data: LoginCompleteRequest): Promise<LoginCompleteResponse> {
-    return apiClient.post<LoginCompleteResponse>('/auth/login/complete', data, {
+  async registerConfirm(data: RegisterConfirmRequestDto): Promise<RegisterConfirmResponseDto> {
+    return apiClient.post<RegisterConfirmResponseDto>('/auth/register/confirm', data, {
       skipAuth: true,
     });
   }
 
-  async registerStep1(data: RegisterStep1Request): Promise<RegisterStep1Response> {
-    return apiClient.post<RegisterStep1Response>('/auth/register', data, {
+  async googleLogin(data: GoogleLoginDto): Promise<GoogleLoginResponseDto> {
+    return apiClient.post<GoogleLoginResponseDto>('/auth/google', data, {
       skipAuth: true,
     });
   }
 
-  async registerConfirm(data: RegisterConfirmRequest): Promise<LoginCompleteResponse> {
-    return apiClient.post<LoginCompleteResponse>('/auth/register/confirm', data, {
-      skipAuth: true,
-    });
-  }
+  async getGoogleOAuthUrl(callbackUrl: string): Promise<{ authUrl: string }> {
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
+    const response = await fetch(`${API_BASE_URL}/auth/google/url?callback_url=${encodeURIComponent(callbackUrl)}`);
 
-  async googleLogin(data: GoogleLoginRequest): Promise<LoginCompleteResponse> {
-    return apiClient.post<LoginCompleteResponse>('/auth/google', data, {
-      skipAuth: true,
-    });
+    if (!response.ok) {
+      throw new Error('Erro ao obter URL de autenticação');
+    }
+
+    return response.json();
   }
 
   async logout(): Promise<void> {
@@ -54,26 +91,35 @@ class AuthService {
     }
   }
 
-  async refreshToken(refreshToken: string): Promise<TokenData> {
-    return apiClient.post<TokenData>('/auth/refresh', { refreshToken }, {
+  async refreshToken(data: RefreshDto): Promise<RefreshResponseDto> {
+    return apiClient.post<RefreshResponseDto>('/auth/refresh', data, {
       skipAuth: true,
     });
   }
 
-  async forgotPassword(data: ForgotPasswordRequest): Promise<{ message: string }> {
-    return apiClient.post<{ message: string }>('/auth/forgot-password', data, {
+  async forgotPassword(data: ForgotPasswordRequestDto): Promise<ForgotPasswordResponseDto> {
+    return apiClient.post<ForgotPasswordResponseDto>('/auth/forgot-password', data, {
       skipAuth: true,
     });
   }
 
-  async resetPassword(data: ResetPasswordRequest): Promise<{ message: string }> {
-    return apiClient.post<{ message: string }>('/auth/reset-password', data, {
+  async resetPassword(data: ResetPasswordRequestDto): Promise<ResetPasswordResponseDto> {
+    return apiClient.post<ResetPasswordResponseDto>('/auth/reset-password', data, {
       skipAuth: true,
     });
   }
 
   async getUserInfo(): Promise<UserInfoDto> {
-    return apiClient.get<UserInfoDto>('/auth/me');
+    try {
+      return await apiClient.get<UserInfoDto>('/auth/me');
+    } catch (error: any) {
+      // If API is not available in development, use mock
+      if (this.isDevelopment && (error?.code === 'NETWORK_ERROR' || error?.statusCode === 404)) {
+        console.warn('API not available, using mock data for development');
+        return this.mockGetUserInfo();
+      }
+      throw error;
+    }
   }
 
   async verifyEmail(token: string): Promise<{ message: string }> {
@@ -89,7 +135,7 @@ class AuthService {
   }
 
   // Mock implementations for development
-  async mockLoginStep1(data: LoginStep1Request): Promise<LoginStep1Response> {
+  async mockLoginStep1(data: LoginRequestDto): Promise<LoginInitResponseDto> {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -105,43 +151,34 @@ class AuthService {
     return {
       requiresTwoFa: true,
       message: 'Please enter the verification code sent to your email.',
+      email: data.email,
     };
   }
 
-  async mockLoginComplete(data: LoginCompleteRequest): Promise<LoginCompleteResponse> {
+  async mockLoginComplete(data: LoginCompleteRequestDto): Promise<LoginCompleteResponseDto> {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     // Mock validation
-    if (data.twoFaCode !== '123456') {
+    if (data.code !== '123456') {
       throw new Error('Invalid verification code');
     }
-
-    const mockTokens: TokenData = {
-      accessToken: 'mock_access_token_' + Date.now(),
-      refreshToken: 'mock_refresh_token_' + Date.now(),
-      expiresIn: 3600, // 1 hour
-    };
 
     const mockUser: UserInfoDto = {
       id: '1',
       email: data.email,
       name: 'Mock User',
-      avatar: undefined,
-      emailVerified: true,
-      twoFactorEnabled: true,
-      role: 'user',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      emailValidated: true,
     };
 
     return {
-      tokens: mockTokens,
       user: mockUser,
+      accessToken: 'mock_access_token_' + Date.now(),
+      refreshToken: 'mock_refresh_token_' + Date.now(),
     };
   }
 
-  async mockRegisterStep1(data: RegisterStep1Request): Promise<RegisterStep1Response> {
+  async mockRegisterStep1(data: RegisterRequestDto): Promise<RegisterResponseDto> {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -155,12 +192,20 @@ class AuthService {
     }
 
     return {
+      user: {
+        id: '1',
+        name: data.name,
+        email: data.email,
+        emailValidated: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
       message: 'Verification code sent to your email.',
-      email: data.email,
+      requiresEmailVerification: true,
     };
   }
 
-  async mockRegisterConfirm(data: RegisterConfirmRequest): Promise<LoginCompleteResponse> {
+  async mockRegisterConfirm(data: RegisterConfirmRequestDto): Promise<RegisterConfirmResponseDto> {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -169,27 +214,8 @@ class AuthService {
       throw new Error('Invalid verification code');
     }
 
-    const mockTokens: TokenData = {
-      accessToken: 'mock_access_token_' + Date.now(),
-      refreshToken: 'mock_refresh_token_' + Date.now(),
-      expiresIn: 3600, // 1 hour
-    };
-
-    const mockUser: UserInfoDto = {
-      id: '1',
-      email: data.email,
-      name: 'New User',
-      avatar: undefined,
-      emailVerified: true,
-      twoFactorEnabled: true,
-      role: 'user',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
     return {
-      tokens: mockTokens,
-      user: mockUser,
+      message: 'Email verified successfully',
     };
   }
 
@@ -201,12 +227,7 @@ class AuthService {
       id: '1',
       email: 'user@example.com',
       name: 'Mock User',
-      avatar: undefined,
-      emailVerified: true,
-      twoFactorEnabled: true,
-      role: 'user',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      emailValidated: true,
     };
   }
 }

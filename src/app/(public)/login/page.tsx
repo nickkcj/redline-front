@@ -46,18 +46,6 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         <LoginForm onSuccess={handleLoginSuccess} />
 
-        <div className="mt-6 text-center">
-          <p className="text-sm text-muted-foreground">
-            Don't have an account?{" "}
-            <Button
-              variant="link"
-              className="text-sm p-0 h-auto underline underline-offset-4"
-              onClick={handleRegisterClick}
-            >
-              Sign up
-            </Button>
-          </p>
-        </div>
       </div>
     </div>
   );

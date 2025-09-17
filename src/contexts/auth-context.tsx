@@ -4,20 +4,25 @@ import { createContext, useContext, ReactNode } from 'react';
 import { useAuth } from '@/lib/auth/hooks/use-auth';
 import {
   AuthState,
-  LoginStep1Request,
-  LoginCompleteRequest,
-  RegisterStep1Request,
-  RegisterConfirmRequest,
-  GoogleLoginRequest,
+  LoginRequestDto,
+  LoginInitResponseDto,
+  LoginCompleteRequestDto,
+  LoginCompleteResponseDto,
+  RegisterRequestDto,
+  RegisterResponseDto,
+  RegisterConfirmRequestDto,
+  RegisterConfirmResponseDto,
+  GoogleLoginDto,
+  GoogleLoginResponseDto,
 } from '@/lib/types/auth.types';
 
 interface AuthContextType extends AuthState {
   isAuthenticated: boolean;
-  loginStep1: (data: LoginStep1Request) => Promise<any>;
-  loginComplete: (data: LoginCompleteRequest) => Promise<any>;
-  registerStep1: (data: RegisterStep1Request) => Promise<any>;
-  registerConfirm: (data: RegisterConfirmRequest) => Promise<any>;
-  googleLogin: (data: GoogleLoginRequest) => Promise<any>;
+  loginStep1: (data: LoginRequestDto) => Promise<LoginInitResponseDto>;
+  loginComplete: (data: LoginCompleteRequestDto) => Promise<LoginCompleteResponseDto>;
+  registerStep1: (data: RegisterRequestDto) => Promise<RegisterResponseDto>;
+  registerConfirm: (data: RegisterConfirmRequestDto) => Promise<RegisterConfirmResponseDto>;
+  googleLogin: (data: GoogleLoginDto) => Promise<GoogleLoginResponseDto>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   initialize: () => Promise<void>;

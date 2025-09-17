@@ -5,13 +5,17 @@ import { authService } from '@/lib/api/services/auth.service';
 import { tokenStore } from '@/lib/auth/stores/auth.store';
 import {
   AuthState,
-  LoginStep1Request,
-  LoginCompleteRequest,
-  RegisterStep1Request,
-  RegisterConfirmRequest,
-  GoogleLoginRequest,
+  LoginRequestDto,
+  LoginInitResponseDto,
+  LoginCompleteRequestDto,
+  LoginCompleteResponseDto,
+  RegisterRequestDto,
+  RegisterResponseDto,
+  RegisterConfirmRequestDto,
+  RegisterConfirmResponseDto,
+  GoogleLoginDto,
+  GoogleLoginResponseDto,
   UserInfoDto,
-  ApiError,
 } from '@/lib/types/auth.types';
 
 const initialState: AuthState = {
@@ -53,7 +57,14 @@ export function useAuth() {
       setLoading(true);
       setState(prev => ({ ...prev, status: 'authenticating' }));
 
-      // Use mock for development
+      // Try to get user from localStorage first (like candor-front)
+      const savedUser = tokenStore.getUser();
+      if (savedUser) {
+        setUser(savedUser);
+        return;
+      }
+
+      // If no saved user, fetch from API
       const user = await authService.mockGetUserInfo();
       setUser(user);
     } catch (error) {
@@ -64,13 +75,12 @@ export function useAuth() {
   }, [setUser, setLoading]);
 
   // Login Step 1
-  const loginStep1 = useCallback(async (data: LoginStep1Request) => {
+  const loginStep1 = useCallback(async (data: LoginRequestDto): Promise<LoginInitResponseDto> => {
     try {
       setLoading(true);
       setError(null);
 
-      // Use mock for development
-      const response = await authService.mockLoginStep1(data);
+      const response = await authService.loginStep1(data);
       return response;
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Login failed';
@@ -82,16 +92,20 @@ export function useAuth() {
   }, [setLoading, setError]);
 
   // Login Complete (with 2FA)
-  const loginComplete = useCallback(async (data: LoginCompleteRequest) => {
+  const loginComplete = useCallback(async (data: LoginCompleteRequestDto): Promise<LoginCompleteResponseDto> => {
     try {
       setLoading(true);
       setError(null);
       setState(prev => ({ ...prev, status: 'authenticating' }));
 
-      // Use mock for development
-      const response = await authService.mockLoginComplete(data);
+      const response = await authService.loginComplete(data);
 
-      tokenStore.setTokens(response.tokens);
+      // Update tokenStore to use new response format
+      tokenStore.setTokens({
+        accessToken: response.accessToken,
+        refreshToken: response.refreshToken,
+        expiresIn: 3600 // default 1 hour
+      });
       setUser(response.user);
 
       return response;
@@ -105,13 +119,12 @@ export function useAuth() {
   }, [setLoading, setError, setUser]);
 
   // Register Step 1
-  const registerStep1 = useCallback(async (data: RegisterStep1Request) => {
+  const registerStep1 = useCallback(async (data: RegisterRequestDto): Promise<RegisterResponseDto> => {
     try {
       setLoading(true);
       setError(null);
 
-      // Use mock for development
-      const response = await authService.mockRegisterStep1(data);
+      const response = await authService.registerStep1(data);
       return response;
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Registration failed';
@@ -123,18 +136,12 @@ export function useAuth() {
   }, [setLoading, setError]);
 
   // Register Confirm
-  const registerConfirm = useCallback(async (data: RegisterConfirmRequest) => {
+  const registerConfirm = useCallback(async (data: RegisterConfirmRequestDto): Promise<RegisterConfirmResponseDto> => {
     try {
       setLoading(true);
       setError(null);
-      setState(prev => ({ ...prev, status: 'authenticating' }));
 
-      // Use mock for development
-      const response = await authService.mockRegisterConfirm(data);
-
-      tokenStore.setTokens(response.tokens);
-      setUser(response.user);
-
+      const response = await authService.registerConfirm(data);
       return response;
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Registration failed';
@@ -143,10 +150,10 @@ export function useAuth() {
     } finally {
       setLoading(false);
     }
-  }, [setLoading, setError, setUser]);
+  }, [setLoading, setError]);
 
   // Google Login
-  const googleLogin = useCallback(async (data: GoogleLoginRequest) => {
+  const googleLogin = useCallback(async (data: GoogleLoginDto): Promise<GoogleLoginResponseDto> => {
     try {
       setLoading(true);
       setError(null);
@@ -154,7 +161,12 @@ export function useAuth() {
 
       const response = await authService.googleLogin(data);
 
-      tokenStore.setTokens(response.tokens);
+      // Update tokenStore to use new response format
+      tokenStore.setTokens({
+        accessToken: response.accessToken,
+        refreshToken: response.refreshToken,
+        expiresIn: 3600 // default 1 hour
+      });
       setUser(response.user);
 
       return response;
@@ -187,8 +199,7 @@ export function useAuth() {
         return;
       }
 
-      // Use mock for development
-      const user = await authService.mockGetUserInfo();
+      const user = await authService.getUserInfo();
       setUser(user);
     } catch (error) {
       console.error('Failed to refresh user info:', error);
@@ -203,11 +214,33 @@ export function useAuth() {
       const isAuthenticated = tokenStore.isAuthenticated();
       if (!isAuthenticated && state.user) {
         setUser(null);
+      } else if (isAuthenticated && !state.user) {
+        // If tokens were added but no user, initialize
+        initialize();
       }
     });
 
     return unsubscribe;
-  }, [state.user, setUser]);
+  }, [state.user, setUser, initialize]);
+
+  // Listen for storage changes (like candor-front)
+  useEffect(() => {
+    function handleStorage(e: StorageEvent) {
+      if (e.key === 'access_token') {
+        const hasToken = !!localStorage.getItem('access_token');
+        if (hasToken && !state.user) {
+          // Token was added, initialize auth
+          initialize();
+        } else if (!hasToken && state.user) {
+          // Token was removed, logout
+          setUser(null);
+        }
+      }
+    }
+
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
+  }, [state.user, setUser, initialize]);
 
   // Initialize on mount
   useEffect(() => {
