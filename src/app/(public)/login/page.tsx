@@ -22,12 +22,6 @@ export default function LoginPage() {
     router.push(returnUrl || '/dashboard');
   };
 
-  const handleRegisterClick = () => {
-    const returnUrl = new URLSearchParams(window.location.search).get('returnUrl');
-    const params = returnUrl ? `?returnUrl=${returnUrl}` : '';
-    router.push(`/register${params}`);
-  };
-
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
       <Button
@@ -45,7 +39,6 @@ export default function LoginPage() {
 
       <div className="w-full max-w-sm">
         <LoginForm onSuccess={handleLoginSuccess} />
-
       </div>
     </div>
   );
