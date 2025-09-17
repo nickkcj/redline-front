@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { usePathname, useRouter } from "next/navigation"
+import { useCommandPaletteContext } from "@/contexts/command-palette-context"
 import {
   Moon,
   Sun,
@@ -15,7 +16,8 @@ import {
   Menu,
   Home,
   MessageCircle,
-  Bot
+  Bot,
+  Search
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTheme } from "next-themes"
@@ -54,12 +56,14 @@ const navigation = [
 
 const actions = [
   { name: "Chat", action: "openChat", icon: MessageCircle },
+  { name: "Command Palette", action: "openCommand", icon: Search },
 ]
 
 export function AppSidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const { theme, setTheme } = useTheme()
+  const { openPalette } = useCommandPaletteContext()
   const [isHoveringHeader, setIsHoveringHeader] = useState(false)
 
   const handleNavigation = (href: string) => {
@@ -69,6 +73,8 @@ export function AppSidebar() {
   const handleAction = (action: string) => {
     if (action === "openChat") {
       window.dispatchEvent(new CustomEvent("open-chat"))
+    } else if (action === "openCommand") {
+      openPalette()
     }
   }
 
