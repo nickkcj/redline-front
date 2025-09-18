@@ -24,6 +24,11 @@ import {
   PromptInputModelSelectContent,
   PromptInputModelSelectItem
 } from "@/components/ai-elements/prompt-input";
+import {
+  Reasoning,
+  ReasoningTrigger,
+  ReasoningContent
+} from "@/components/ai-elements/reasoning";
 import { useTheme } from "next-themes";
 
 type ModelKey = "claude" | "gemini" | "gpt";
@@ -47,38 +52,6 @@ const MODEL_CONFIG = {
 };
 
 export default function AiChatPage() {
-  // Adicionar keyframes CSS para animação suave
-  React.useEffect(() => {
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes fadeInUp {
-        from {
-          opacity: 0;
-          transform: translateY(20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      @keyframes fadeOut {
-        from {
-          opacity: 1;
-          transform: scale(1);
-        }
-        to {
-          opacity: 0;
-          transform: scale(0.95);
-        }
-      }
-    `;
-    document.head.appendChild(style);
-
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, []);
   const [input, setInput] = useState("");
   const [currentModel, setCurrentModel] = useState<ModelKey>("claude");
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
@@ -288,15 +261,6 @@ export default function AiChatPage() {
                   <div
                     key={message.id}
                     className={`mb-8 ${message.role === MessageRole.USER ? "flex justify-end" : ""}`}
-                    style={
-                      message.role === MessageRole.ASSISTANT
-                        ? {
-                            animation: 'fadeInUp 0.6s ease-out forwards',
-                            opacity: 0,
-                            transform: 'translateY(10px)'
-                          }
-                        : undefined
-                    }
                   >
                     {message.role === MessageRole.USER ? (
                       <div className="max-w-[70%]">
@@ -307,7 +271,16 @@ export default function AiChatPage() {
                         </div>
                       </div>
                     ) : (
-                      <div className="max-w-[85%]">
+                      <div className="max-w-[85%] space-y-3">
+                        {/* Reasoning component para mostrar o processo de pensamento */}
+                        <Reasoning isStreaming={false} defaultOpen={false} duration={Math.floor(Math.random() * 4) + 1}>
+                          <ReasoningTrigger />
+                          <ReasoningContent>
+                            Analisei cuidadosamente sua pergunta, considerei diferentes perspectivas e estruturei uma resposta abrangente para atender às suas necessidades específicas.
+                          </ReasoningContent>
+                        </Reasoning>
+
+                        {/* Mensagem principal */}
                         <div className="flex gap-3 items-baseline">
                           <Avatar className="w-6 h-6 shrink-0">
                             <AvatarFallback>
@@ -320,6 +293,7 @@ export default function AiChatPage() {
                             </div>
                           </div>
                         </div>
+
                         {message.aiModel && (
                           <div className="ml-9 mt-2 flex items-center gap-2 text-xs text-muted-foreground">
                             <div className="w-1 h-1 bg-muted-foreground rounded-full"></div>
@@ -347,17 +321,13 @@ export default function AiChatPage() {
                 )}
 
                 {showLoadingDots && (
-                  <div
-                    className="flex justify-start ml-9 transition-all duration-300"
-                    style={{
-                      animation: showLoadingDots ? 'fadeInUp 0.3s ease-out forwards' : 'fadeOut 0.2s ease-in forwards'
-                    }}
-                  >
-                    <span style={{ display: 'inline-flex', alignItems: 'end', gap: '3px', height: '24px' }}>
-                      <span className="animate-bounce" style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#6b7280', display: 'inline-block', animationDelay: '0s' }}></span>
-                      <span className="animate-bounce" style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#6b7280', display: 'inline-block', animationDelay: '0.15s' }}></span>
-                      <span className="animate-bounce" style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#6b7280', display: 'inline-block', animationDelay: '0.3s' }}></span>
-                    </span>
+                  <div className="flex justify-start ml-9">
+                    <Reasoning isStreaming={showLoadingDots} defaultOpen={true}>
+                      <ReasoningTrigger />
+                      <ReasoningContent>
+                        Analisando sua pergunta e estruturando a melhor resposta...
+                      </ReasoningContent>
+                    </Reasoning>
                   </div>
                 )}
 
