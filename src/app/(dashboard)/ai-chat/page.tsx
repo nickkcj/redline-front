@@ -200,7 +200,7 @@ export default function AiChatPage() {
   }, [messages, pendingUserMessage]);
 
   return (
-    <div className="min-h-[calc(100vh-8rem)] flex flex-col">
+    <div className="h-[95vh] flex flex-col">
       <ChatHeader
         onNewChat={handleNewChat}
         onSelectChat={handleSelectChat}
@@ -208,7 +208,7 @@ export default function AiChatPage() {
         title={chatData?.title || "AI Chat"}
       />
 
-      <div className="flex-1 flex flex-col px-8 py-6">
+      <div className="flex-1 flex flex-col px-8 py-2 min-h-0">
         <div className="w-full max-w-4xl mx-auto flex flex-col h-full">
 
         {/* Se temos mensagens ou mensagem pendente, mostrar o chat */}
@@ -216,7 +216,7 @@ export default function AiChatPage() {
           <>
 
             {/* Área de Mensagens */}
-            <ScrollArea className="flex-1">
+            <ScrollArea className="flex-1 min-h-0">
               <div className="space-y-6 p-4">
                 {isLoadingChat && (
                   <div className="flex items-center justify-center py-8">
@@ -300,7 +300,7 @@ export default function AiChatPage() {
             </ScrollArea>
 
             {/* Input fixo na parte inferior */}
-            <div className="border-t bg-background p-4">
+            <div className="bg-background p-4 pb-5 shrink-0">
               <div className="w-full max-w-2xl mx-auto">
                 <PromptInput
                   onSubmit={(message, e) => {
