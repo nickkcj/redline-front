@@ -16,8 +16,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "[App Name] | Dooor",
+  title: "App | Dooor",
   description: "A Dooor product to start your Dooor product",
+  icons: {
+    icon: "/Selo-Dooor White.png",
+    apple: "/Selo-Dooor White.png",
+  },
 };
 
 export default function RootLayout({
