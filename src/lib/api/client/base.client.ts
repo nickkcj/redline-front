@@ -21,7 +21,6 @@ class BaseApiClient {
 
     return {
       'Authorization': `Bearer ${accessToken}`,
-      'x-google-auth-token': accessToken, // Backend também aceita este header
     };
   }
 

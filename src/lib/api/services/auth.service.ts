@@ -1,4 +1,5 @@
 import { apiClient } from '@/lib/api/client/base.client';
+import { tokenStore } from '@/lib/auth/stores/auth.store';
 import {
   LoginRequestDto,
   LoginInitResponseDto,
@@ -84,7 +85,20 @@ class AuthService {
 
   async logout(): Promise<void> {
     try {
-      await apiClient.post('/auth/logout');
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
+      const accessToken = tokenStore.getAccessToken();
+
+      const response = await fetch(`${API_BASE_URL}/auth/logout`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Logout failed');
+      }
     } catch (error) {
       // Ignore logout errors, clear tokens anyway
       console.warn('Logout API call failed:', error);
@@ -111,10 +125,24 @@ class AuthService {
 
   async getUserInfo(): Promise<UserInfoDto> {
     try {
-      return await apiClient.get<UserInfoDto>('/auth/me');
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
+      const accessToken = tokenStore.getAccessToken();
+
+      const response = await fetch(`${API_BASE_URL}/auth/me`, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get user info');
+      }
+
+      return response.json();
     } catch (error: any) {
       // If API is not available in development, use mock
-      if (this.isDevelopment && (error?.code === 'NETWORK_ERROR' || error?.statusCode === 404)) {
+      if (this.isDevelopment && (error?.message?.includes('fetch') || error?.message?.includes('Network'))) {
         console.warn('API not available, using mock data for development');
         return this.mockGetUserInfo();
       }

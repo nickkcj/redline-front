@@ -1,5 +1,6 @@
 import { useApiQuery } from '@/hooks/use-api'
 import { apiClient } from '@/lib/api/client/base.client'
+import { tokenStore } from '@/lib/auth/stores/auth.store'
 import type { ApiResponse, User } from '@/types/common'
 import {
   useCurrentOrganization,
@@ -18,7 +19,23 @@ export function useUserWithOrganizations() {
 
   return useApiQuery(
     ['users'], // Call to /users endpoint
-    () => apiClient.get<User>('/users'), // Backend retorna UserDTO diretamente, não wrapped em ApiResponse
+    async () => {
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
+      const accessToken = tokenStore.getAccessToken();
+
+      const response = await fetch(`${API_BASE_URL}/users`, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao buscar dados do usuário');
+      }
+
+      return response.json();
+    }, // Using direct fetch with Google token
     {
       staleTime: 2 * 60 * 1000, // 2 minutes
       onSuccess: (userData) => {
