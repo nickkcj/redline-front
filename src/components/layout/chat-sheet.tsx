@@ -12,76 +12,125 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { aiService, ChatMessage } from "@/lib/services/ai.service";
+import { useCreateChat, useChat } from "@/hooks/use-chat";
+import { useApiMutation } from "@/hooks/use-api";
+import { useCurrentWorkspace } from "@/store/app-store";
+import { MessageRole, ChatMessageResponseDto, SendMessageDto } from "@/types/chat";
+import { toast } from "sonner";
 
 type ChatSheetProps = PropsWithChildren<{
   /** Deixe undefined para não ter trigger visual */
   trigger?: React.ReactNode;
-  /** Slug for the AI endpoint - defaults to "default" */
-  slug?: string;
-  /** AI provider - defaults to "mock" */
-  provider?: string;
+  /** ID do chat existente - se não fornecido, criará um novo */
+  chatId?: string;
 }>;
 
-export function ChatSheet({ trigger, slug = "default", provider = "mock" }: ChatSheetProps) {
+export function ChatSheet({ trigger, chatId: initialChatId }: ChatSheetProps) {
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isStreaming, setIsStreaming] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const bottomRef = useRef<HTMLDivElement>(null);
-  useEffect(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), [messages]);
-
   const [open, setOpen] = useState(false);
+  const [currentChatId, setCurrentChatId] = useState<string | null>(initialChatId || null);
+
+  const currentWorkspace = useCurrentWorkspace();
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  const createChatMutation = useCreateChat(currentWorkspace?.id || '');
+
+  // Criar hook de envio de mensagem manualmente
+  const sendMessageMutation = useApiMutation<ChatMessageResponseDto, SendMessageDto>(
+    async (data) => {
+      if (!currentWorkspace?.id || !currentChatId) {
+        throw new Error('Workspace ou Chat ID não encontrado');
+      }
+
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
+      const response = await fetch(`${API_BASE_URL}/chats/${currentWorkspace.id}/${currentChatId}/messages`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(errorData || `HTTP error! status: ${response.status}`);
+      }
+
+      return response.json();
+    },
+    {
+      showSuccessToast: false,
+      invalidateKeys: currentWorkspace?.id && currentChatId ? [
+        ['chat', currentWorkspace.id, currentChatId],
+        ['chat-messages', currentWorkspace.id, currentChatId],
+        ['chats', currentWorkspace.id]
+      ] : [],
+    }
+  );
+
+  // Debug current workspace
+  useEffect(() => {
+    console.log('Current workspace changed:', currentWorkspace);
+  }, [currentWorkspace]);
+
+  useEffect(() => {
+    console.log('Current chatId changed:', currentChatId);
+  }, [currentChatId]);
+
+  const { data: chatData, isLoading: isLoadingChat, error: chatError } = useChat(
+    currentWorkspace?.id || '',
+    currentChatId || '',
+  );
+
+  const messages = chatData?.messages || [];
+  const isStreaming = sendMessageMutation.isPending;
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const sendMessage = async (content: string) => {
-    if (!content.trim() || isStreaming) return;
+    console.log('sendMessage called with:', { content, currentWorkspace: currentWorkspace?.id, currentChatId, isStreaming });
 
-    const userMessage: ChatMessage = {
-      role: 'user',
-      content: content.trim()
-    };
+    if (!content.trim()) {
+      console.log('Empty content, returning');
+      return;
+    }
 
-    setMessages(prev => [...prev, userMessage]);
-    setIsStreaming(true);
-    setError(null);
+    if (isStreaming) {
+      console.log('Already streaming, returning');
+      return;
+    }
+
+    if (!currentWorkspace?.id) {
+      console.log('No workspace ID, returning');
+      toast.error('Workspace não encontrado');
+      return;
+    }
 
     try {
-      const assistantMessage: ChatMessage = {
-        role: 'assistant',
-        content: ''
-      };
-
-      setMessages(prev => [...prev, assistantMessage]);
-
-      let accumulatedContent = '';
-
-      for await (const chunk of aiService.streamChatCompletions(slug, {
-        messages: [...messages, userMessage],
-        model: "mock-model",
-        stream: true,
-        temperature: 0.7
-      }, provider)) {
-        const content = chunk.choices[0]?.delta.content;
-        if (content) {
-          accumulatedContent += content;
-          setMessages(prev => {
-            const newMessages = [...prev];
-            const lastMessage = newMessages[newMessages.length - 1];
-            if (lastMessage && lastMessage.role === 'assistant') {
-              lastMessage.content = accumulatedContent;
-            }
-            return newMessages;
-          });
-        }
+      // Se não temos um chat, criar um novo
+      if (!currentChatId) {
+        console.log('Creating new chat...');
+        const newChat = await createChatMutation.mutateAsync({
+          title: content.slice(0, 50) + (content.length > 50 ? '...' : ''),
+          initialMessage: content
+        });
+        console.log('New chat created:', newChat);
+        setCurrentChatId(newChat.id);
+        return;
       }
+
+      // Enviar mensagem para o chat existente
+      console.log('Sending message to existing chat:', currentChatId);
+      const result = await sendMessageMutation.mutateAsync({
+        content: content.trim(),
+        role: MessageRole.USER
+      });
+      console.log('Message sent successfully:', result);
     } catch (err) {
       console.error('Chat error:', err);
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      // Remove the empty assistant message if there was an error
-      setMessages(prev => prev.filter(msg => !(msg.role === 'assistant' && !msg.content)));
-    } finally {
-      setIsStreaming(false);
+      toast.error('Erro ao enviar mensagem');
     }
   };
 
@@ -116,33 +165,45 @@ export function ChatSheet({ trigger, slug = "default", provider = "mock" }: Chat
         <div className="flex h-full flex-col">
           <ScrollArea className="flex-1 px-4 py-3">
             <div className="space-y-3 text-sm">
-              {error && (
+              {chatError && (
                 <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md">
-                  <div className="text-destructive text-sm">{error}</div>
+                  <div className="text-destructive text-sm">Erro ao carregar chat</div>
                 </div>
               )}
 
-              {messages.map((m, index) => (
-                <div key={index}>
+              {isLoadingChat && (
+                <div className="flex items-center justify-center py-8">
+                  <div className="text-sm text-muted-foreground">Carregando...</div>
+                </div>
+              )}
+
+              {!isLoadingChat && messages.length === 0 && (
+                <div className="flex items-center justify-center py-8">
+                  <div className="text-sm text-muted-foreground">Inicie uma conversa...</div>
+                </div>
+              )}
+
+              {messages.map((message) => (
+                <div key={message.id}>
                   <div className="mb-1 font-medium">
-                    {m.role === "user" ? "You" : "Assistant"}
+                    {message.role === MessageRole.USER ? "Você" : "Assistente"}
                   </div>
 
                   <div className="text-muted-foreground whitespace-pre-wrap">
-                    {typeof m.content === 'string'
-                      ? m.content
-                      : Array.isArray(m.content)
-                        ? m.content.map(c => c.text).join(' ')
-                        : ''
-                    }
-                    {m.role === "assistant" && isStreaming && index === messages.length - 1 && (
-                      <span className="inline-block w-2 h-4 bg-current animate-pulse ml-1" />
-                    )}
+                    {message.content}
                   </div>
 
                   <Separator className="my-3" />
                 </div>
               ))}
+
+              {isStreaming && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <span>Enviando</span>
+                  <span className="inline-block w-2 h-4 bg-current animate-pulse" />
+                </div>
+              )}
+
               <div ref={bottomRef} />
             </div>
           </ScrollArea>
@@ -164,8 +225,8 @@ export function ChatSheet({ trigger, slug = "default", provider = "mock" }: Chat
               autoFocus
               disabled={isStreaming}
             />
-            <Button disabled={isStreaming}>
-              {isStreaming ? "Sending..." : "Send"}
+            <Button disabled={isStreaming || !currentWorkspace?.id}>
+              {isStreaming ? "Enviando..." : "Enviar"}
             </Button>
           </form>
         </div>

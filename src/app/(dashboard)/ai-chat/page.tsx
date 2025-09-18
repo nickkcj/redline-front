@@ -4,7 +4,14 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { MessageSquare, Copy, Check } from "lucide-react";
+import { MessageSquare, Copy, Check, User, Bot } from "lucide-react";
+import { useCreateChat, useChat } from "@/hooks/use-chat";
+import { useCurrentWorkspace } from "@/store/app-store";
+import { MessageRole, ChatMessageResponseDto, SendMessageDto } from "@/types/chat";
+import { useApiMutation } from "@/hooks/use-api";
+import { tokenStore } from "@/lib/auth/stores/auth.store";
+import { ChatHeader } from "@/components/chat/chat-header";
+import { toast } from "sonner";
 import {
   PromptInput,
   PromptInputTextarea,
@@ -41,28 +48,230 @@ const MODEL_CONFIG = {
 export default function AiChatPage() {
   const [input, setInput] = useState("");
   const [currentModel, setCurrentModel] = useState<ModelKey>("claude");
+  const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const currentWorkspace = useCurrentWorkspace();
   const docsCount = 156; // Mock document count
+
+  // Hooks para API
+  const createChatMutation = useCreateChat(currentWorkspace?.id || '');
+
+  const { data: chatData, isLoading: isLoadingChat, error: chatError } = useChat(
+    currentWorkspace?.id || '',
+    currentChatId || '',
+  );
+
+  const sendMessageMutation = useApiMutation<ChatMessageResponseDto, { content: string; role: MessageRole }>(
+    async (data) => {
+      if (!currentWorkspace?.id || !currentChatId) {
+        throw new Error('Workspace ou Chat ID não encontrado');
+      }
+
+      const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
+      const accessToken = tokenStore.getAccessToken();
+
+      console.log('Sending request to:', `${API_BASE_URL}/chats/${currentWorkspace.id}/${currentChatId}/messages`);
+      console.log('With token:', accessToken ? 'Token present' : 'No token');
+      console.log('Data:', data);
+
+      const response = await fetch(`${API_BASE_URL}/chats/${currentWorkspace.id}/${currentChatId}/messages`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      console.log('Response status:', response.status);
+
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('Response error:', errorData);
+        throw new Error(errorData || `HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Response data:', result);
+      return result;
+    },
+    {
+      showSuccessToast: false,
+      invalidateKeys: currentWorkspace?.id && currentChatId ? [
+        ['chat', currentWorkspace.id, currentChatId],
+        ['chat-messages', currentWorkspace.id, currentChatId],
+        ['chats', currentWorkspace.id]
+      ] : [],
+    }
+  );
+
+  const messages = chatData?.messages || [];
+  const isStreaming = sendMessageMutation.isPending || createChatMutation.isPending;
+
+  // Auto scroll para a última mensagem
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  // Debug logs
+  useEffect(() => {
+    console.log('Current workspace:', currentWorkspace);
+    console.log('Current chatId:', currentChatId);
+    console.log('Messages:', messages);
+  }, [currentWorkspace, currentChatId, messages]);
 
   const handleQuickAction = (prompt: string) => {
     setInput("");
     handleSendMessage(prompt);
   };
 
-  const handleSendMessage = (text: string) => {
+  const handleSendMessage = async (text: string) => {
     console.log("Sending message:", text, "with model:", currentModel);
-    // Here you would integrate with your AI service
-    // For now, just log the message
+
+    if (!text.trim()) {
+      console.log('Empty message, returning');
+      return;
+    }
+
+    if (isStreaming) {
+      console.log('Already processing, returning');
+      return;
+    }
+
+    if (!currentWorkspace?.id) {
+      console.log('No workspace found');
+      toast.error('Workspace não encontrado');
+      return;
+    }
+
+    try {
+      // Se não temos um chat, criar um novo
+      if (!currentChatId) {
+        console.log('Creating new chat...');
+        const newChat = await createChatMutation.mutateAsync({
+          title: text.slice(0, 50) + (text.length > 50 ? '...' : ''),
+          initialMessage: text
+        });
+        console.log('New chat created:', newChat);
+        setCurrentChatId(newChat.id);
+        return;
+      }
+
+      // Enviar mensagem para o chat existente
+      console.log('Sending message to existing chat:', currentChatId);
+      const result = await sendMessageMutation.mutateAsync({
+        content: text.trim(),
+        role: MessageRole.USER
+      });
+      console.log('Message sent successfully:', result);
+    } catch (err) {
+      console.error('Chat error:', err);
+      toast.error('Erro ao enviar mensagem');
+    }
+  };
+
+  const handleNewChat = () => {
+    setCurrentChatId(null);
+    setInput('');
+  };
+
+  const handleSelectChat = (chatId: string) => {
+    setCurrentChatId(chatId);
   };
 
   return (
-    <div className="min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-8 py-6">
-      <div className="w-full max-w-2xl">
-        {/* Welcome Section */}
-        <div className="text-center mb-10">
+    <div className="min-h-[calc(100vh-8rem)] flex flex-col">
+      <ChatHeader
+        onNewChat={handleNewChat}
+        onSelectChat={handleSelectChat}
+        currentChatId={currentChatId || undefined}
+        title={chatData?.title || "AI Chat"}
+      />
+
+      <div className="flex-1 flex flex-col px-8 py-6">
+        <div className="w-full max-w-4xl mx-auto flex flex-col h-full">
+
+        {/* Se temos mensagens, mostrar o chat */}
+        {messages.length > 0 ? (
+          <>
+            {/* Header do Chat */}
+            <div className="mb-6">
+              <h1 className="text-2xl font-bold">{chatData?.title || 'Chat AI'}</h1>
+              <p className="text-muted-foreground">Conversando sobre {docsCount} documentos</p>
+            </div>
+
+            {/* Área de Mensagens */}
+            <ScrollArea className="flex-1 mb-6">
+              <div className="space-y-6">
+                {isLoadingChat && (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="text-sm text-muted-foreground">Carregando...</div>
+                  </div>
+                )}
+
+                {chatError && (
+                  <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-md">
+                    <div className="text-destructive text-sm">Erro ao carregar chat</div>
+                  </div>
+                )}
+
+                {messages.map((message) => (
+                  <div key={message.id} className="flex gap-4">
+                    <Avatar className="w-8 h-8 shrink-0">
+                      <AvatarFallback>
+                        {message.role === MessageRole.USER ? (
+                          <User className="w-4 h-4" />
+                        ) : (
+                          <Bot className="w-4 h-4" />
+                        )}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium mb-1">
+                        {message.role === MessageRole.USER ? 'Você' : 'Assistente AI'}
+                      </div>
+                      <div className="text-sm text-muted-foreground whitespace-pre-wrap">
+                        {message.content}
+                      </div>
+                      {message.aiModel && (
+                        <div className="text-xs text-muted-foreground mt-1">
+                          Modelo: {message.aiModel}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+
+                {isStreaming && (
+                  <div className="flex gap-4">
+                    <Avatar className="w-8 h-8 shrink-0">
+                      <AvatarFallback>
+                        <Bot className="w-4 h-4" />
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium mb-1">Assistente AI</div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <span>Processando</span>
+                        <span className="inline-block w-2 h-4 bg-current animate-pulse" />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div ref={messagesEndRef} />
+              </div>
+            </ScrollArea>
+          </>
+        ) : (
+          /* Interface inicial quando não há mensagens */
+          <div className="flex-1 flex flex-col items-center justify-center">
+            {/* Welcome Section */}
+            <div className="text-center mb-10">
           <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-primary/20 to-primary/10 rounded-2xl flex items-center justify-center shadow-lg">
             <MessageSquare className="h-8 w-8 text-primary" />
           </div>
@@ -72,11 +281,11 @@ export default function AiChatPage() {
           <p className="text-lg text-muted-foreground max-w-lg mx-auto">
             Ask me anything about the {docsCount} documents in this data room
           </p>
-        </div>
+            </div>
 
-        {/* Quick Actions */}
-        {docsCount > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+            {/* Quick Actions */}
+            {docsCount > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
             <Button
               variant="outline"
               className="h-auto p-6 text-left justify-start hover:bg-accent/50 hover:shadow-md transition-all duration-200 border-2 hover:border-primary/20"
@@ -133,10 +342,13 @@ export default function AiChatPage() {
                 </div>
               </div>
             </Button>
+              </div>
+            )}
           </div>
         )}
 
-        {/* Main Chat Input */}
+        {/* Main Chat Input - sempre visível */}
+        <div className="w-full max-w-2xl mx-auto">
         <PromptInput
           onSubmit={(message, e) => {
             e.preventDefault();
@@ -183,14 +395,16 @@ export default function AiChatPage() {
               disabled={!input.trim()}
             />
           </PromptInputToolbar>
-        </PromptInput>
+          </PromptInput>
 
-        {/* Additional Help Text */}
-        <div className="text-center mt-6">
-          <p className="text-sm text-muted-foreground">
-            Press <kbd className="px-2 py-1 bg-muted rounded text-xs">Enter</kbd> to send,
-            <kbd className="px-2 py-1 bg-muted rounded text-xs ml-1">Shift + Enter</kbd> for new line
-          </p>
+          {/* Additional Help Text */}
+          <div className="text-center mt-6">
+            <p className="text-sm text-muted-foreground">
+              Press <kbd className="px-2 py-1 bg-muted rounded text-xs">Enter</kbd> to send,
+              <kbd className="px-2 py-1 bg-muted rounded text-xs ml-1">Shift + Enter</kbd> for new line
+            </p>
+          </div>
+        </div>
         </div>
       </div>
     </div>
