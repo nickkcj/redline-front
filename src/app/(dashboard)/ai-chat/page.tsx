@@ -244,7 +244,7 @@ export default function AiChatPage() {
         onSelectChat={handleSelectChat}
         currentChatId={currentChatId || undefined}
       />
-      <div className="h-[85vh] flex flex-col min-h-0">
+      <div className="h-[92vh] flex flex-col min-h-0">
         {/* Se temos mensagens ou mensagem pendente, mostrar o chat */}
         {messages.length > 0 || pendingUserMessage ? (
           <>
