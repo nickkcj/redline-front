@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -47,10 +47,44 @@ const MODEL_CONFIG = {
 };
 
 export default function AiChatPage() {
+  // Adicionar keyframes CSS para animação suave
+  React.useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes fadeOut {
+        from {
+          opacity: 1;
+          transform: scale(1);
+        }
+        to {
+          opacity: 0;
+          transform: scale(0.95);
+        }
+      }
+    `;
+    document.head.appendChild(style);
+
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
   const [input, setInput] = useState("");
   const [currentModel, setCurrentModel] = useState<ModelKey>("claude");
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [pendingUserMessage, setPendingUserMessage] = useState<string | null>(null);
+  const [showLoadingDots, setShowLoadingDots] = useState(false);
+  const [lastMessageCount, setLastMessageCount] = useState(0);
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
@@ -113,6 +147,27 @@ export default function AiChatPage() {
 
   const messages = chatData?.messages || [];
   const isStreaming = sendMessageMutation.isPending || createChatMutation.isPending;
+
+  // Controlar dots de loading
+  useEffect(() => {
+    if (isStreaming) {
+      setShowLoadingDots(true);
+    } else {
+      // Delay para esconder os dots apenas quando uma nova mensagem realmente chegar
+      const timer = setTimeout(() => {
+        setShowLoadingDots(false);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isStreaming]);
+
+  // Detectar quando novas mensagens chegam para esconder dots imediatamente
+  useEffect(() => {
+    if (messages.length > lastMessageCount) {
+      setShowLoadingDots(false);
+      setLastMessageCount(messages.length);
+    }
+  }, [messages.length, lastMessageCount]);
 
   // Auto scroll para a última mensagem
   useEffect(() => {
@@ -229,8 +284,20 @@ export default function AiChatPage() {
                   </div>
                 )}
 
-                {messages.map((message) => (
-                  <div key={message.id} className={`mb-8 ${message.role === MessageRole.USER ? "flex justify-end" : ""}`}>
+                {messages.map((message, index) => (
+                  <div
+                    key={message.id}
+                    className={`mb-8 ${message.role === MessageRole.USER ? "flex justify-end" : ""}`}
+                    style={
+                      message.role === MessageRole.ASSISTANT
+                        ? {
+                            animation: 'fadeInUp 0.6s ease-out forwards',
+                            opacity: 0,
+                            transform: 'translateY(10px)'
+                          }
+                        : undefined
+                    }
+                  >
                     {message.role === MessageRole.USER ? (
                       <div className="max-w-[70%]">
                         <div className="bg-gray-100 dark:bg-primary text-gray-900 dark:text-primary-foreground px-6 py-4 rounded-3xl">
@@ -279,8 +346,13 @@ export default function AiChatPage() {
                   </div>
                 )}
 
-                {isStreaming && (
-                  <div className="flex justify-start ml-9">
+                {showLoadingDots && (
+                  <div
+                    className="flex justify-start ml-9 transition-all duration-300"
+                    style={{
+                      animation: showLoadingDots ? 'fadeInUp 0.3s ease-out forwards' : 'fadeOut 0.2s ease-in forwards'
+                    }}
+                  >
                     <span style={{ display: 'inline-flex', alignItems: 'end', gap: '3px', height: '24px' }}>
                       <span className="animate-bounce" style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#6b7280', display: 'inline-block', animationDelay: '0s' }}></span>
                       <span className="animate-bounce" style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#6b7280', display: 'inline-block', animationDelay: '0.15s' }}></span>
