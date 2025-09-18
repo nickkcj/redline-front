@@ -280,32 +280,12 @@ export default function AiChatPage() {
                 )}
 
                 {isStreaming && (
-                  <div className="flex justify-start">
-                    <div className="flex gap-3 max-w-[85%]">
-                      <Avatar className="h-6 w-6 shrink-0">
-                        <AvatarFallback className="text-xs">
-                          <Bot className="w-3 h-3" />
-                        </AvatarFallback>
-                      </Avatar>
-
-                      <div className="rounded-lg p-4 bg-muted/50 border">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-xs font-medium">
-                            Assistente
-                          </span>
-                          <span className="text-xs text-muted-foreground">
-                            agora
-                          </span>
-                        </div>
-                        <div className="text-sm leading-relaxed">
-                          <span style={{ display: 'inline-flex', alignItems: 'end', gap: '3px', height: '24px' }}>
-                            <span className="animate-bounce" style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#6b7280', display: 'inline-block', animationDelay: '0s' }}></span>
-                            <span className="animate-bounce" style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#6b7280', display: 'inline-block', animationDelay: '0.15s' }}></span>
-                            <span className="animate-bounce" style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#6b7280', display: 'inline-block', animationDelay: '0.3s' }}></span>
-                          </span>
-                        </div>
-                      </div>
-                    </div>
+                  <div className="flex justify-start ml-9">
+                    <span style={{ display: 'inline-flex', alignItems: 'end', gap: '3px', height: '24px' }}>
+                      <span className="animate-bounce" style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#6b7280', display: 'inline-block', animationDelay: '0s' }}></span>
+                      <span className="animate-bounce" style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#6b7280', display: 'inline-block', animationDelay: '0.15s' }}></span>
+                      <span className="animate-bounce" style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#6b7280', display: 'inline-block', animationDelay: '0.3s' }}></span>
+                    </span>
                   </div>
                 )}
 
