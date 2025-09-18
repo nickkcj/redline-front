@@ -244,119 +244,118 @@ export default function AiChatPage() {
         onSelectChat={handleSelectChat}
         currentChatId={currentChatId || undefined}
       />
-      <div className="h-[85vh] flex flex-col px-8 py-2 min-h-0">
-        <div className="w-full max-w-4xl mx-auto flex flex-col h-full">
-
+      <div className="h-[85vh] flex flex-col min-h-0">
         {/* Se temos mensagens ou mensagem pendente, mostrar o chat */}
         {messages.length > 0 || pendingUserMessage ? (
           <>
+            {/* Área de Mensagens - com scroll independente */}
+            <div className="flex-1 overflow-hidden">
+              <ScrollArea className="h-full p-6">
+                <div className="space-y-8 max-w-4xl mx-auto">
+                  {isLoadingChat && (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="text-sm text-muted-foreground">Carregando...</div>
+                    </div>
+                  )}
 
-            {/* Área de Mensagens */}
-            <ScrollArea className="flex-1 min-h-0">
-              <div className="space-y-8 max-w-4xl mx-auto p-6">
-                {isLoadingChat && (
-                  <div className="flex items-center justify-center py-8">
-                    <div className="text-sm text-muted-foreground">Carregando...</div>
-                  </div>
-                )}
+                  {chatError && (
+                    <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-md">
+                      <div className="text-destructive text-sm">Erro ao carregar chat</div>
+                    </div>
+                  )}
 
-                {chatError && (
-                  <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-md">
-                    <div className="text-destructive text-sm">Erro ao carregar chat</div>
-                  </div>
-                )}
-
-                {messages.map((message, index) => (
-                  <div key={message.id} className="space-y-4">
-                    {message.role === MessageRole.ASSISTANT && (
-                      <Reasoning isStreaming={false} defaultOpen={false} duration={Math.floor(Math.random() * 4) + 1}>
-                        <ReasoningTrigger />
-                        <ReasoningContent>
-                          Analisei cuidadosamente sua pergunta, considerei diferentes perspectivas e estruturei uma resposta abrangente para atender às suas necessidades específicas.
-                        </ReasoningContent>
-                      </Reasoning>
-                    )}
-
-                    <Message from={message.role}>
+                  {messages.map((message, index) => (
+                    <div key={message.id} className="space-y-4">
                       {message.role === MessageRole.ASSISTANT && (
-                        <MessageAvatar
-                          src=""
-                          name="AI"
-                        />
+                        <Reasoning isStreaming={false} defaultOpen={false} duration={Math.floor(Math.random() * 4) + 1}>
+                          <ReasoningTrigger />
+                          <ReasoningContent>
+                            Analisei cuidadosamente sua pergunta, considerei diferentes perspectivas e estruturei uma resposta abrangente para atender às suas necessidades específicas.
+                          </ReasoningContent>
+                        </Reasoning>
                       )}
-                      <MessageContent variant={message.role === MessageRole.USER ? "contained" : "flat"}>
+
+                      <Message from={message.role}>
+                        {message.role === MessageRole.ASSISTANT && (
+                          <MessageAvatar
+                            src=""
+                            name="AI"
+                          />
+                        )}
+                        <MessageContent variant={message.role === MessageRole.USER ? "contained" : "flat"}>
+                          <Response>
+                            {message.content}
+                          </Response>
+                        </MessageContent>
+                        {message.role === MessageRole.USER && (
+                          <MessageAvatar
+                            src=""
+                            name="You"
+                          />
+                        )}
+                      </Message>
+
+                      {message.role === MessageRole.ASSISTANT && (
+                        <Actions className="ml-10">
+                          <Action
+                            tooltip="Copy message"
+                            label="Copy"
+                            onClick={() => navigator.clipboard.writeText(message.content)}
+                          >
+                            <Copy className="w-4 h-4" />
+                          </Action>
+                          <Action
+                            tooltip="Regenerate response"
+                            label="Regenerate"
+                            onClick={() => console.log('Regenerate message')}
+                          >
+                            <RotateCcw className="w-4 h-4" />
+                          </Action>
+                        </Actions>
+                      )}
+
+                      {message.role === MessageRole.ASSISTANT && message.aiModel && (
+                        <div className="ml-10 flex items-center gap-2 text-xs text-muted-foreground">
+                          <div className="w-1 h-1 bg-muted-foreground rounded-full"></div>
+                          <span>{message.aiModel}</span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+
+                  {/* Mensagem pendente do usuário */}
+                  {pendingUserMessage && (
+                    <Message from="user">
+                      <MessageContent>
                         <Response>
-                          {message.content}
+                          {pendingUserMessage}
                         </Response>
                       </MessageContent>
-                      {message.role === MessageRole.USER && (
-                        <MessageAvatar
-                          src=""
-                          name="You"
-                        />
-                      )}
+                      <MessageAvatar
+                        src=""
+                        name="You"
+                      />
                     </Message>
+                  )}
 
-                    {message.role === MessageRole.ASSISTANT && (
-                      <Actions className="ml-10">
-                        <Action
-                          tooltip="Copy message"
-                          label="Copy"
-                          onClick={() => navigator.clipboard.writeText(message.content)}
-                        >
-                          <Copy className="w-4 h-4" />
-                        </Action>
-                        <Action
-                          tooltip="Regenerate response"
-                          label="Regenerate"
-                          onClick={() => console.log('Regenerate message')}
-                        >
-                          <RotateCcw className="w-4 h-4" />
-                        </Action>
-                      </Actions>
-                    )}
+                  {showLoadingDots && (
+                    <div className="w-full">
+                      <Reasoning isStreaming={showLoadingDots} defaultOpen={true}>
+                        <ReasoningTrigger />
+                        <ReasoningContent>
+                          Analisando sua pergunta e estruturando a melhor resposta...
+                        </ReasoningContent>
+                      </Reasoning>
+                    </div>
+                  )}
 
-                    {message.role === MessageRole.ASSISTANT && message.aiModel && (
-                      <div className="ml-10 flex items-center gap-2 text-xs text-muted-foreground">
-                        <div className="w-1 h-1 bg-muted-foreground rounded-full"></div>
-                        <span>{message.aiModel}</span>
-                      </div>
-                    )}
-                  </div>
-                ))}
+                  <div ref={messagesEndRef} />
+                </div>
+              </ScrollArea>
+            </div>
 
-                {/* Mensagem pendente do usuário */}
-                {pendingUserMessage && (
-                  <Message from="user">
-                    <MessageContent>
-                      <Response>
-                        {pendingUserMessage}
-                      </Response>
-                    </MessageContent>
-                    <MessageAvatar
-                      src=""
-                      name="You"
-                    />
-                  </Message>
-                )}
-
-                {showLoadingDots && (
-                  <div className="w-full">
-                    <Reasoning isStreaming={showLoadingDots} defaultOpen={true}>
-                      <ReasoningTrigger />
-                      <ReasoningContent>
-                        Analisando sua pergunta e estruturando a melhor resposta...
-                      </ReasoningContent>
-                    </Reasoning>
-                  </div>
-                )}
-
-                <div ref={messagesEndRef} />
-              </div>
-            </ScrollArea>
-
-            {/* Input fixo na parte inferior */}
-            <div className="bg-background p-6 shrink-0">
+            {/* Input fixo na parte inferior - com linha divisória */}
+            <div className="border-t bg-background p-6">
               <div className="max-w-4xl mx-auto">
                 <PromptInput
                   onSubmit={(message, e) => {
@@ -420,7 +419,7 @@ export default function AiChatPage() {
           </>
         ) : (
           /* Interface inicial quando não há mensagens */
-          <div className="flex-1 flex flex-col items-center justify-center">
+          <div className="flex-1 flex flex-col items-center justify-center px-8">
             {/* Welcome Section */}
             <div className="text-center mb-10">
               <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-primary/20 to-primary/10 rounded-2xl flex items-center justify-center shadow-lg">
@@ -566,7 +565,6 @@ export default function AiChatPage() {
             </div>
           </div>
         )}
-        </div>
       </div>
     </>
   );
