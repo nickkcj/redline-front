@@ -259,7 +259,7 @@ export default function AiChatPage() {
 
                 {/* Mensagem pendente do usuário */}
                 {pendingUserMessage && (
-                  <div className="flex gap-4 bg-accent/20 p-3 rounded-lg">
+                  <div className="flex gap-4">
                     <Avatar className="w-8 h-8 shrink-0">
                       <AvatarFallback>
                         <User className="w-4 h-4" />
@@ -269,10 +269,6 @@ export default function AiChatPage() {
                       <div className="text-sm font-medium mb-1">Você</div>
                       <div className="text-sm text-muted-foreground whitespace-pre-wrap">
                         {pendingUserMessage}
-                      </div>
-                      <div className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                        <span className="inline-block w-2 h-2 bg-current rounded-full animate-pulse" />
-                        Enviando...
                       </div>
                     </div>
                   </div>
