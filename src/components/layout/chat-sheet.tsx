@@ -39,7 +39,6 @@ import { useCreateChat, useChat } from "@/hooks/use-chat";
 import { useApiMutation } from "@/hooks/use-api";
 import { useCurrentWorkspace } from "@/store/app-store";
 import { MessageRole, ChatMessageResponseDto, SendMessageDto } from "@/types/chat";
-import { toast } from "sonner";
 
 type ModelKey = "claude" | "gemini" | "gpt";
 
@@ -69,12 +68,11 @@ type ChatSheetProps = PropsWithChildren<{
 }>;
 
 export function ChatSheet({ trigger, chatId: initialChatId }: ChatSheetProps) {
+  const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [currentModel, setCurrentModel] = useState<ModelKey>("claude");
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isStreaming, setIsStreaming] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [showClearDialog, setShowClearDialog] = useState(false);
+  const [currentChatId, setCurrentChatId] = useState<string | undefined>(initialChatId);
 
   const currentWorkspace = useCurrentWorkspace();
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -136,8 +134,7 @@ export function ChatSheet({ trigger, chatId: initialChatId }: ChatSheetProps) {
   }, [messages]);
 
   const handleClearChat = () => {
-    setMessages([]);
-    setError(null);
+    // TODO: Implement API call to clear chat messages
     setShowClearDialog(false);
     toast.success("Histórico do chat foi limpo");
   };

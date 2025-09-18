@@ -201,7 +201,7 @@ export default function AiChatPage() {
   }, [messages, pendingUserMessage]);
 
   return (
-    <div className="h-[95vh] flex flex-col">
+  <div className="h-[95vh] flex flex-col">
       <ChatHeader
         onNewChat={handleNewChat}
         onSelectChat={handleSelectChat}
@@ -354,15 +354,15 @@ export default function AiChatPage() {
           <div className="flex-1 flex flex-col items-center justify-center">
             {/* Welcome Section */}
             <div className="text-center mb-10">
-          <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-primary/20 to-primary/10 rounded-2xl flex items-center justify-center shadow-lg">
-            <MessageSquare className="h-8 w-8 text-primary" />
-          </div>
-          <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-            How can I help you today?
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-lg mx-auto">
-            Ask me anything about the {docsCount} documents in this data room
-          </p>
+              <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-primary/20 to-primary/10 rounded-2xl flex items-center justify-center shadow-lg">
+                <MessageSquare className="h-8 w-8 text-primary" />
+              </div>
+              <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
+                How can I help you today?
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-lg mx-auto">
+                Ask me anything about the {docsCount} documents in this data room
+              </p>
             </div>
 
             {/* Quick Actions */}
@@ -494,9 +494,7 @@ export default function AiChatPage() {
                 </p>
               </div>
             </div>
-          </div>
         )}
-
         </div>
       </div>
     </div>
