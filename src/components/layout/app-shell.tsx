@@ -9,6 +9,7 @@ import { CommandPaletteProvider } from "@/components/providers/command-palette-p
 import { CommandPaletteContextProvider } from "@/contexts/command-palette-context";
 import { useAuthGuard } from "@/lib/auth/hooks/use-auth-guard";
 import { Loader2 } from "lucide-react";
+import { Breadcrumbs } from "./breadcrumbs";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { isLoading } = useAuthGuard();
@@ -39,7 +40,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <SidebarInset className="min-h-svh">
             <CommandPaletteProvider />
             <ChatSheet />
-            <main className="p-4 md:p-6">{children}</main>
+            <main className="p-4 md:p-6">
+              <Breadcrumbs />
+              {children}
+            </main>
           </SidebarInset>
         </SidebarProvider>
       </CommandPaletteContextProvider>

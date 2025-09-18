@@ -4,22 +4,23 @@ import { useState } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import { useCommandPaletteContext } from "@/contexts/command-palette-context"
 import { useAuthContext } from "@/contexts/auth-context"
+import Image from "next/image"
 import {
+  House,
+  Robot,
+  Folders,
+  Files,
+  Link,
+  Scroll,
+  ChatCircle,
+  MagnifyingGlass,
+  User as UserIcon,
+  Gear,
+  SignOut,
   Moon,
   Sun,
-  LogOut,
-  User,
-  FileText,
-  Settings,
-  FolderOpen,
-  ScrollText,
-  Link2,
-  Menu,
-  Home,
-  MessageCircle,
-  Bot,
-  Search
-} from "lucide-react"
+  List
+} from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
 import { useTheme } from "next-themes"
 import {
@@ -47,17 +48,17 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 const navigation = [
-  { name: "Dashboard", href: "/", icon: Home },
-  { name: "AI Chat", href: "/ai-chat", icon: Bot },
-  { name: "Data Rooms", href: "/rooms", icon: FolderOpen },
-  { name: "Documents", href: "/documents", icon: FileText },
-  { name: "Share Links", href: "/accesses", icon: Link2 },
-  { name: "Audit Logs", href: "/audit", icon: ScrollText },
+  { name: "Dashboard", href: "/dashboard", icon: House },
+  { name: "AI Chat", href: "/ai-chat", icon: Robot },
+  { name: "Data Rooms", href: "/rooms", icon: Folders },
+  { name: "Documents", href: "/documents", icon: Files },
+  { name: "Share Links", href: "/accesses", icon: Link },
+  { name: "Audit Logs", href: "/audit", icon: Scroll },
 ]
 
 const actions = [
-  { name: "Chat", action: "openChat", icon: MessageCircle },
-  { name: "Command Palette", action: "openCommand", icon: Search },
+  { name: "Chat", action: "openChat", icon: ChatCircle },
+  { name: "Command Palette", action: "openCommand", icon: MagnifyingGlass },
 ]
 
 export function AppSidebar() {
@@ -94,31 +95,37 @@ export function AppSidebar() {
   return (
     <Sidebar
       collapsible="icon"
-      className="group border-r transition-[width] duration-200 ease-out"
+      className="group transition-[width] duration-200 ease-out"
     >
       <SidebarHeader
-        className="h-[60px] relative"
+        className="h-[72px] relative border-b"
         onMouseEnter={() => setIsHoveringHeader(true)}
         onMouseLeave={() => setIsHoveringHeader(false)}
       >
-        <div className="flex items-center justify-between px-3 h-full">
+        <div className="flex items-center justify-between px-3 h-full group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:justify-center">
           <div className={cn(
-            "flex items-center gap-2 transition-opacity duration-200",
+            "flex items-center gap-3 transition-opacity duration-200",
             isHoveringHeader && "group-data-[collapsible=icon]:opacity-0"
           )}>
-            <div className="h-7 w-7 shrink-0 -ml-2 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">V</span>
+            <div className="h-8 w-8 shrink-0 flex items-center justify-center">
+              <Image
+                src={theme === "dark" ? "/Selo-Dooor-White.png" : "/Selo-Dooor-Black.png"}
+                alt="Logo"
+                width={32}
+                height={32}
+                className="object-contain group-data-[collapsible=icon]:w-4 group-data-[collapsible=icon]:h-4"
+              />
             </div>
-            <span className="text-sm font-semibold group-data-[collapsible=icon]:hidden">
+            <span className="text-sm font-semibold whitespace-nowrap group-data-[collapsible=icon]:sr-only">
               App Name
             </span>
           </div>
 
           <SidebarTrigger
-            className="h-8 w-8 rounded-md hover:bg-accent/40 group-data-[collapsible=icon]:hidden"
+            className="h-8 w-8 rounded-md hover:bg-accent/40 group-data-[collapsible=icon]:hidden flex items-center justify-center"
             aria-label="Toggle sidebar"
           >
-            <Menu className="h-4 w-4" />
+            <List className="h-4 w-4" />
           </SidebarTrigger>
 
           <button
@@ -135,15 +142,15 @@ export function AppSidebar() {
             )}
           >
             <div className="h-8 w-8 rounded-md hover:bg-accent/40 flex items-center justify-center">
-              <Menu className="h-4 w-4" />
+              <List className="h-4 w-4" />
             </div>
           </button>
         </div>
       </SidebarHeader>
 
       <SidebarContent className="overflow-x-hidden">
-        <SidebarGroup className="py-0">
-          <div className="h-9 flex items-center ">
+        <SidebarGroup className="pt-4 pb-2">
+          <div className="h-9 flex items-center mb-1">
             <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
               Navegação
             </SidebarGroupLabel>
@@ -169,8 +176,8 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup className="py-0">
-          <div className="h-9 flex items-center">
+        <SidebarGroup className="pt-2 pb-2">
+          <div className="h-9 flex items-center mb-1">
             <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
               Ações
             </SidebarGroupLabel>
@@ -234,11 +241,11 @@ export function AppSidebar() {
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                   <DropdownMenuItem onClick={() => router.push('/profile')}>
-                    <User className="mr-2 h-4 w-4" />
+                    <UserIcon className="mr-2 h-4 w-4" />
                     Perfil
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => router.push('/settings')}>
-                    <Settings className="mr-2 h-4 w-4" />
+                    <Gear className="mr-2 h-4 w-4" />
                     Configurações
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setTheme(theme === "light" ? "dark" : "light")}>
@@ -252,7 +259,7 @@ export function AppSidebar() {
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>
-                  <LogOut className="mr-2 h-4 w-4" />
+                  <SignOut className="mr-2 h-4 w-4" />
                   Sair
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -261,7 +268,7 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarFooter>
 
-      <SidebarRail />
+      {/* Removed SidebarRail to prevent double border */}
     </Sidebar>
   )
 }

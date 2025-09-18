@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { MessageSquare, Copy, Check } from "lucide-react";
+import Image from "next/image";
 import {
   PromptInput,
   PromptInputTextarea,
@@ -24,17 +25,17 @@ const MODEL_CONFIG = {
   claude: {
     key: "claude" as ModelKey,
     name: "Claude 4 Sonnet",
-    icon: "🤖",
+    icon: "/Claude_AI_symbol.svg.png",
   },
   gemini: {
     key: "gemini" as ModelKey,
     name: "Gemini 2.5 Pro",
-    icon: "✨",
+    icon: "/Gemini-Icon.png.webp",
   },
   gpt: {
     key: "gpt" as ModelKey,
     name: "GPT-5",
-    icon: "🧠",
+    icon: "/ChatGPT-Logo.svg.png",
   },
 };
 
@@ -159,9 +160,13 @@ export default function AiChatPage() {
               <PromptInputModelSelect value={currentModel} onValueChange={(value) => setCurrentModel(value as ModelKey)}>
                 <PromptInputModelSelectTrigger>
                   <div className="flex items-center gap-2">
-                    <span className="text-base">
-                      {MODEL_CONFIG[currentModel].icon}
-                    </span>
+                    <Image
+                      src={MODEL_CONFIG[currentModel].icon}
+                      alt={MODEL_CONFIG[currentModel].name}
+                      width={20}
+                      height={20}
+                      className="rounded"
+                    />
                     <span className="hidden sm:inline">
                       {MODEL_CONFIG[currentModel].name}
                     </span>
@@ -171,7 +176,13 @@ export default function AiChatPage() {
                   {Object.values(MODEL_CONFIG).map((model) => (
                     <PromptInputModelSelectItem key={model.key} value={model.key}>
                       <div className="flex items-center gap-2">
-                        <span className="text-base">{model.icon}</span>
+                        <Image
+                          src={model.icon}
+                          alt={model.name}
+                          width={20}
+                          height={20}
+                          className="rounded"
+                        />
                         {model.name}
                       </div>
                     </PromptInputModelSelectItem>

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { AppShell } from "@/components/layout/app-shell";
 
 export const metadata: Metadata = {
-  title: "[App Name] | Dashboard",
+  title: "[App Name] | Dooor",
   description: "Dashboard",
 };
 

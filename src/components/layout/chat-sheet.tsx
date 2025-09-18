@@ -1,6 +1,7 @@
 "use client";
 
 import { PropsWithChildren, useRef, useEffect, useState } from "react";
+import Image from "next/image";
 import {
   Sheet,
   SheetContent,
@@ -8,11 +9,53 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Trash } from "@phosphor-icons/react";
+import { toast } from "sonner";
+import {
+  PromptInput,
+  PromptInputTextarea,
+  PromptInputSubmit,
+  PromptInputToolbar,
+  PromptInputTools,
+  PromptInputModelSelect,
+  PromptInputModelSelectTrigger,
+  PromptInputModelSelectContent,
+  PromptInputModelSelectItem
+} from "@/components/ai-elements/prompt-input";
 import { aiService, ChatMessage } from "@/lib/services/ai.service";
+
+type ModelKey = "claude" | "gemini" | "gpt";
+
+const MODEL_CONFIG = {
+  claude: {
+    key: "claude" as ModelKey,
+    name: "Claude 4 Sonnet",
+    icon: "/Claude_AI_symbol.svg.png",
+  },
+  gemini: {
+    key: "gemini" as ModelKey,
+    name: "Gemini 2.5 Pro",
+    icon: "/Gemini-Icon.png.webp",
+  },
+  gpt: {
+    key: "gpt" as ModelKey,
+    name: "GPT-5",
+    icon: "/ChatGPT-Logo.svg.png",
+  },
+};
 
 type ChatSheetProps = PropsWithChildren<{
   /** Deixe undefined para não ter trigger visual */
@@ -25,14 +68,23 @@ type ChatSheetProps = PropsWithChildren<{
 
 export function ChatSheet({ trigger, slug = "default", provider = "mock" }: ChatSheetProps) {
   const [input, setInput] = useState("");
+  const [currentModel, setCurrentModel] = useState<ModelKey>("claude");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showClearDialog, setShowClearDialog] = useState(false);
 
   const bottomRef = useRef<HTMLDivElement>(null);
   useEffect(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), [messages]);
 
   const [open, setOpen] = useState(false);
+
+  const handleClearChat = () => {
+    setMessages([]);
+    setError(null);
+    setShowClearDialog(false);
+    toast.success("Histórico do chat foi limpo");
+  };
 
   const sendMessage = async (content: string) => {
     if (!content.trim() || isStreaming) return;
@@ -109,8 +161,18 @@ export function ChatSheet({ trigger, slug = "default", provider = "mock" }: Chat
     <Sheet open={open} onOpenChange={setOpen}>
       {trigger ? <SheetTrigger asChild>{trigger}</SheetTrigger> : null}
       <SheetContent side="right" className="w-[420px] p-0">
-        <SheetHeader className="px-4 py-3 border-b">
+        <SheetHeader className="px-4 py-3 border-b flex flex-row items-center justify-between">
           <SheetTitle>Chat</SheetTitle>
+          {messages.length > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowClearDialog(true)}
+              className="h-8 px-2"
+            >
+              <Trash className="h-4 w-4" />
+            </Button>
+          )}
         </SheetHeader>
 
         <div className="flex h-full flex-col">
@@ -147,29 +209,93 @@ export function ChatSheet({ trigger, slug = "default", provider = "mock" }: Chat
             </div>
           </ScrollArea>
 
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              const value = input.trim();
-              if (!value) return;
-              sendMessage(value);
-              setInput("");
-            }}
-            className="flex gap-2 border-t p-3"
-          >
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Type your message…"
-              autoFocus
-              disabled={isStreaming}
-            />
-            <Button disabled={isStreaming}>
-              {isStreaming ? "Sending..." : "Send"}
-            </Button>
-          </form>
+          <div className="border-t p-3">
+            <PromptInput
+              onSubmit={(message, e) => {
+                e.preventDefault();
+                const text = message.text?.trim();
+                if (!text) return;
+                sendMessage(text);
+                setInput("");
+              }}
+              className="relative"
+            >
+              <PromptInputTextarea
+                placeholder="Type your message..."
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                className="text-sm min-h-[60px] max-h-[120px]"
+                disabled={isStreaming}
+              />
+              <PromptInputToolbar>
+                <PromptInputTools>
+                  <PromptInputModelSelect value={currentModel} onValueChange={(value) => setCurrentModel(value as ModelKey)}>
+                    <PromptInputModelSelectTrigger>
+                      <div className="flex items-center gap-1.5">
+                        <Image
+                          src={MODEL_CONFIG[currentModel].icon}
+                          alt={MODEL_CONFIG[currentModel].name}
+                          width={16}
+                          height={16}
+                          className="rounded"
+                        />
+                        <span className="hidden sm:inline text-xs">
+                          {MODEL_CONFIG[currentModel].name}
+                        </span>
+                      </div>
+                    </PromptInputModelSelectTrigger>
+                    <PromptInputModelSelectContent>
+                      {Object.values(MODEL_CONFIG).map((model) => (
+                        <PromptInputModelSelectItem key={model.key} value={model.key}>
+                          <div className="flex items-center gap-2">
+                            <Image
+                              src={model.icon}
+                              alt={model.name}
+                              width={16}
+                              height={16}
+                              className="rounded"
+                            />
+                            <span className="text-sm">{model.name}</span>
+                          </div>
+                        </PromptInputModelSelectItem>
+                      ))}
+                    </PromptInputModelSelectContent>
+                  </PromptInputModelSelect>
+                </PromptInputTools>
+                <PromptInputSubmit
+                  disabled={!input.trim() || isStreaming}
+                />
+              </PromptInputToolbar>
+            </PromptInput>
+          </div>
         </div>
       </SheetContent>
+
+      <AlertDialog open={showClearDialog} onOpenChange={setShowClearDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Limpar Histórico do Chat</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div>
+                <p>Você tem certeza que deseja limpar todo o histórico de conversas?</p>
+                <p className="mt-3 text-sm text-muted-foreground">
+                  Esta ação removerá permanentemente todas as <strong className="text-foreground">{messages.length} mensagens</strong> do chat atual.
+                  Esta ação não pode ser desfeita.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleClearChat}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Limpar Histórico
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Sheet>
   );
 }

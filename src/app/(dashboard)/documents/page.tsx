@@ -1,10 +1,22 @@
 "use client";
 
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, FileText, Download, Eye, Calendar, FolderOpen } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Plus, MagnifyingGlass, Files, Download, Eye, Calendar, Folders, Trash } from "@phosphor-icons/react";
+import { toast } from "sonner";
 
 const documents = [
   {
@@ -65,7 +77,7 @@ const documents = [
 ];
 
 const getFileIcon = (type: string) => {
-  return <FileText className="h-4 w-4" />;
+  return <Files className="h-4 w-4" />;
 };
 
 const getTypeBadge = (type: string) => {
@@ -84,6 +96,24 @@ const getTypeBadge = (type: string) => {
 };
 
 export default function DocumentsPage() {
+  const [documentList, setDocumentList] = useState(documents);
+  const [deleteDialog, setDeleteDialog] = useState<{ open: boolean; document: typeof documents[0] | null }>({
+    open: false,
+    document: null,
+  });
+
+  const handleDeleteDocument = (doc: typeof documents[0]) => {
+    setDeleteDialog({ open: true, document: doc });
+  };
+
+  const confirmDelete = () => {
+    if (deleteDialog.document) {
+      setDocumentList(prev => prev.filter(doc => doc.id !== deleteDialog.document?.id));
+      toast.success(`Documento "${deleteDialog.document.name}" excluído com sucesso`);
+      setDeleteDialog({ open: false, document: null });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -101,7 +131,7 @@ export default function DocumentsPage() {
 
       <div className="flex items-center space-x-2">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <MagnifyingGlass className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Buscar documentos..."
             className="pl-8"
@@ -110,7 +140,7 @@ export default function DocumentsPage() {
       </div>
 
       <div className="space-y-4">
-        {documents.map((doc) => (
+        {documentList.map((doc) => (
           <Card key={doc.id} className="hover:shadow-md transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -129,7 +159,7 @@ export default function DocumentsPage() {
                     </p>
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
                       <div className="flex items-center gap-1">
-                        <FolderOpen className="h-3 w-3" />
+                        <Folders className="h-3 w-3" />
                         <span>{doc.room}</span>
                       </div>
                       <div className="flex items-center gap-1">
@@ -160,6 +190,14 @@ export default function DocumentsPage() {
                     <Button variant="outline" size="sm">
                       <Download className="h-4 w-4" />
                     </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDeleteDocument(doc)}
+                      className="hover:bg-destructive hover:text-destructive-foreground"
+                    >
+                      <Trash className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -168,9 +206,9 @@ export default function DocumentsPage() {
         ))}
       </div>
 
-      {documents.length === 0 && (
+      {documentList.length === 0 && (
         <Card className="flex flex-col items-center justify-center py-12">
-          <FileText className="h-12 w-12 text-muted-foreground mb-4" />
+          <Files className="h-12 w-12 text-muted-foreground mb-4" />
           <CardTitle className="mb-2">Nenhum documento encontrado</CardTitle>
           <CardDescription className="text-center mb-4">
             Faça upload dos seus primeiros documentos para começar a compartilhar com segurança.
@@ -181,6 +219,38 @@ export default function DocumentsPage() {
           </Button>
         </Card>
       )}
+
+      <AlertDialog
+        open={deleteDialog.open}
+        onOpenChange={(open) => !open && setDeleteDialog({ open: false, document: null })}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div>
+                <p>
+                  Você tem certeza que deseja excluir o documento{" "}
+                  <strong>"{deleteDialog.document?.name}"</strong>?
+                </p>
+                <p className="mt-3 text-sm text-muted-foreground">
+                  Esta ação não pode ser desfeita. O documento será permanentemente removido
+                  do data room <strong className="text-foreground">{deleteDialog.document?.room}</strong>.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir Documento
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

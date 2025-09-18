@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { QueryProvider } from "@/components/providers/query-provider";
@@ -17,11 +18,15 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "App | Dooor",
+  title: "[App Name] | Dooor",
   description: "A Dooor product to start your Dooor product",
   icons: {
-    icon: "/Selo-Dooor White.png",
-    apple: "/Selo-Dooor White.png",
+    icon: [
+      { url: "/Selo-Dooor-Black.png", media: "(prefers-color-scheme: light)" },
+      { url: "/Selo-Dooor-White.png", media: "(prefers-color-scheme: dark)" },
+    ],
+    shortcut: "/Selo-Dooor-Black.png",
+    apple: "/Selo-Dooor-Black.png",
   },
 };
 
@@ -43,7 +48,9 @@ export default function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
-              <StoreInitializer />
+              <Suspense fallback={null}>
+                <StoreInitializer />
+              </Suspense>
               {children}
             </ThemeProvider>
           </AuthProvider>

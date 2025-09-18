@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, FolderOpen, FileText, Link2, ScrollText } from "lucide-react";
+import { Plus, Folders, Files, Link, Scroll } from "@phosphor-icons/react";
 
 export default function DashboardPage() {
   return (
@@ -26,7 +26,7 @@ export default function DashboardPage() {
             <CardTitle className="text-sm font-medium">
               Data Rooms
             </CardTitle>
-            <FolderOpen className="h-4 w-4 text-muted-foreground" />
+            <Folders className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">12</div>
@@ -40,7 +40,7 @@ export default function DashboardPage() {
             <CardTitle className="text-sm font-medium">
               Documentos
             </CardTitle>
-            <FileText className="h-4 w-4 text-muted-foreground" />
+            <Files className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">145</div>
@@ -54,7 +54,7 @@ export default function DashboardPage() {
             <CardTitle className="text-sm font-medium">
               Links Compartilhados
             </CardTitle>
-            <Link2 className="h-4 w-4 text-muted-foreground" />
+            <Link className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">23</div>
@@ -68,7 +68,7 @@ export default function DashboardPage() {
             <CardTitle className="text-sm font-medium">
               Acessos
             </CardTitle>
-            <ScrollText className="h-4 w-4 text-muted-foreground" />
+            <Scroll className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">1,234</div>
@@ -90,7 +90,7 @@ export default function DashboardPage() {
           <CardContent className="space-y-4">
             <div className="flex items-center gap-4 text-sm">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent">
-                <FolderOpen className="h-4 w-4" />
+                <Folders className="h-4 w-4" />
               </div>
               <div className="grid gap-1">
                 <p className="font-medium leading-none">
@@ -103,7 +103,7 @@ export default function DashboardPage() {
             </div>
             <div className="flex items-center gap-4 text-sm">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent">
-                <FileText className="h-4 w-4" />
+                <Files className="h-4 w-4" />
               </div>
               <div className="grid gap-1">
                 <p className="font-medium leading-none">
@@ -116,7 +116,7 @@ export default function DashboardPage() {
             </div>
             <div className="flex items-center gap-4 text-sm">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent">
-                <Link2 className="h-4 w-4" />
+                <Link className="h-4 w-4" />
               </div>
               <div className="grid gap-1">
                 <p className="font-medium leading-none">
