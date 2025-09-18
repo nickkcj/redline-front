@@ -10,9 +10,12 @@ import { CommandPaletteContextProvider } from "@/contexts/command-palette-contex
 import { useAuthGuard } from "@/lib/auth/hooks/use-auth-guard";
 import { Loader2 } from "lucide-react";
 import { Breadcrumbs } from "./breadcrumbs";
+import { usePathname } from "next/navigation";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { isLoading } = useAuthGuard();
+  const pathname = usePathname();
+  const isAiChatPage = pathname === "/ai-chat";
 
   if (isLoading) {
     return (
@@ -41,7 +44,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <CommandPaletteProvider />
             <ChatSheet />
             <main className="p-4 md:p-6">
-              <Breadcrumbs />
+              {!isAiChatPage && <Breadcrumbs />}
               {children}
             </main>
           </SidebarInset>
