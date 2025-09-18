@@ -201,7 +201,7 @@ export default function AiChatPage() {
   }, [messages, pendingUserMessage]);
 
   return (
-  <div className="h-[95vh] flex flex-col">
+    <div className="h-[90vh] flex flex-col">
       <ChatHeader
         onNewChat={handleNewChat}
         onSelectChat={handleSelectChat}
@@ -218,7 +218,7 @@ export default function AiChatPage() {
 
             {/* Área de Mensagens */}
             <ScrollArea className="flex-1 min-h-0">
-              <div className="space-y-6 p-4">
+              <div className="space-y-8 max-w-4xl mx-auto p-6">
                 {isLoadingChat && (
                   <div className="flex items-center justify-center py-8">
                     <div className="text-sm text-muted-foreground">Carregando...</div>
@@ -232,61 +232,80 @@ export default function AiChatPage() {
                 )}
 
                 {messages.map((message) => (
-                  <div key={message.id} className="flex gap-4">
-                    <Avatar className="w-8 h-8 shrink-0">
-                      <AvatarFallback>
-                        {message.role === MessageRole.USER ? (
-                          <User className="w-4 h-4" />
-                        ) : (
-                          <Bot className="w-4 h-4" />
-                        )}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="text-sm font-medium mb-1">
-                        {message.role === MessageRole.USER ? 'Você' : 'Assistente AI'}
-                      </div>
-                      <div className="text-sm text-muted-foreground whitespace-pre-wrap">
-                        {message.content}
-                      </div>
-                      {message.aiModel && (
-                        <div className="text-xs text-muted-foreground mt-1">
-                          Modelo: {message.aiModel}
+                  <div key={message.id} className={`mb-8 ${message.role === MessageRole.USER ? "flex justify-end" : ""}`}>
+                    {message.role === MessageRole.USER ? (
+                      <div className="max-w-[70%]">
+                        <div className="bg-gray-100 dark:bg-primary text-gray-900 dark:text-primary-foreground px-6 py-4 rounded-3xl">
+                          <div className="text-sm leading-relaxed whitespace-pre-wrap">
+                            {message.content}
+                          </div>
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    ) : (
+                      <div className="max-w-[85%]">
+                        <div className="flex gap-3 items-baseline">
+                          <Avatar className="w-6 h-6 shrink-0">
+                            <AvatarFallback>
+                              <Bot className="w-3 h-3" />
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 text-sm leading-6">
+                            <div className="whitespace-pre-wrap">
+                              {message.content}
+                            </div>
+                          </div>
+                        </div>
+                        {message.aiModel && (
+                          <div className="ml-9 mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+                            <div className="w-1 h-1 bg-muted-foreground rounded-full"></div>
+                            <span className="text-xs">
+                              {message.aiModel}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 ))}
 
                 {/* Mensagem pendente do usuário */}
                 {pendingUserMessage && (
-                  <div className="flex gap-4">
-                    <Avatar className="w-8 h-8 shrink-0">
-                      <AvatarFallback>
-                        <User className="w-4 h-4" />
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="text-sm font-medium mb-1">Você</div>
-                      <div className="text-sm text-muted-foreground whitespace-pre-wrap">
-                        {pendingUserMessage}
+                  <div className="mb-8 flex justify-end">
+                    <div className="max-w-[70%]">
+                      <div className="bg-gray-100 dark:bg-primary text-gray-900 dark:text-primary-foreground px-6 py-4 rounded-3xl">
+                        <div className="text-sm leading-relaxed whitespace-pre-wrap">
+                          {pendingUserMessage}
+                        </div>
                       </div>
                     </div>
                   </div>
                 )}
 
                 {isStreaming && (
-                  <div className="flex gap-4">
-                    <Avatar className="w-8 h-8 shrink-0">
-                      <AvatarFallback>
-                        <Bot className="w-4 h-4" />
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <div className="text-sm font-medium mb-1">Assistente AI</div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <span>Processando</span>
-                        <span className="inline-block w-2 h-4 bg-current animate-pulse" />
+                  <div className="flex justify-start">
+                    <div className="flex gap-3 max-w-[85%]">
+                      <Avatar className="h-6 w-6 shrink-0">
+                        <AvatarFallback className="text-xs">
+                          <Bot className="w-3 h-3" />
+                        </AvatarFallback>
+                      </Avatar>
+
+                      <div className="rounded-lg p-4 bg-muted/50 border">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-xs font-medium">
+                            Assistente
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            agora
+                          </span>
+                        </div>
+                        <div className="text-sm leading-relaxed">
+                          <span style={{ display: 'inline-flex', alignItems: 'end', gap: '3px', height: '24px' }}>
+                            <span className="animate-bounce" style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#6b7280', display: 'inline-block', animationDelay: '0s' }}></span>
+                            <span className="animate-bounce" style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#6b7280', display: 'inline-block', animationDelay: '0.15s' }}></span>
+                            <span className="animate-bounce" style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#6b7280', display: 'inline-block', animationDelay: '0.3s' }}></span>
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -297,8 +316,8 @@ export default function AiChatPage() {
             </ScrollArea>
 
             {/* Input fixo na parte inferior */}
-            <div className="bg-background p-4 pb-5 shrink-0">
-              <div className="w-full max-w-2xl mx-auto">
+            <div className="border-t bg-background p-6 shrink-0">
+              <div className="max-w-4xl mx-auto">
                 <PromptInput
                   onSubmit={(message, e) => {
                     e.preventDefault();
@@ -321,9 +340,13 @@ export default function AiChatPage() {
                       <PromptInputModelSelect value={currentModel} onValueChange={(value) => setCurrentModel(value as ModelKey)}>
                         <PromptInputModelSelectTrigger>
                           <div className="flex items-center gap-2">
-                            <span className="text-base">
-                              {MODEL_CONFIG[currentModel].icon}
-                            </span>
+                            <Image
+                              src={MODEL_CONFIG[currentModel].icon}
+                              alt={MODEL_CONFIG[currentModel].name}
+                              width={16}
+                              height={16}
+                              className="rounded"
+                            />
                             <span className="hidden sm:inline">
                               {MODEL_CONFIG[currentModel].name}
                             </span>
@@ -333,7 +356,13 @@ export default function AiChatPage() {
                           {Object.values(MODEL_CONFIG).map((model) => (
                             <PromptInputModelSelectItem key={model.key} value={model.key}>
                               <div className="flex items-center gap-2">
-                                <span className="text-base">{model.icon}</span>
+                                <Image
+                                  src={model.icon}
+                                  alt={model.name}
+                                  width={16}
+                                  height={16}
+                                  className="rounded"
+                                />
                                 {model.name}
                               </div>
                             </PromptInputModelSelectItem>
@@ -427,64 +456,65 @@ export default function AiChatPage() {
               </div>
             )}
 
-        {/* Main Chat Input */}
-        <PromptInput
-          onSubmit={(message, e) => {
-            e.preventDefault();
-            const text = message.text?.trim();
-            if (!text) return;
-            setInput("");
-            handleSendMessage(text);
-          }}
-          className="relative"
-        >
-          <PromptInputTextarea
-            ref={inputRef as any}
-            placeholder="Ask or find anything from your documents..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            className="text-base"
-          />
-          <PromptInputToolbar>
-            <PromptInputTools>
-              <PromptInputModelSelect value={currentModel} onValueChange={(value) => setCurrentModel(value as ModelKey)}>
-                <PromptInputModelSelectTrigger>
-                  <div className="flex items-center gap-2">
-                    <Image
-                      src={MODEL_CONFIG[currentModel].icon}
-                      alt={MODEL_CONFIG[currentModel].name}
-                      width={20}
-                      height={20}
-                      className="rounded"
-                    />
-                    <span className="hidden sm:inline">
-                      {MODEL_CONFIG[currentModel].name}
-                    </span>
-                  </div>
-                </PromptInputModelSelectTrigger>
-                <PromptInputModelSelectContent>
-                  {Object.values(MODEL_CONFIG).map((model) => (
-                    <PromptInputModelSelectItem key={model.key} value={model.key}>
-                      <div className="flex items-center gap-2">
-                        <Image
-                          src={model.icon}
-                          alt={model.name}
-                          width={20}
-                          height={20}
-                          className="rounded"
-                        />
-                        {model.name}
-                      </div>
-                    </PromptInputModelSelectItem>
-                  ))}
-                </PromptInputModelSelectContent>
-              </PromptInputModelSelect>
-            </PromptInputTools>
-            <PromptInputSubmit
-              disabled={!input.trim()}
-            />
-          </PromptInputToolbar>
-        </PromptInput>
+            {/* Input na tela inicial */}
+            <div className="w-full max-w-4xl mx-auto">
+              <PromptInput
+                onSubmit={(message, e) => {
+                  e.preventDefault();
+                  const text = message.text?.trim();
+                  if (!text) return;
+                  setInput("");
+                  handleSendMessage(text);
+                }}
+                className="relative"
+              >
+                <PromptInputTextarea
+                  ref={inputRef as any}
+                  placeholder="Ask or find anything from your documents..."
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  className="text-base"
+                />
+                <PromptInputToolbar>
+                  <PromptInputTools>
+                    <PromptInputModelSelect value={currentModel} onValueChange={(value) => setCurrentModel(value as ModelKey)}>
+                      <PromptInputModelSelectTrigger>
+                        <div className="flex items-center gap-2">
+                          <Image
+                            src={MODEL_CONFIG[currentModel].icon}
+                            alt={MODEL_CONFIG[currentModel].name}
+                            width={16}
+                            height={16}
+                            className="rounded"
+                          />
+                          <span className="hidden sm:inline">
+                            {MODEL_CONFIG[currentModel].name}
+                          </span>
+                        </div>
+                      </PromptInputModelSelectTrigger>
+                      <PromptInputModelSelectContent>
+                        {Object.values(MODEL_CONFIG).map((model) => (
+                          <PromptInputModelSelectItem key={model.key} value={model.key}>
+                            <div className="flex items-center gap-2">
+                              <Image
+                                src={model.icon}
+                                alt={model.name}
+                                width={16}
+                                height={16}
+                                className="rounded"
+                              />
+                              {model.name}
+                            </div>
+                          </PromptInputModelSelectItem>
+                        ))}
+                      </PromptInputModelSelectContent>
+                    </PromptInputModelSelect>
+                  </PromptInputTools>
+                  <PromptInputSubmit
+                    disabled={!input.trim()}
+                  />
+                </PromptInputToolbar>
+              </PromptInput>
 
               {/* Additional Help Text */}
               <div className="text-center mt-6">
@@ -494,6 +524,7 @@ export default function AiChatPage() {
                 </p>
               </div>
             </div>
+          </div>
         )}
         </div>
       </div>
