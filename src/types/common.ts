@@ -21,4 +21,19 @@ export interface User {
   avatar?: string
   createdAt: string
   updatedAt: string
+  workspaces?: UserWorkspace[]
+}
+
+export interface Organization {
+  id: string
+  name: string
+  description?: string
+}
+
+export interface UserWorkspace {
+  id: string
+  name: string
+  description?: string
+  role: 'ADMIN' | 'MEMBER' | 'OWNER'
+  organization: Organization
 }
