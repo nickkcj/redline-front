@@ -341,7 +341,7 @@ export default function AiChatPage() {
                 )}
 
                 {showLoadingDots && (
-                  <div className="flex justify-start ml-9">
+                  <div className="w-full">
                     <Reasoning isStreaming={showLoadingDots} defaultOpen={true}>
                       <ReasoningTrigger />
                       <ReasoningContent>
