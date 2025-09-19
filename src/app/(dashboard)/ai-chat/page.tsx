@@ -140,6 +140,7 @@ export default function AiChatPage() {
     streamingContent,
     startStream,
     stopStream,
+    clearStreamingContent,
   } = useStreamChat({
     onStreamStart: () => {
       setShowLoadingDots(true);
@@ -154,15 +155,26 @@ export default function AiChatPage() {
       setShowLoadingDots(false);
       setStreamingResponse("");
       setReasoningContent("");
-      setPendingUserMessage(null); // Remove mensagem pendente apenas quando streaming termina
-      // Invalidate queries to refresh the chat
+
+      // Invalidate queries to refresh the chat e remove mensagem pendente depois
       if (currentWorkspace?.id && currentChatId) {
-        queryClient.invalidateQueries({
-          queryKey: ['chat', currentWorkspace.id, currentChatId]
+        Promise.all([
+          queryClient.invalidateQueries({
+            queryKey: ['chat', currentWorkspace.id, currentChatId]
+          }),
+          queryClient.invalidateQueries({
+            queryKey: ['chats', currentWorkspace.id]
+          })
+        ]).then(() => {
+          // Aguarda um pouco mais para garantir que os dados foram carregados
+          setTimeout(() => {
+            setPendingUserMessage(null);
+            clearStreamingContent(); // Limpa conteúdo streaming junto
+          }, 300);
         });
-        queryClient.invalidateQueries({
-          queryKey: ['chats', currentWorkspace.id]
-        });
+      } else {
+        // Se não tiver workspace/chat, remove imediatamente
+        setPendingUserMessage(null);
       }
     },
     onError: (error) => {
@@ -170,6 +182,7 @@ export default function AiChatPage() {
       setStreamingResponse("");
       setReasoningContent("");
       setPendingUserMessage(null); // Remove mensagem pendente também em caso de erro
+      clearStreamingContent(); // Limpa streaming content em caso de erro
       toast.error(`Erro no streaming: ${error.message}`);
     },
     onMessageSaved: (messageId, role, content) => {
@@ -189,6 +202,15 @@ export default function AiChatPage() {
   useEffect(() => {
     console.log('🎯 isStreamingChat state:', isStreamingChat);
   }, [isStreamingChat]);
+
+  // Limpa streaming content quando muda de chat
+  useEffect(() => {
+    clearStreamingContent();
+    setShowLoadingDots(false);
+    setStreamingResponse("");
+    setReasoningContent("");
+    setPendingUserMessage(null);
+  }, [currentChatId, clearStreamingContent]);
 
   // Controlar dots de loading
   useEffect(() => {
@@ -307,11 +329,21 @@ export default function AiChatPage() {
     setCurrentChatId(null);
     setInput('');
     setPendingUserMessage(null);
+    // Limpa streaming content quando cria novo chat
+    clearStreamingContent();
+    setShowLoadingDots(false);
+    setStreamingResponse("");
+    setReasoningContent("");
   };
 
   const handleSelectChat = (chatId: string) => {
     setCurrentChatId(chatId);
     setPendingUserMessage(null);
+    // Limpa streaming content quando muda de chat
+    clearStreamingContent();
+    setShowLoadingDots(false);
+    setStreamingResponse("");
+    setReasoningContent("");
   };
 
   // Limpar mensagem pendente quando novas mensagens chegam

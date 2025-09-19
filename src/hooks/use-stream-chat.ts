@@ -185,7 +185,7 @@ export function useStreamChat(options: UseStreamChatOptions = {}) {
         setState(prev => ({
           ...prev,
           isStreaming: false,
-          streamingContent: '', // Limpa o conteúdo quando termina
+          // NÃO limpa streamingContent aqui - deixa para o componente controlar
         }));
         options.onStreamEnd?.(endData.fullResponse);
         break;
@@ -217,9 +217,17 @@ export function useStreamChat(options: UseStreamChatOptions = {}) {
     }));
   }, []);
 
+  const clearStreamingContent = useCallback(() => {
+    setState(prev => ({
+      ...prev,
+      streamingContent: '',
+    }));
+  }, []);
+
   return {
     ...state,
     startStream,
     stopStream,
+    clearStreamingContent,
   };
 }
