@@ -8,6 +8,7 @@ import { useCreateChat, useChat } from "@/hooks/use-chat";
 import { useCurrentWorkspace } from "@/store/app-store";
 import { MessageRole, ChatMessageResponseDto, SendMessageDto } from "@/types/chat";
 import { useApiMutation } from "@/hooks/use-api";
+import { useQueryClient } from "@tanstack/react-query";
 import { tokenStore } from "@/lib/auth/stores/auth.store";
 import { toast } from "sonner";
 import Image from "next/image";
@@ -39,6 +40,7 @@ import {
   Action
 } from "@/components/ai-elements/actions";
 import { useTheme } from "next-themes";
+import { useStreamChat } from "@/hooks/use-stream-chat";
 
 type ModelKey = "claude" | "gemini" | "gpt";
 
@@ -67,12 +69,15 @@ export default function AiChatPage() {
   const [pendingUserMessage, setPendingUserMessage] = useState<string | null>(null);
   const [showLoadingDots, setShowLoadingDots] = useState(false);
   const [lastMessageCount, setLastMessageCount] = useState(0);
+  const [streamingResponse, setStreamingResponse] = useState<string>("");
+  const [reasoningContent, setReasoningContent] = useState<string>("");
   const { theme } = useTheme();
   const isDarkMode = theme === "dark";
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const currentWorkspace = useCurrentWorkspace();
+  const queryClient = useQueryClient();
   const docsCount = 156; // Mock document count
 
   // Hooks para API
@@ -128,7 +133,62 @@ export default function AiChatPage() {
   );
 
   const messages = chatData?.messages || [];
-  const isStreaming = sendMessageMutation.isPending || createChatMutation.isPending;
+
+  // Stream chat hook
+  const {
+    isStreaming: isStreamingChat,
+    streamingContent,
+    startStream,
+    stopStream,
+  } = useStreamChat({
+    onStreamStart: () => {
+      setShowLoadingDots(true);
+      setStreamingResponse("");
+      setReasoningContent("Analisando sua pergunta e iniciando o processamento...");
+    },
+    onChunk: (content: string) => {
+      console.log('📝 Received chunk:', content);
+      setReasoningContent("Gerando resposta...");
+    },
+    onStreamEnd: (fullResponse: string) => {
+      setShowLoadingDots(false);
+      setStreamingResponse("");
+      setReasoningContent("");
+      setPendingUserMessage(null); // Remove mensagem pendente apenas quando streaming termina
+      // Invalidate queries to refresh the chat
+      if (currentWorkspace?.id && currentChatId) {
+        queryClient.invalidateQueries({
+          queryKey: ['chat', currentWorkspace.id, currentChatId]
+        });
+        queryClient.invalidateQueries({
+          queryKey: ['chats', currentWorkspace.id]
+        });
+      }
+    },
+    onError: (error) => {
+      setShowLoadingDots(false);
+      setStreamingResponse("");
+      setReasoningContent("");
+      setPendingUserMessage(null); // Remove mensagem pendente também em caso de erro
+      toast.error(`Erro no streaming: ${error.message}`);
+    },
+    onMessageSaved: (messageId, role, content) => {
+      // Não remove a mensagem pendente do usuário aqui
+      // Ela só será removida quando o streaming terminar completamente
+    },
+  });
+
+  const isStreaming = sendMessageMutation.isPending || createChatMutation.isPending || isStreamingChat;
+
+  // Debug streaming content
+  useEffect(() => {
+    console.log('🎬 Streaming content updated:', streamingContent, 'Length:', streamingContent?.length);
+  }, [streamingContent]);
+
+  // Debug streaming state
+  useEffect(() => {
+    console.log('🎯 isStreamingChat state:', isStreamingChat);
+  }, [isStreamingChat]);
 
   // Controlar dots de loading
   useEffect(() => {
@@ -155,6 +215,25 @@ export default function AiChatPage() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, pendingUserMessage]);
+
+  // Auto scroll durante streaming - suave e performático
+  useEffect(() => {
+    if (streamingContent && messagesEndRef.current) {
+      // Usa requestAnimationFrame para scroll mais suave
+      const scrollToBottom = () => {
+        requestAnimationFrame(() => {
+          messagesEndRef.current?.scrollIntoView({
+            behavior: 'smooth',
+            block: 'end'
+          });
+        });
+      };
+
+      // Debounce scroll para não ser muito agressivo
+      const timeoutId = setTimeout(scrollToBottom, 50);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [streamingContent]);
 
   // Debug logs (only in development)
   useEffect(() => {
@@ -203,11 +282,20 @@ export default function AiChatPage() {
         return;
       }
 
-      // Enviar mensagem para o chat existente
-      const result = await sendMessageMutation.mutateAsync({
-        content: text.trim(),
-        role: MessageRole.USER
-      });
+      // Use streaming para chat existente
+      console.log('Starting stream with:', { workspaceId: currentWorkspace.id, chatId: currentChatId, content: text.trim() });
+
+      try {
+        await startStream(currentWorkspace.id, currentChatId, text.trim());
+      } catch (streamError) {
+        console.error('Streaming failed, falling back to normal message:', streamError);
+        // Fallback para o método normal se streaming falhar
+        const result = await sendMessageMutation.mutateAsync({
+          content: text.trim(),
+          role: MessageRole.USER
+        });
+      }
+
     } catch (err) {
       console.error('Chat error:', err);
       toast.error('Erro ao enviar mensagem');
@@ -343,9 +431,26 @@ export default function AiChatPage() {
                       <Reasoning isStreaming={showLoadingDots} defaultOpen={true}>
                         <ReasoningTrigger />
                         <ReasoningContent>
-                          Analisando sua pergunta e estruturando a melhor resposta...
+                          {reasoningContent || "Analisando sua pergunta e estruturando a melhor resposta..."}
                         </ReasoningContent>
                       </Reasoning>
+                    </div>
+                  )}
+
+                  {/* Resposta sendo transmitida em tempo real */}
+                  {streamingContent && (
+                    <div className="w-full mb-4">
+                      <Message from="assistant">
+                        <MessageAvatar
+                          src=""
+                          name="AI"
+                        />
+                        <MessageContent variant="flat">
+                          <Response>
+                            {streamingContent}
+                          </Response>
+                        </MessageContent>
+                      </Message>
                     </div>
                   )}
 
