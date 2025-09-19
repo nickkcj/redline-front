@@ -77,6 +77,10 @@ export default function AiChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const currentWorkspace = useCurrentWorkspace();
+
+  // Refs para valores atuais (evitar closure stale)
+  const currentWorkspaceRef = useRef(currentWorkspace);
+  const currentChatIdRef = useRef(currentChatId);
   const queryClient = useQueryClient();
   const docsCount = 156; // Mock document count
 
@@ -156,24 +160,34 @@ export default function AiChatPage() {
       setStreamingResponse("");
       setReasoningContent("");
 
+      console.log('🎯 onStreamEnd called with:', {
+        fullResponse: fullResponse?.substring(0, 50) + '...',
+        currentWorkspaceId: currentWorkspaceRef.current?.id,
+        currentChatId: currentChatIdRef.current,
+        hasWorkspace: !!currentWorkspaceRef.current?.id,
+        hasChatId: !!currentChatIdRef.current
+      });
+
       // Invalidate queries to refresh the chat e remove mensagem pendente depois
-      if (currentWorkspace?.id && currentChatId) {
+      if (currentWorkspaceRef.current?.id && currentChatIdRef.current) {
         Promise.all([
           queryClient.invalidateQueries({
-            queryKey: ['chat', currentWorkspace.id, currentChatId]
+            queryKey: ['chat', currentWorkspaceRef.current.id, currentChatIdRef.current]
           }),
           queryClient.invalidateQueries({
-            queryKey: ['chats', currentWorkspace.id]
+            queryKey: ['chats', currentWorkspaceRef.current.id]
           })
         ]).then(() => {
-          // Aguarda um pouco mais para garantir que os dados foram carregados
+          // Aguarda um pouco para garantir que os dados foram carregados
           setTimeout(() => {
+            console.log('🔴 Clearing pendingUserMessage after stream end');
             setPendingUserMessage(null);
             clearStreamingContent(); // Limpa conteúdo streaming junto
-          }, 300);
+          }, 100);
         });
       } else {
         // Se não tiver workspace/chat, remove imediatamente
+        console.log('🔴 Clearing pendingUserMessage (no workspace/chat)');
         setPendingUserMessage(null);
       }
     },
@@ -181,6 +195,7 @@ export default function AiChatPage() {
       setShowLoadingDots(false);
       setStreamingResponse("");
       setReasoningContent("");
+      console.log('🔴 Clearing pendingUserMessage (stream error)');
       setPendingUserMessage(null); // Remove mensagem pendente também em caso de erro
       clearStreamingContent(); // Limpa streaming content em caso de erro
       toast.error(`Erro no streaming: ${error.message}`);
@@ -203,13 +218,13 @@ export default function AiChatPage() {
     console.log('🎯 isStreamingChat state:', isStreamingChat);
   }, [isStreamingChat]);
 
-  // Limpa streaming content quando muda de chat
+  // Limpa streaming content quando muda de chat (mas preserva pendingUserMessage)
   useEffect(() => {
     clearStreamingContent();
     setShowLoadingDots(false);
     setStreamingResponse("");
     setReasoningContent("");
-    setPendingUserMessage(null);
+    // NÃO limpa pendingUserMessage aqui - pode estar sendo usada
   }, [currentChatId, clearStreamingContent]);
 
   // Controlar dots de loading
@@ -269,6 +284,20 @@ export default function AiChatPage() {
     }
   }, [currentChatId, messages.length, pendingUserMessage, isStreaming]);
 
+  // Debug pendingUserMessage changes specifically
+  useEffect(() => {
+    console.log('🔵 pendingUserMessage changed:', pendingUserMessage);
+  }, [pendingUserMessage]);
+
+  // Atualizar refs para evitar closure stale
+  useEffect(() => {
+    currentWorkspaceRef.current = currentWorkspace;
+  }, [currentWorkspace]);
+
+  useEffect(() => {
+    currentChatIdRef.current = currentChatId;
+  }, [currentChatId]);
+
   const handleQuickAction = (prompt: string) => {
     setInput("");
     handleSendMessage(prompt);
@@ -291,6 +320,7 @@ export default function AiChatPage() {
     }
 
     // Mostrar mensagem do usuário imediatamente
+    console.log('🟢 Setting pendingUserMessage:', text.trim());
     setPendingUserMessage(text.trim());
 
     try {
@@ -321,6 +351,7 @@ export default function AiChatPage() {
     } catch (err) {
       console.error('Chat error:', err);
       toast.error('Erro ao enviar mensagem');
+      console.log('🔴 Clearing pendingUserMessage (general error)');
       setPendingUserMessage(null);
     }
   };
@@ -328,6 +359,7 @@ export default function AiChatPage() {
   const handleNewChat = () => {
     setCurrentChatId(null);
     setInput('');
+    console.log('🔴 Clearing pendingUserMessage (new chat)');
     setPendingUserMessage(null);
     // Limpa streaming content quando cria novo chat
     clearStreamingContent();
@@ -338,12 +370,12 @@ export default function AiChatPage() {
 
   const handleSelectChat = (chatId: string) => {
     setCurrentChatId(chatId);
-    setPendingUserMessage(null);
-    // Limpa streaming content quando muda de chat
-    clearStreamingContent();
-    setShowLoadingDots(false);
-    setStreamingResponse("");
-    setReasoningContent("");
+    // O useEffect já vai limpar o streaming content
+    // Só limpa pendingUserMessage se estivermos realmente mudando de chat
+    if (chatId !== currentChatId) {
+      console.log('🔴 Clearing pendingUserMessage (chat selection change)');
+      setPendingUserMessage(null);
+    }
   };
 
   // Limpar mensagem pendente quando novas mensagens chegam
@@ -351,11 +383,25 @@ export default function AiChatPage() {
     if (messages.length > 0 && pendingUserMessage) {
       // Verificar se a última mensagem do usuário é a mesma que está pendente
       const lastUserMessage = messages.filter(m => m.role === MessageRole.USER).pop();
+      console.log('🔍 Checking if pending message matches last user message:', {
+        pendingUserMessage,
+        lastUserMessage: lastUserMessage?.content,
+        matches: lastUserMessage && lastUserMessage.content === pendingUserMessage,
+        messagesLength: messages.length,
+        allUserMessages: messages.filter(m => m.role === MessageRole.USER).map(m => m.content)
+      });
       if (lastUserMessage && lastUserMessage.content === pendingUserMessage) {
+        console.log('🔴 Clearing pendingUserMessage (message found in chat)');
         setPendingUserMessage(null);
+
+        // Se temos streaming content, limpar também para evitar duplicação da resposta da IA
+        if (streamingContent) {
+          console.log('🧹 Clearing streaming content to avoid AI response duplication');
+          clearStreamingContent();
+        }
       }
     }
-  }, [messages, pendingUserMessage]);
+  }, [messages, pendingUserMessage, streamingContent, clearStreamingContent]);
 
   return (
     <div>
