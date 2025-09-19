@@ -339,13 +339,24 @@ export default function AiChatPage() {
                   )}
 
                   {showLoadingDots && (
-                    <div className="w-full">
+                    <div className="w-full mb-4">
                       <Reasoning isStreaming={showLoadingDots} defaultOpen={true}>
                         <ReasoningTrigger />
                         <ReasoningContent>
                           Analisando sua pergunta e estruturando a melhor resposta...
                         </ReasoningContent>
                       </Reasoning>
+                    </div>
+                  )}
+
+                  {/* Fallback dots caso o Reasoning não apareça */}
+                  {isStreaming && !showLoadingDots && (
+                    <div className="flex justify-start mb-4">
+                      <div className="flex items-center gap-1 p-4 bg-muted/50 rounded-lg">
+                        <span className="animate-bounce w-2 h-2 bg-muted-foreground rounded-full" style={{ animationDelay: '0s' }}></span>
+                        <span className="animate-bounce w-2 h-2 bg-muted-foreground rounded-full" style={{ animationDelay: '0.15s' }}></span>
+                        <span className="animate-bounce w-2 h-2 bg-muted-foreground rounded-full" style={{ animationDelay: '0.3s' }}></span>
+                      </div>
                     </div>
                   )}
 
