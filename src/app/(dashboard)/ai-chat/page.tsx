@@ -238,13 +238,13 @@ export default function AiChatPage() {
   }, [messages, pendingUserMessage]);
 
   return (
-    <>
+    <div>
       <ChatBreadcrumb
         onNewChat={handleNewChat}
         onSelectChat={handleSelectChat}
         currentChatId={currentChatId || undefined}
       />
-      <div className="h-[92vh] flex flex-col min-h-0">
+      <div className="h-[90vh] flex flex-col min-h-0 overflow-y-hidden">
         {/* Se temos mensagens ou mensagem pendente, mostrar o chat */}
         {messages.length > 0 || pendingUserMessage ? (
           <>
@@ -566,6 +566,6 @@ export default function AiChatPage() {
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 }
