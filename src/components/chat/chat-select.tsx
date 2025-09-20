@@ -2,6 +2,8 @@
 
 import { History, MessageSquare } from "lucide-react";
 import { TrashIcon } from "@phosphor-icons/react";
+import { useState } from "react";
+import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -43,6 +45,9 @@ export function ChatSelect({
   placeholder = "Selecionar chat..."
 }: ChatSelectProps) {
   const currentWorkspace = useCurrentWorkspace();
+  const [selectOpen, setSelectOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [chatToDelete, setChatToDelete] = useState<string | null>(null);
 
   const { data: chatsData, isLoading } = useChats(
     currentWorkspace?.id || '',
@@ -66,102 +71,142 @@ export function ChatSelect({
     return currentChat?.title || 'Chat sem título';
   };
 
-  const handleDeleteChat = async (chatId: string, event: React.MouseEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
+  const handleOpenDeleteDialog = (chatId: string) => {
+    console.log('🗑️ Opening delete dialog for chat:', chatId);
+    setChatToDelete(chatId);
+    setSelectOpen(false);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteChat = async () => {
+    if (!chatToDelete) return;
+
+    console.log('🔥 handleDeleteChat called with chatId:', chatToDelete);
+
+    // Fecha o dialog primeiro
+    setDeleteDialogOpen(false);
+
+    // Mostra toast de loading manual para debug
+    const loadingToast = toast.loading('Deletando chat...');
 
     try {
-      await deleteChat.mutateAsync(chatId);
+      console.log('🚀 Starting delete mutation...');
+      const result = await deleteChat.mutateAsync(chatToDelete);
+      console.log('🎯 Delete mutation result:', result);
+
       // Se o chat deletado é o atual, limpa a seleção
-      if (chatId === currentChatId) {
+      if (chatToDelete === currentChatId) {
+        console.log('🧹 Clearing current chat selection...');
         onSelectChat?.(null);
       }
+
+      console.log('✅ Delete successful!');
+
+      // Remove loading e mostra sucesso manual para debug
+      toast.dismiss(loadingToast);
+      toast.success('Chat deletado com sucesso! (manual)');
     } catch (error) {
-      console.error('Erro ao deletar chat:', error);
+      console.error('❌ Erro ao deletar chat:', error);
+
+      // Remove loading e mostra erro manual para debug
+      toast.dismiss(loadingToast);
+      toast.error('Erro ao deletar chat: ' + (error instanceof Error ? error.message : 'Erro desconhecido'));
+    } finally {
+      setChatToDelete(null);
     }
   };
 
   return (
-    <Select
-      value={currentChatId || ""}
-      onValueChange={handleValueChange}
-    >
-      <SelectTrigger
-        className="w-[280px] overflow-hidden [&_span[data-radix-select-value]]:!text-ellipsis [&_span[data-radix-select-value]]:!overflow-hidden [&_span[data-radix-select-value]]:!whitespace-nowrap [&_span[data-radix-select-value]]:!max-w-[200px] [&_span[data-radix-select-value]]:!block"
-        style={selectTriggerStyle}
+    <>
+      <Select
+        value={currentChatId || ""}
+        onValueChange={handleValueChange}
+        open={selectOpen}
+        onOpenChange={setSelectOpen}
       >
-        <div className="flex items-center gap-2 w-full min-w-0">
-          <History className="w-4 h-4 flex-shrink-0" />
-          <div className="flex-1 min-w-0">
-            <SelectValue placeholder={placeholder} />
+        <SelectTrigger
+          className="w-[280px] overflow-hidden [&_span[data-radix-select-value]]:!text-ellipsis [&_span[data-radix-select-value]]:!overflow-hidden [&_span[data-radix-select-value]]:!whitespace-nowrap [&_span[data-radix-select-value]]:!max-w-[200px] [&_span[data-radix-select-value]]:!block"
+          style={selectTriggerStyle}
+        >
+          <div className="flex items-center gap-2 w-full min-w-0">
+            <History className="w-4 h-4 flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <SelectValue placeholder={placeholder} />
+            </div>
           </div>
-        </div>
-      </SelectTrigger>
-      <SelectContent>
-        
+        </SelectTrigger>
+        <SelectContent>
 
-        {isLoading && (
-          <SelectItem value="loading" disabled>
-            Carregando chats...
-          </SelectItem>
-        )}
 
-        {!isLoading && chatsData?.chats && chatsData.chats.length > 0 && (
-          <>
-            {chatsData.chats.map((chat) => (
-              <div key={chat.id} className="relative group">
-                <SelectItem value={chat.id} className="pr-8">
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <span className="text-xs text-muted-foreground flex-shrink-0">
-                      {chat.isActive ? '●' : '○'}
-                    </span>
-                    <span className="truncate flex-1">
-                      {chat.title || 'Chat sem título'}
-                    </span>
-                  </div>
-                </SelectItem>
+          {isLoading && (
+            <SelectItem value="loading" disabled>
+              Carregando chats...
+            </SelectItem>
+          )}
 
-                {/* Lixeira na posição exata onde fica o check mark do Radix - só aparece no hover */}
-                {chat.id !== currentChatId && (
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <button
-                        className="absolute right-2 cursor-pointer top-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center text-red-500 hover:text-red-600 rounded-sm transition-colors z-20 opacity-0 group-hover:opacity-100 pointer-events-auto"
-                        style={{ color: '#ef4444' }}
-                      >
-                        <TrashIcon className="w-3.5 h-3.5" />
-                      </button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Deletar Chat</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Tem certeza que deseja deletar este chat? Esta ação não pode ser desfeita.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={(e) => handleDeleteChat(chat.id, e)}
-                          className="bg-destructive hover:bg-destructive/90"
-                        >
-                          Deletar
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                )}
-              </div>
-            ))}
-          </>
-        )}
+          {!isLoading && chatsData?.chats && chatsData.chats.length > 0 && (
+            <>
+              {chatsData.chats.map((chat) => (
+                <div key={chat.id} className="relative group">
+                  <SelectItem value={chat.id} className="pr-8">
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <span className="text-xs text-muted-foreground flex-shrink-0">
+                        {chat.isActive ? '●' : '○'}
+                      </span>
+                      <span className="truncate flex-1">
+                        {chat.title || 'Chat sem título'}
+                      </span>
+                    </div>
+                  </SelectItem>
 
-        {!isLoading && (!chatsData?.chats || chatsData.chats.length === 0) && (
-          <SelectItem value="empty" disabled>
-            Nenhum chat encontrado
-          </SelectItem>
-        )}
-      </SelectContent>
-    </Select>
+                  {/* Lixeira na posição exata onde fica o check mark do Radix - só aparece no hover */}
+                  {chat.id !== currentChatId && (
+                    <button
+                      className="absolute right-2 cursor-pointer top-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center text-red-500 hover:text-red-600 rounded-sm transition-colors z-20 opacity-0 group-hover:opacity-100 pointer-events-auto"
+                      style={{ color: '#ef4444' }}
+                      onClick={(e) => {
+                        console.log('🖱️ Trash button clicked!');
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleOpenDeleteDialog(chat.id);
+                      }}
+                    >
+                      <TrashIcon className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </>
+          )}
+
+          {!isLoading && (!chatsData?.chats || chatsData.chats.length === 0) && (
+            <SelectItem value="empty" disabled>
+              Nenhum chat encontrado
+            </SelectItem>
+          )}
+        </SelectContent>
+      </Select>
+
+      {/* AlertDialog controlado separadamente */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Deletar Chat</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja deletar este chat? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteChat}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              Deletar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }
