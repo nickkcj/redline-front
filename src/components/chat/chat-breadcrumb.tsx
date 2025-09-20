@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Home, Plus, History } from "lucide-react";
+import { Home, Plus } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -12,7 +12,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
-import { ChatHistorySheet } from "./chat-history-sheet";
+import { ChatSelect } from "./chat-select";
 
 interface ChatBreadcrumbProps {
   onNewChat?: () => void;
@@ -45,15 +45,10 @@ export function ChatBreadcrumb({
       </Breadcrumb>
 
       <div className="flex items-center gap-2">
-        <ChatHistorySheet
+        <ChatSelect
           onSelectChat={onSelectChat}
           currentChatId={currentChatId}
-          trigger={
-            <Button variant="outline" size="sm">
-              <History className="w-4 h-4 mr-2" />
-              Histórico
-            </Button>
-          }
+          placeholder="Histórico"
         />
 
         <Button
