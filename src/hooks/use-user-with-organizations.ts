@@ -59,16 +59,16 @@ export function useUserWithOrganizations() {
             setCurrentWorkspace(firstWorkspace)
           }
 
-          // Update URL with query params automatically
-          const newParams = new URLSearchParams()
-          newParams.set('orgId', firstOrg.id)
-          newParams.set('workspaceId', firstWorkspace.id)
+          // Update URL with query params automatically (preserving existing params)
+          const currentParams = new URLSearchParams(window.location.search)
+          currentParams.set('orgId', firstOrg.id)
+          currentParams.set('workspaceId', firstWorkspace.id)
 
           const currentPath = window.location.pathname
-          const newUrl = `${currentPath}?${newParams.toString()}`
+          const newUrl = `${currentPath}?${currentParams.toString()}`
 
           // Only update URL if params actually changed
-          if (window.location.search !== `?${newParams.toString()}`) {
+          if (window.location.search !== `?${currentParams.toString()}`) {
             router.replace(newUrl)
           }
         }

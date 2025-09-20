@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageSquare, Copy, RotateCcw } from "lucide-react";
@@ -13,6 +13,7 @@ import { tokenStore } from "@/lib/auth/stores/auth.store";
 import { toast } from "sonner";
 import Image from "next/image";
 import { ChatBreadcrumb } from "@/components/chat/chat-breadcrumb";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   PromptInput,
   PromptInputTextarea,
@@ -77,6 +78,16 @@ export default function AiChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const currentWorkspace = useCurrentWorkspace();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Debug inicial
+  console.log('🔎 Initial render:', {
+    searchParams: searchParams?.toString(),
+    allParams: searchParams ? Object.fromEntries(searchParams.entries()) : 'null',
+    chatIdParam: searchParams?.get('chatId'),
+    currentChatId
+  });
 
   // Refs para valores atuais (evitar closure stale)
   const currentWorkspaceRef = useRef(currentWorkspace);
@@ -298,6 +309,58 @@ export default function AiChatPage() {
     currentChatIdRef.current = currentChatId;
   }, [currentChatId]);
 
+  // Flag para evitar loop na primeira leitura da URL
+  const hasInitialized = useRef(false);
+
+  // Ler chatId da URL e recarregar no chat
+  useEffect(() => {
+    const chatIdFromUrl = searchParams.get('chatId');
+    console.log('🔍 URL check:', { chatIdFromUrl, currentChatId, hasInitialized: hasInitialized.current, searchParams: searchParams.toString() });
+
+    // Se tem chatId na URL e ainda não inicializou, ou se o chatId mudou (navegação)
+    if (chatIdFromUrl && (!hasInitialized.current || chatIdFromUrl !== currentChatId)) {
+      console.log('📖 Setting chat ID from URL:', chatIdFromUrl);
+      setCurrentChatId(chatIdFromUrl);
+      hasInitialized.current = true;
+    } else if (!chatIdFromUrl && hasInitialized.current && currentChatId) {
+      // URL foi limpa (usuário navegou para /ai-chat sem chatId)
+      console.log('🗑️ URL cleared, clearing current chat');
+      setCurrentChatId(null);
+    }
+
+    if (!hasInitialized.current) {
+      hasInitialized.current = true;
+    }
+  }, [searchParams]); // Monitora mudanças na URL
+
+  // Função para atualizar URL com chatId (preservando outros parâmetros)
+  const updateUrlWithChatId = useCallback((chatId: string | null) => {
+    console.log('🔧 updateUrlWithChatId called with:', chatId);
+
+    const currentParams = new URLSearchParams(window.location.search);
+
+    if (chatId) {
+      currentParams.set('chatId', chatId);
+      console.log('🔗 Adding chatId to URL:', chatId);
+    } else {
+      currentParams.delete('chatId');
+      console.log('🗑️ Removing chatId from URL');
+    }
+
+    const newUrl = currentParams.toString() ? `?${currentParams.toString()}` : '';
+    console.log('🌐 New URL will be:', `/ai-chat${newUrl}`);
+    router.replace(`/ai-chat${newUrl}`, { scroll: false });
+  }, [router]);
+
+  // Debug condição de exibição do chat
+  const shouldShowChat = messages.length > 0 || pendingUserMessage || currentChatId;
+  console.log('🖥️ Should show chat:', {
+    shouldShowChat,
+    messagesLength: messages.length,
+    pendingUserMessage: !!pendingUserMessage,
+    currentChatId: !!currentChatId
+  });
+
   const handleQuickAction = (prompt: string) => {
     setInput("");
     handleSendMessage(prompt);
@@ -331,6 +394,7 @@ export default function AiChatPage() {
           initialMessage: text
         });
         setCurrentChatId(newChat.id);
+        updateUrlWithChatId(newChat.id); // Adiciona novo chatId à URL
         return;
       }
 
@@ -358,6 +422,7 @@ export default function AiChatPage() {
 
   const handleNewChat = () => {
     setCurrentChatId(null);
+    updateUrlWithChatId(null); // Remove chatId da URL
     setInput('');
     console.log('🔴 Clearing pendingUserMessage (new chat)');
     setPendingUserMessage(null);
@@ -369,7 +434,9 @@ export default function AiChatPage() {
   };
 
   const handleSelectChat = (chatId: string) => {
+    console.log('🎯 handleSelectChat called with:', chatId, 'current:', currentChatId);
     setCurrentChatId(chatId);
+    updateUrlWithChatId(chatId); // Atualiza URL explicitamente
     // O useEffect já vai limpar o streaming content
     // Só limpa pendingUserMessage se estivermos realmente mudando de chat
     if (chatId !== currentChatId) {
@@ -411,8 +478,8 @@ export default function AiChatPage() {
         currentChatId={currentChatId || undefined}
       />
       <div className="h-[90vh] flex flex-col min-h-0 overflow-y-hidden">
-        {/* Se temos mensagens ou mensagem pendente, mostrar o chat */}
-        {messages.length > 0 || pendingUserMessage ? (
+        {/* Se temos mensagens, mensagem pendente, ou chat selecionado, mostrar o chat */}
+        {shouldShowChat ? (
           <>
             {/* Área de Mensagens - com scroll independente */}
             <div className="flex-1 overflow-hidden">
