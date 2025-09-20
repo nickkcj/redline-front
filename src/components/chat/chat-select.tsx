@@ -1,6 +1,7 @@
 "use client";
 
 import { History, MessageSquare } from "lucide-react";
+import { TrashIcon } from "@phosphor-icons/react";
 import {
   Select,
   SelectContent,
@@ -8,7 +9,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useChats } from "@/hooks/use-chat";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useChats, useDeleteChat } from "@/hooks/use-chat";
 import { useCurrentWorkspace } from "@/store/app-store";
 
 // CSS-in-JS para forçar ellipsis
@@ -36,6 +49,8 @@ export function ChatSelect({
     { page: 1, limit: 50 }
   );
 
+  const deleteChat = useDeleteChat(currentWorkspace?.id || '');
+
   const handleValueChange = (value: string) => {
     if (value === "new") {
       // Se selecionou "Novo Chat", limpa o chat atual
@@ -49,6 +64,21 @@ export function ChatSelect({
     if (!currentChatId) return null;
     const currentChat = chatsData?.chats?.find(chat => chat.id === currentChatId);
     return currentChat?.title || 'Chat sem título';
+  };
+
+  const handleDeleteChat = async (chatId: string, event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    try {
+      await deleteChat.mutateAsync(chatId);
+      // Se o chat deletado é o atual, limpa a seleção
+      if (chatId === currentChatId) {
+        onSelectChat?.(null);
+      }
+    } catch (error) {
+      console.error('Erro ao deletar chat:', error);
+    }
   };
 
   return (
@@ -79,13 +109,49 @@ export function ChatSelect({
         {!isLoading && chatsData?.chats && chatsData.chats.length > 0 && (
           <>
             {chatsData.chats.map((chat) => (
-              <SelectItem key={chat.id} value={chat.id}>
-                <div className="flex items-center justify-between w-full min-w-0 text-ellipsis">
-                  <span className="truncate flex-1 mr-2 text-ellipsis">
-                    {chat.title || 'Chat sem título'}
-                  </span>
-                </div>
-              </SelectItem>
+              <div key={chat.id} className="relative group">
+                <SelectItem value={chat.id} className="pr-8">
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <span className="text-xs text-muted-foreground flex-shrink-0">
+                      {chat.isActive ? '●' : '○'}
+                    </span>
+                    <span className="truncate flex-1">
+                      {chat.title || 'Chat sem título'}
+                    </span>
+                  </div>
+                </SelectItem>
+
+                {/* Lixeira na posição exata onde fica o check mark do Radix - só aparece no hover */}
+                {chat.id !== currentChatId && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <button
+                        className="absolute right-2 cursor-pointer top-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center text-red-500 hover:text-red-600 rounded-sm transition-colors z-20 opacity-0 group-hover:opacity-100 pointer-events-auto"
+                        style={{ color: '#ef4444' }}
+                      >
+                        <TrashIcon className="w-3.5 h-3.5" />
+                      </button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Deletar Chat</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Tem certeza que deseja deletar este chat? Esta ação não pode ser desfeita.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={(e) => handleDeleteChat(chat.id, e)}
+                          className="bg-destructive hover:bg-destructive/90"
+                        >
+                          Deletar
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
+              </div>
             ))}
           </>
         )}
