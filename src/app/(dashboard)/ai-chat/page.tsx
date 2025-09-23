@@ -311,9 +311,16 @@ export default function AiChatPage() {
 
   // Flag para evitar loop na primeira leitura da URL
   const hasInitialized = useRef(false);
+  // Flag para saber se estamos criando um novo chat
+  const isCreatingNewChat = useRef(false);
 
   // Ler chatId da URL e recarregar no chat
   useEffect(() => {
+    // Se estamos criando um novo chat, não processar mudanças de URL
+    if (isCreatingNewChat.current) {
+      return;
+    }
+
     const chatIdFromUrl = searchParams.get('chatId');
     console.log('🔍 URL check:', { chatIdFromUrl, currentChatId, hasInitialized: hasInitialized.current, searchParams: searchParams.toString() });
 
@@ -387,22 +394,32 @@ export default function AiChatPage() {
     setPendingUserMessage(text.trim());
 
     try {
+      let chatIdToUse = currentChatId;
+
       // Se não temos um chat, criar um novo
-      if (!currentChatId) {
+      if (!chatIdToUse) {
+        isCreatingNewChat.current = true; // Marcar que estamos criando um chat
+
         const newChat = await createChatMutation.mutateAsync({
-          title: text.slice(0, 50) + (text.length > 50 ? '...' : ''),
-          initialMessage: text
+          title: text.slice(0, 50) + (text.length > 50 ? '...' : '')
+          // Removido initialMessage - o streaming enviará a mensagem
         });
+        chatIdToUse = newChat.id;
         setCurrentChatId(newChat.id);
         updateUrlWithChatId(newChat.id); // Adiciona novo chatId à URL
-        return;
+
+        // Aguardar um pouco para evitar conflitos de estado
+        await new Promise(resolve => setTimeout(resolve, 100));
+        isCreatingNewChat.current = false; // Desmarcar flag
+
+        // NÃO retornar aqui - continuar para iniciar o streaming
       }
 
-      // Use streaming para chat existente
-      console.log('Starting stream with:', { workspaceId: currentWorkspace.id, chatId: currentChatId, content: text.trim() });
+      // Use streaming para o chat (novo ou existente)
+      console.log('Starting stream with:', { workspaceId: currentWorkspace.id, chatId: chatIdToUse, content: text.trim() });
 
       try {
-        await startStream(currentWorkspace.id, currentChatId, text.trim());
+        await startStream(currentWorkspace.id, chatIdToUse, text.trim());
       } catch (streamError) {
         console.error('Streaming failed, falling back to normal message:', streamError);
         // Fallback para o método normal se streaming falhar
@@ -417,6 +434,7 @@ export default function AiChatPage() {
       toast.error('Erro ao enviar mensagem');
       console.log('🔴 Clearing pendingUserMessage (general error)');
       setPendingUserMessage(null);
+      isCreatingNewChat.current = false; // Garantir que a flag seja resetada em caso de erro
     }
   };
 
@@ -486,7 +504,7 @@ export default function AiChatPage() {
             <div className="flex-1 overflow-hidden">
               <ScrollArea className="h-full p-6">
                 <div className="space-y-8 max-w-4xl mx-auto">
-                  {isLoadingChat && (
+                  {isLoadingChat && messages.length === 0 && !pendingUserMessage && (
                     <div className="flex items-center justify-center py-8">
                       <div className="text-sm text-muted-foreground">Carregando...</div>
                     </div>
