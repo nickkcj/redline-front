@@ -149,6 +149,25 @@ export default function AiChatPage() {
 
   const messages = chatData?.messages || [];
 
+  // Função para atualizar URL com chatId (preservando outros parâmetros)
+  const updateUrlWithChatId = useCallback((chatId: string | null) => {
+    console.log('🔧 updateUrlWithChatId called with:', chatId);
+
+    const currentParams = new URLSearchParams(window.location.search);
+
+    if (chatId) {
+      currentParams.set('chatId', chatId);
+      console.log('🔗 Adding chatId to URL:', chatId);
+    } else {
+      currentParams.delete('chatId');
+      console.log('🗑️ Removing chatId from URL');
+    }
+
+    const newUrl = currentParams.toString() ? `?${currentParams.toString()}` : '';
+    console.log('🌐 New URL will be:', `/ai-chat${newUrl}`);
+    router.replace(`/ai-chat${newUrl}`, { scroll: false });
+  }, [router]);
+
   // Stream chat hook
   const {
     isStreaming: isStreamingChat,
@@ -178,6 +197,14 @@ export default function AiChatPage() {
         hasWorkspace: !!currentWorkspaceRef.current?.id,
         hasChatId: !!currentChatIdRef.current
       });
+
+      // Se devemos atualizar a URL após o stream (primeiro chat)
+      if (shouldUpdateUrlAfterStream.current) {
+        console.log('📍 Updating URL after stream end with chatId:', shouldUpdateUrlAfterStream.current);
+        updateUrlWithChatId(shouldUpdateUrlAfterStream.current);
+        shouldUpdateUrlAfterStream.current = null;
+        isCreatingNewChat.current = false; // Liberar flag agora
+      }
 
       // Invalidate queries to refresh the chat e remove mensagem pendente depois
       if (currentWorkspaceRef.current?.id && currentChatIdRef.current) {
@@ -209,6 +236,13 @@ export default function AiChatPage() {
       console.log('🔴 Clearing pendingUserMessage (stream error)');
       setPendingUserMessage(null); // Remove mensagem pendente também em caso de erro
       clearStreamingContent(); // Limpa streaming content em caso de erro
+
+      // Limpar flags se estava criando novo chat
+      if (shouldUpdateUrlAfterStream.current) {
+        shouldUpdateUrlAfterStream.current = null;
+        isCreatingNewChat.current = false;
+      }
+
       toast.error(`Erro no streaming: ${error.message}`);
     },
     onMessageSaved: (messageId, role, content) => {
@@ -313,6 +347,8 @@ export default function AiChatPage() {
   const hasInitialized = useRef(false);
   // Flag para saber se estamos criando um novo chat
   const isCreatingNewChat = useRef(false);
+  // Flag para atualizar URL após o stream terminar
+  const shouldUpdateUrlAfterStream = useRef<string | null>(null);
 
   // Ler chatId da URL e recarregar no chat
   useEffect(() => {
@@ -339,25 +375,6 @@ export default function AiChatPage() {
       hasInitialized.current = true;
     }
   }, [searchParams]); // Monitora mudanças na URL
-
-  // Função para atualizar URL com chatId (preservando outros parâmetros)
-  const updateUrlWithChatId = useCallback((chatId: string | null) => {
-    console.log('🔧 updateUrlWithChatId called with:', chatId);
-
-    const currentParams = new URLSearchParams(window.location.search);
-
-    if (chatId) {
-      currentParams.set('chatId', chatId);
-      console.log('🔗 Adding chatId to URL:', chatId);
-    } else {
-      currentParams.delete('chatId');
-      console.log('🗑️ Removing chatId from URL');
-    }
-
-    const newUrl = currentParams.toString() ? `?${currentParams.toString()}` : '';
-    console.log('🌐 New URL will be:', `/ai-chat${newUrl}`);
-    router.replace(`/ai-chat${newUrl}`, { scroll: false });
-  }, [router]);
 
   // Debug condição de exibição do chat
   const shouldShowChat = messages.length > 0 || pendingUserMessage || currentChatId;
@@ -406,12 +423,12 @@ export default function AiChatPage() {
         });
         chatIdToUse = newChat.id;
         setCurrentChatId(newChat.id);
-        updateUrlWithChatId(newChat.id); // Adiciona novo chatId à URL
 
-        // Aguardar um pouco para evitar conflitos de estado
-        await new Promise(resolve => setTimeout(resolve, 100));
-        isCreatingNewChat.current = false; // Desmarcar flag
+        // Marcar para atualizar URL apenas após o stream terminar
+        shouldUpdateUrlAfterStream.current = newChat.id;
+        console.log('🔸 Will update URL after stream ends with chatId:', newChat.id);
 
+        // NÃO atualizar URL aqui - será feito após o stream terminar
         // NÃO retornar aqui - continuar para iniciar o streaming
       }
 
@@ -434,7 +451,10 @@ export default function AiChatPage() {
       toast.error('Erro ao enviar mensagem');
       console.log('🔴 Clearing pendingUserMessage (general error)');
       setPendingUserMessage(null);
-      isCreatingNewChat.current = false; // Garantir que a flag seja resetada em caso de erro
+
+      // Limpar todas as flags em caso de erro
+      isCreatingNewChat.current = false;
+      shouldUpdateUrlAfterStream.current = null;
     }
   };
 
