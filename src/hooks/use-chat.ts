@@ -137,6 +137,23 @@ export function useUpdateChatStatus(workspaceId: string, chatId: string) {
   )
 }
 
+// Renomeia um chat
+export function useRenameChat(workspaceId: string) {
+  return useApiMutation<ChatResponseDto, { chatId: string; title: string }>(
+    ({ chatId, title }) => apiCall<ChatResponseDto>(`/chats/${workspaceId}/${chatId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ title }),
+    }),
+    {
+      successMessage: 'Chat renomeado com sucesso!',
+      invalidateKeys: [
+        ['chat', workspaceId],
+        ['chats', workspaceId]
+      ],
+    }
+  )
+}
+
 // Deleta um chat
 export function useDeleteChat(workspaceId: string) {
   return useApiMutation<{ success: boolean }, string>(

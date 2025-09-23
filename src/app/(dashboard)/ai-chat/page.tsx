@@ -476,6 +476,7 @@ export default function AiChatPage() {
         onNewChat={handleNewChat}
         onSelectChat={handleSelectChat}
         currentChatId={currentChatId || undefined}
+        currentChatTitle={chatData?.title}
       />
       <div className="h-[90vh] flex flex-col min-h-0 overflow-y-hidden">
         {/* Se temos mensagens, mensagem pendente, ou chat selecionado, mostrar o chat */}
@@ -499,58 +500,38 @@ export default function AiChatPage() {
 
                   {messages.map((message, index) => (
                     <div key={message.id} className="space-y-4">
-                      {message.role === MessageRole.ASSISTANT && (
-                        <Reasoning isStreaming={false} defaultOpen={false} duration={Math.floor(Math.random() * 4) + 1}>
-                          <ReasoningTrigger />
-                          <ReasoningContent>
-                            Analisei cuidadosamente sua pergunta, considerei diferentes perspectivas e estruturei uma resposta abrangente para atender às suas necessidades específicas.
-                          </ReasoningContent>
-                        </Reasoning>
-                      )}
-
                       <Message from={message.role}>
-                        {message.role === MessageRole.ASSISTANT && (
-                          <MessageAvatar
-                            src=""
-                            name="AI"
-                          />
-                        )}
                         <MessageContent variant={message.role === MessageRole.USER ? "contained" : "flat"}>
                           <Response>
                             {message.content}
                           </Response>
                         </MessageContent>
-                        {message.role === MessageRole.USER && (
-                          <MessageAvatar
-                            src=""
-                            name="You"
-                          />
-                        )}
                       </Message>
 
                       {message.role === MessageRole.ASSISTANT && (
-                        <Actions className="ml-10">
-                          <Action
-                            tooltip="Copy message"
-                            label="Copy"
-                            onClick={() => navigator.clipboard.writeText(message.content)}
-                          >
-                            <Copy className="w-4 h-4" />
-                          </Action>
-                          <Action
-                            tooltip="Regenerate response"
-                            label="Regenerate"
-                            onClick={() => console.log('Regenerate message')}
-                          >
-                            <RotateCcw className="w-4 h-4" />
-                          </Action>
-                        </Actions>
-                      )}
-
-                      {message.role === MessageRole.ASSISTANT && message.aiModel && (
-                        <div className="ml-10 flex items-center gap-2 text-xs text-muted-foreground">
-                          <div className="w-1 h-1 bg-muted-foreground rounded-full"></div>
-                          <span>{message.aiModel}</span>
+                        <div className="flex items-center gap-2 mt-2">
+                          <Actions>
+                            <Action
+                              tooltip="Copy message"
+                              label="Copy"
+                              onClick={() => navigator.clipboard.writeText(message.content)}
+                            >
+                              <Copy className="w-4 h-4" />
+                            </Action>
+                            <Action
+                              tooltip="Regenerate response"
+                              label="Regenerate"
+                              onClick={() => console.log('Regenerate message')}
+                            >
+                              <RotateCcw className="w-4 h-4" />
+                            </Action>
+                          </Actions>
+                          {message.aiModel && (
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <div className="w-1 h-1 bg-muted-foreground rounded-full"></div>
+                              <span>{message.aiModel}</span>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
@@ -564,21 +545,16 @@ export default function AiChatPage() {
                           {pendingUserMessage}
                         </Response>
                       </MessageContent>
-                      <MessageAvatar
-                        src=""
-                        name="You"
-                      />
                     </Message>
                   )}
 
-                  {showLoadingDots && (
-                    <div className="w-full mb-4">
-                      <Reasoning isStreaming={showLoadingDots} defaultOpen={true}>
-                        <ReasoningTrigger />
-                        <ReasoningContent>
-                          {reasoningContent || "Analisando sua pergunta e estruturando a melhor resposta..."}
-                        </ReasoningContent>
-                      </Reasoning>
+                  {showLoadingDots && !streamingContent && (
+                    <div className="flex justify-start mb-4">
+                      <div className="flex items-center gap-1 p-4 bg-muted/50 rounded-lg">
+                        <span className="animate-bounce w-2 h-2 bg-muted-foreground rounded-full" style={{ animationDelay: '0s' }}></span>
+                        <span className="animate-bounce w-2 h-2 bg-muted-foreground rounded-full" style={{ animationDelay: '0.15s' }}></span>
+                        <span className="animate-bounce w-2 h-2 bg-muted-foreground rounded-full" style={{ animationDelay: '0.3s' }}></span>
+                      </div>
                     </div>
                   )}
 
@@ -586,10 +562,6 @@ export default function AiChatPage() {
                   {streamingContent && (
                     <div className="w-full mb-4">
                       <Message from="assistant">
-                        <MessageAvatar
-                          src=""
-                          name="AI"
-                        />
                         <MessageContent variant="flat">
                           <Response>
                             {streamingContent}
@@ -600,7 +572,7 @@ export default function AiChatPage() {
                   )}
 
                   {/* Fallback dots caso o Reasoning não apareça */}
-                  {isStreaming && !showLoadingDots && (
+                  {isStreaming && !showLoadingDots && !streamingContent && (
                     <div className="flex justify-start mb-4">
                       <div className="flex items-center gap-1 p-4 bg-muted/50 rounded-lg">
                         <span className="animate-bounce w-2 h-2 bg-muted-foreground rounded-full" style={{ animationDelay: '0s' }}></span>
