@@ -471,8 +471,15 @@ export default function AiChatPage() {
     setReasoningContent("");
   };
 
-  const handleSelectChat = (chatId: string) => {
+  const handleSelectChat = (chatId: string | null) => {
     console.log('🎯 handleSelectChat called with:', chatId, 'current:', currentChatId);
+    if (chatId === null) {
+      // Se chatId for null, limpar o chat atual
+      setCurrentChatId(null);
+      updateUrlWithChatId(null);
+      setPendingUserMessage(null);
+      return;
+    }
     setCurrentChatId(chatId);
     updateUrlWithChatId(chatId); // Atualiza URL explicitamente
     // O useEffect já vai limpar o streaming content

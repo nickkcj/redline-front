@@ -37,7 +37,7 @@ import { useRouter } from "next/navigation";
 
 interface ChatBreadcrumbProps {
   onNewChat?: () => void;
-  onSelectChat?: (chatId: string) => void;
+  onSelectChat?: (chatId: string | null) => void;
   currentChatId?: string;
   currentChatTitle?: string;
 }
