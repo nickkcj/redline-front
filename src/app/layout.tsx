@@ -22,11 +22,11 @@ export const metadata: Metadata = {
   description: "A Dooor product to start your Dooor product",
   icons: {
     icon: [
-      { url: "/Selo-Dooor-Black.png", media: "(prefers-color-scheme: light)" },
-      { url: "/Selo-Dooor-White.png", media: "(prefers-color-scheme: dark)" },
+      { url: "/seloDooorBlack.png", media: "(prefers-color-scheme: light)" },
+      { url: "/seloDooorWhite.png", media: "(prefers-color-scheme: dark)" },
     ],
-    shortcut: "/Selo-Dooor-Black.png",
-    apple: "/Selo-Dooor-Black.png",
+    shortcut: "/seloDooorBlack.png",
+    apple: "/seloDooorBlack.png",
   },
 };
 

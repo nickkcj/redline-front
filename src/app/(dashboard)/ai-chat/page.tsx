@@ -49,17 +49,17 @@ const MODEL_CONFIG = {
   claude: {
     key: "claude" as ModelKey,
     name: "Claude 4 Sonnet",
-    icon: "/Claude_AI_symbol.svg.png",
+    icon: "/claudeAiSymbol.png",
   },
   gemini: {
     key: "gemini" as ModelKey,
     name: "Gemini 2.5 Pro",
-    icon: "/Gemini-Icon.png.webp",
+    icon: "/geminiIcon.webp",
   },
   gpt: {
     key: "gpt" as ModelKey,
     name: "GPT-5",
-    icon: "/ChatGPT-Logo.svg.png",
+    icon: "/chatGptLogo.png",
   },
 };
 
