@@ -16,7 +16,7 @@ import {
   GoogleLoginDto,
   GoogleLoginResponseDto,
   UserInfoDto,
-} from '@/lib/types/auth.types';
+} from '@/lib/auth/types/auth.types';
 
 const initialState: AuthState = {
   user: null,

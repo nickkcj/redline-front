@@ -1,7 +1,7 @@
 'use client'
 
 import { useUrlStoreSync } from '@/hooks/use-url-store-sync'
-import { useUserWithOrganizations } from '@/hooks/use-user-with-organizations'
+import { useUserWithOrganizations } from '@/hooks/api/use-user-with-organizations'
 import { useIsAuthenticated } from '@/store/app-store'
 
 export function StoreInitializer() {

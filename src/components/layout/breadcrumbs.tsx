@@ -19,13 +19,8 @@ interface BreadcrumbItem {
 }
 
 const routeMapping: Record<string, string> = {
-  dashboard: "Dashboard",
-  rooms: "Salas",
-  documents: "Documentos",
-  accesses: "Acessos",
-  audit: "Auditoria",
-  settings: "Configurações",
-  "ai-chat": "AI Chat",
+  org: "Organizações",
+  workspace: "Projetos",
 };
 
 export function Breadcrumbs() {
@@ -59,7 +54,7 @@ export function Breadcrumbs() {
       <BreadcrumbList>
         <BreadcrumbItem>
           <BreadcrumbLink asChild>
-            <Link href="/dashboard" className="flex items-center gap-1">
+            <Link href="/org" className="flex items-center gap-1">
               <Home className="h-4 w-4" />
               <span className="sr-only">Home</span>
             </Link>
