@@ -23,7 +23,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useChats, useDeleteChat } from "@/hooks/use-chat";
+import { useChats, useDeleteChat } from "@/hooks/api/use-chat";
 import { useCurrentWorkspace } from "@/store/app-store";
 
 // CSS-in-JS para forçar ellipsis

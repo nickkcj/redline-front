@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { ChatSelect } from "./chat-select";
-import { useRenameChat, useDeleteChat } from "@/hooks/use-chat";
+import { useRenameChat, useDeleteChat } from "@/hooks/api/use-chat";
 import { useCurrentWorkspace } from "@/store/app-store";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";

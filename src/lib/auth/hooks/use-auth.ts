@@ -65,7 +65,7 @@ export function useAuth() {
       }
 
       // If no saved user, fetch from API
-      const user = await authService.mockGetUserInfo();
+      const user = await authService.getUserInfo();
       setUser(user);
     } catch (error) {
       console.error('Auth initialization failed:', error);
