@@ -39,9 +39,16 @@ export default function WorkspacesPage() {
   const { organizations, loading: orgsLoading } = useOrganizations();
 
   // Get workspaces from current organization
-  const currentOrgWithWorkspaces = currentOrganization
-    ? organizations.find((org: OrganizationWithWorkspaces) => org.id === currentOrganization.id)
-    : null;
+  // Try to find by currentOrganization first, then by orgId from URL
+  const currentOrgWithWorkspaces = React.useMemo(() => {
+    if (currentOrganization) {
+      const found = organizations.find((org: OrganizationWithWorkspaces) => org.id === currentOrganization.id);
+      if (found) return found;
+    }
+    // Fallback: try to find by any organization in the list (should match currentOrganization)
+    return organizations.find((org: OrganizationWithWorkspaces) => org.id === currentOrganization?.id) || null;
+  }, [organizations, currentOrganization]);
+  
   const workspaces: WorkspaceSummary[] = (currentOrgWithWorkspaces as OrganizationWithWorkspaces | null)?.workspaces ?? [];
 
   // New workspace modal state
@@ -71,14 +78,20 @@ export default function WorkspacesPage() {
 
   // Check if user can create workspaces
   const canCreateWorkspace = React.useMemo(() => {
-    if (!currentOrganization || !currentUser) return false;
+    // Use authUser from context (same as organizations page)
+    const userId = authUser?.id || currentUser?.id;
+    if (!currentOrganization || !userId) {
+      return false;
+    }
     // Get full organization with workspaces to check owner/master
     const fullOrg = currentOrgWithWorkspaces as OrganizationWithWorkspaces | null;
-    if (!fullOrg) return false;
-    const isOwner = fullOrg.ownerId === currentUser.id;
-    const isMaster = fullOrg.masterMemberId === currentUser.id;
+    if (!fullOrg) {
+      return false;
+    }
+    const isOwner = fullOrg.ownerId === userId;
+    const isMaster = fullOrg.masterMemberId === userId;
     return isOwner || isMaster;
-  }, [currentOrganization, currentUser, currentOrgWithWorkspaces]);
+  }, [currentOrganization, authUser, currentUser, currentOrgWithWorkspaces]);
 
   const isLoading = orgsLoading || (organizations.length > 0 && !currentOrganization);
 
@@ -326,24 +339,25 @@ export default function WorkspacesPage() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-gray-700 hover:text-gray-900 hover:bg-gray-100"
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="start" className="w-40">
+                            <DropdownMenuContent align="start" className="w-40 !bg-white !border-gray-200">
                               {canCreateWorkspace && (
                                 <>
                                   <DropdownMenuItem
                                     onClick={(e) => handleEditWorkspace(workspace, e)}
+                                    className="text-gray-900 hover:bg-gray-100"
                                   >
                                     <Edit className="mr-2 h-4 w-4" />
                                     Editar
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
                                     onClick={(e) => handleDeleteWorkspace(workspace, e)}
-                                    className="text-red-600"
+                                    className="text-red-600 hover:bg-red-50"
                                   >
                                     <Trash2 className="mr-2 h-4 w-4" />
                                     Excluir
@@ -352,7 +366,7 @@ export default function WorkspacesPage() {
                               )}
                               <DropdownMenuItem
                                 onClick={(e) => handleLeaveWorkspace(workspace, e)}
-                                className="text-orange-600"
+                                className="text-orange-600 hover:bg-orange-50"
                               >
                                 <DoorOpen className="mr-2 h-4 w-4" />
                                 Sair
@@ -383,14 +397,14 @@ export default function WorkspacesPage() {
 
         {/* New Workspace Modal */}
         <Dialog open={showNewWorkspaceModal} onOpenChange={setShowNewWorkspaceModal}>
-          <DialogContent className="sm:max-w-[400px]">
+          <DialogContent className="sm:max-w-[400px] !bg-white !border-gray-200">
             <DialogHeader>
-              <DialogTitle>Novo Projeto</DialogTitle>
+              <DialogTitle className="text-xl font-semibold text-gray-900">Novo Projeto</DialogTitle>
             </DialogHeader>
 
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Nome do Projeto
                 </label>
                 <input
@@ -398,13 +412,13 @@ export default function WorkspacesPage() {
                   value={workspaceName}
                   onChange={(e) => setWorkspaceName(e.target.value)}
                   placeholder="Digite o nome do projeto"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all bg-white text-gray-900 placeholder-gray-400"
                   maxLength={100}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Descrição (Opcional)
                 </label>
                 <textarea
@@ -412,7 +426,7 @@ export default function WorkspacesPage() {
                   onChange={(e) => setWorkspaceDescription(e.target.value)}
                   placeholder="Digite uma descrição para o projeto"
                   rows={3}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 resize-none transition-all bg-white text-gray-900 placeholder-gray-400"
                   maxLength={500}
                 />
               </div>
@@ -445,14 +459,14 @@ export default function WorkspacesPage() {
 
         {/* Edit Workspace Modal */}
         <Dialog open={showEditWorkspaceModal} onOpenChange={setShowEditWorkspaceModal}>
-          <DialogContent className="sm:max-w-[400px]">
+          <DialogContent className="sm:max-w-[400px] !bg-white !border-gray-200">
             <DialogHeader>
-              <DialogTitle>Editar Projeto</DialogTitle>
+              <DialogTitle className="text-xl font-semibold text-gray-900">Editar Projeto</DialogTitle>
             </DialogHeader>
 
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Nome do Projeto
                 </label>
                 <input
@@ -460,13 +474,13 @@ export default function WorkspacesPage() {
                   value={editWorkspaceName}
                   onChange={(e) => setEditWorkspaceName(e.target.value)}
                   placeholder="Digite o nome do projeto"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all bg-white text-gray-900 placeholder-gray-400"
                   maxLength={100}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Descrição (Opcional)
                 </label>
                 <textarea
@@ -474,7 +488,7 @@ export default function WorkspacesPage() {
                   onChange={(e) => setEditWorkspaceDescription(e.target.value)}
                   placeholder="Digite uma descrição para o projeto"
                   rows={3}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 resize-none transition-all bg-white text-gray-900 placeholder-gray-400"
                   maxLength={500}
                 />
               </div>
@@ -509,14 +523,14 @@ export default function WorkspacesPage() {
 
         {/* Delete Confirmation Modal */}
         <Dialog open={showDeleteConfirmation} onOpenChange={setShowDeleteConfirmation}>
-          <DialogContent className="sm:max-w-[400px]">
+          <DialogContent className="sm:max-w-[400px] !bg-white !border-gray-200">
             <DialogHeader>
-              <DialogTitle>Excluir Projeto</DialogTitle>
+              <DialogTitle className="text-xl font-semibold text-gray-900">Excluir Projeto</DialogTitle>
             </DialogHeader>
 
             <div className="space-y-4">
-              <p className="text-sm text-gray-600">
-                Tem certeza que deseja excluir o projeto <strong>&ldquo;{deletingWorkspace?.name}&rdquo;</strong>?
+              <p className="text-sm text-gray-700 leading-relaxed">
+                Tem certeza que deseja excluir o projeto <strong className="font-semibold">&ldquo;{deletingWorkspace?.name}&rdquo;</strong>?
               </p>
               <p className="text-sm text-gray-600 font-medium">
                 Todo o conteúdo do projeto será excluído.
@@ -557,14 +571,14 @@ export default function WorkspacesPage() {
 
         {/* Leave Workspace Confirmation Modal */}
         <Dialog open={showLeaveConfirmation} onOpenChange={setShowLeaveConfirmation}>
-          <DialogContent className="sm:max-w-[400px]">
+          <DialogContent className="sm:max-w-[400px] !bg-white !border-gray-200">
             <DialogHeader>
-              <DialogTitle>Sair do Projeto</DialogTitle>
+              <DialogTitle className="text-xl font-semibold text-gray-900">Sair do Projeto</DialogTitle>
             </DialogHeader>
 
             <div className="space-y-4">
-              <p className="text-sm text-gray-600">
-                Tem certeza que deseja sair do projeto <strong>&ldquo;{leavingWorkspace?.name}&rdquo;</strong>?
+              <p className="text-sm text-gray-700 leading-relaxed">
+                Tem certeza que deseja sair do projeto <strong className="font-semibold">&ldquo;{leavingWorkspace?.name}&rdquo;</strong>?
               </p>
               <p className="text-sm text-gray-600 font-medium">
                 Você perderá acesso a este projeto e precisará ser convidado novamente para retornar.

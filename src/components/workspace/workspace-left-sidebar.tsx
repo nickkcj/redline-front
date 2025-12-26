@@ -124,14 +124,27 @@ export function WorkspaceLeftSidebar({
         return
       }
 
-      const formData = new FormData()
-      formData.append("file", file)
-
       try {
-        await uploadDocumentMutation.mutateAsync(formData)
-        toast.success("Documento enviado com sucesso")
+        await uploadDocumentMutation.mutateAsync({
+          file,
+          name: file.name,
+        })
+        // Success toast is handled by the mutation hook
       } catch (error) {
-        toast.error("Erro ao enviar documento")
+        // Error toast is handled by the mutation hook
+        // Extract error info for better logging
+        const errorMessage = error instanceof Error 
+          ? error.message 
+          : (error && typeof error === 'object' && 'message' in error)
+          ? String(error.message)
+          : 'Erro desconhecido ao enviar documento'
+        
+        console.error("Error uploading document:", {
+          message: errorMessage,
+          error: error instanceof Error ? error : String(error),
+          ...(error && typeof error === 'object' && 'statusCode' in error ? { statusCode: error.statusCode } : {}),
+          ...(error && typeof error === 'object' && 'code' in error ? { code: error.code } : {}),
+        })
       } finally {
         event.target.value = ""
       }

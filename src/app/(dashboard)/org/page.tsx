@@ -391,22 +391,23 @@ export default function OrganizationsListPage() {
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-gray-700 hover:text-gray-900 hover:bg-gray-100"
                                     onClick={(e) => e.stopPropagation()}
                                   >
                                     <MoreVertical className="h-4 w-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="start" className="w-40">
+                                <DropdownMenuContent align="start" className="w-40 !bg-white !border-gray-200">
                                   <DropdownMenuItem
                                     onClick={(e) => handleEditOrganization(org, e)}
+                                    className="text-gray-900 hover:bg-gray-100"
                                   >
                                     <Edit className="mr-2 h-4 w-4" />
                                     Editar
                                   </DropdownMenuItem>
                                   <DropdownMenuItem
                                     onClick={(e) => handleDeleteOrganization(org, e)}
-                                    className="text-red-600"
+                                    className="text-red-600 hover:bg-red-50"
                                   >
                                     <Trash2 className="mr-2 h-4 w-4" />
                                     Excluir
@@ -452,9 +453,9 @@ export default function OrganizationsListPage() {
 
         {/* New Organization Modal */}
         <Dialog open={showNewOrgModal} onOpenChange={setShowNewOrgModal}>
-          <DialogContent className="sm:max-w-[400px]">
+          <DialogContent className="sm:max-w-[400px] !bg-white !border-gray-200">
             <DialogHeader>
-              <DialogTitle className="text-xl font-semibold">Nova Organização</DialogTitle>
+              <DialogTitle className="text-xl font-semibold text-gray-900">Nova Organização</DialogTitle>
             </DialogHeader>
 
             <div className="space-y-5">
@@ -467,7 +468,7 @@ export default function OrganizationsListPage() {
                   value={orgName}
                   onChange={(e) => setOrgName(e.target.value)}
                   placeholder="Digite o nome da organização"
-                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all"
+                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all bg-white text-gray-900 placeholder-gray-400"
                   maxLength={100}
                 />
               </div>
@@ -481,7 +482,7 @@ export default function OrganizationsListPage() {
                   onChange={(e) => setOrgDescription(e.target.value)}
                   placeholder="Digite uma descrição para a organização"
                   rows={3}
-                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 resize-none transition-all"
+                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 resize-none transition-all bg-white text-gray-900 placeholder-gray-400"
                   maxLength={500}
                 />
               </div>
@@ -516,9 +517,9 @@ export default function OrganizationsListPage() {
 
         {/* Edit Organization Modal */}
         <Dialog open={showEditOrgModal} onOpenChange={setShowEditOrgModal}>
-          <DialogContent className="sm:max-w-[400px]">
+          <DialogContent className="sm:max-w-[400px] !bg-white !border-gray-200">
             <DialogHeader>
-              <DialogTitle className="text-xl font-semibold">Editar Organização</DialogTitle>
+              <DialogTitle className="text-xl font-semibold text-gray-900">Editar Organização</DialogTitle>
             </DialogHeader>
 
             <div className="space-y-5">
@@ -531,7 +532,7 @@ export default function OrganizationsListPage() {
                   value={editOrgName}
                   onChange={(e) => setEditOrgName(e.target.value)}
                   placeholder="Digite o nome da organização"
-                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all"
+                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all bg-white text-gray-900 placeholder-gray-400"
                   maxLength={100}
                 />
               </div>
@@ -545,7 +546,7 @@ export default function OrganizationsListPage() {
                   onChange={(e) => setEditOrgDescription(e.target.value)}
                   placeholder="Digite uma descrição para a organização"
                   rows={3}
-                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 resize-none transition-all"
+                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 resize-none transition-all bg-white text-gray-900 placeholder-gray-400"
                   maxLength={500}
                 />
               </div>
@@ -580,7 +581,7 @@ export default function OrganizationsListPage() {
 
         {/* Delete Confirmation Modal */}
         <Dialog open={showDeleteConfirmation} onOpenChange={setShowDeleteConfirmation}>
-          <DialogContent className="sm:max-w-[400px]">
+          <DialogContent className="sm:max-w-[400px] !bg-white !border-gray-200">
             <DialogHeader>
               <DialogTitle className="text-xl font-semibold text-gray-900">Excluir Organização</DialogTitle>
             </DialogHeader>

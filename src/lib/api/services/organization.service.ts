@@ -76,10 +76,11 @@ class OrganizationService {
   async createWorkspace(data: CreateWorkspaceDto): Promise<WorkspaceSummary> {
     try {
       return await apiClient.post<WorkspaceSummary>(
-        `/organizations/${data.organizationId}/workspaces`,
+        `/workspaces`,
         {
           name: data.name,
           description: data.description,
+          organizationId: data.organizationId,
         }
       );
     } catch (error: any) {
