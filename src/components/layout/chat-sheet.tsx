@@ -35,10 +35,9 @@ import {
   PromptInputModelSelectContent,
   PromptInputModelSelectItem
 } from "@/components/ai-elements/prompt-input";
-import { useCreateChat, useChat } from "@/hooks/use-chat";
-import { useApiMutation } from "@/hooks/use-api";
+import { useCreateChat, useChat, useSendMessage } from "@/hooks/api/use-chat";
 import { useCurrentWorkspace } from "@/store/app-store";
-import { MessageRole, ChatMessageResponseDto, SendMessageDto } from "@/types/chat";
+import { MessageRole, SendMessageDto } from "@/types/chat";
 
 type ModelKey = "claude" | "gemini" | "gpt";
 
@@ -46,17 +45,17 @@ const MODEL_CONFIG = {
   claude: {
     key: "claude" as ModelKey,
     name: "Claude 4 Sonnet",
-    icon: "/Claude_AI_symbol.svg.png",
+    icon: "/claudeAiSymbol.png",
   },
   gemini: {
     key: "gemini" as ModelKey,
     name: "Gemini 2.5 Pro",
-    icon: "/Gemini-Icon.png.webp",
+    icon: "/geminiIcon.webp",
   },
   gpt: {
     key: "gpt" as ModelKey,
     name: "GPT-5",
-    icon: "/ChatGPT-Logo.svg.png",
+    icon: "/chatGptLogo.png",
   },
 };
 
@@ -78,38 +77,9 @@ export function ChatSheet({ trigger, chatId: initialChatId }: ChatSheetProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const createChatMutation = useCreateChat(currentWorkspace?.id || '');
-
-  // Criar hook de envio de mensagem manualmente
-  const sendMessageMutation = useApiMutation<ChatMessageResponseDto, SendMessageDto>(
-    async (data) => {
-      if (!currentWorkspace?.id || !currentChatId) {
-        throw new Error('Workspace ou Chat ID não encontrado');
-      }
-
-      const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
-      const response = await fetch(`${API_BASE_URL}/chats/${currentWorkspace.id}/${currentChatId}/messages`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(errorData || `HTTP error! status: ${response.status}`);
-      }
-
-      return response.json();
-    },
-    {
-      showSuccessToast: false,
-      invalidateKeys: currentWorkspace?.id && currentChatId ? [
-        ['chat', currentWorkspace.id, currentChatId],
-        ['chat-messages', currentWorkspace.id, currentChatId],
-        ['chats', currentWorkspace.id]
-      ] : [],
-    }
+  const sendMessageMutation = useSendMessage(
+    currentWorkspace?.id || '',
+    currentChatId || ''
   );
 
   // Debug current workspace

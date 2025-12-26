@@ -19,7 +19,7 @@ import {
   RefreshResponseDto,
   UserInfoDto,
   TokenData,
-} from '@/lib/types/auth.types';
+} from '@/lib/auth/types/auth.types';
 
 class AuthService {
   private isDevelopment = process.env.NODE_ENV === 'development';
@@ -30,11 +30,6 @@ class AuthService {
         skipAuth: true,
       });
     } catch (error: any) {
-      // If API is not available in development, use mock
-      if (this.isDevelopment && (error?.code === 'NETWORK_ERROR' || error?.statusCode === 404)) {
-        console.warn('API not available, using mock data for development');
-        return this.mockLoginStep1(data);
-      }
       throw error;
     }
   }
@@ -45,11 +40,6 @@ class AuthService {
         skipAuth: true,
       });
     } catch (error: any) {
-      // If API is not available in development, use mock
-      if (this.isDevelopment && (error?.code === 'NETWORK_ERROR' || error?.statusCode === 404)) {
-        console.warn('API not available, using mock data for development');
-        return this.mockLoginComplete(data);
-      }
       throw error;
     }
   }
@@ -74,7 +64,14 @@ class AuthService {
 
   async getGoogleOAuthUrl(callbackUrl: string): Promise<{ authUrl: string }> {
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
-    const response = await fetch(`${API_BASE_URL}/auth/google/url?callback_url=${encodeURIComponent(callbackUrl)}`);
+    const API_KEY = process.env.NEXT_PUBLIC_API_KEY || '';
+    
+    const response = await fetch(`${API_BASE_URL}/auth/google/init?callback_url=${encodeURIComponent(callbackUrl)}`, {
+      headers: {
+        'X-API-Key': API_KEY,
+        'Content-Type': 'application/json',
+      },
+    });
 
     if (!response.ok) {
       throw new Error('Erro ao obter URL de autenticação');
@@ -83,15 +80,67 @@ class AuthService {
     return response.json();
   }
 
+  async requestMagicLink(email: string): Promise<{ success: boolean; message: string }> {
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
+    const API_KEY = process.env.NEXT_PUBLIC_API_KEY || '';
+    
+    // Set the callback URL for magic link
+    const callbackUrl = typeof window !== 'undefined' 
+      ? `${window.location.origin}/auth/magic-link`
+      : 'http://localhost:3000/auth/magic-link';
+    
+    const response = await fetch(`${API_BASE_URL}/auth/email/init`, {
+      method: 'POST',
+      headers: {
+        'X-API-Key': API_KEY,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ 
+        email,
+        callback_url: callbackUrl,
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Erro ao enviar magic link');
+    }
+
+    return response.json();
+  }
+
+  async verifyMagicLink(token: string): Promise<{ success: boolean; sessionToken: string; user: UserInfoDto }> {
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
+    const API_KEY = process.env.NEXT_PUBLIC_API_KEY || '';
+    
+    const response = await fetch(`${API_BASE_URL}/auth/email/callback`, {
+      method: 'POST',
+      headers: {
+        'X-API-Key': API_KEY,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ token }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Magic link inválido ou expirado');
+    }
+
+    return response.json();
+  }
+
   async logout(): Promise<void> {
     try {
       const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
+      const API_KEY = process.env.NEXT_PUBLIC_API_KEY || '';
       const accessToken = tokenStore.getAccessToken();
 
       const response = await fetch(`${API_BASE_URL}/auth/logout`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          'X-API-Key': API_KEY,
+          'x-parse-session-token': accessToken || '',
           'Content-Type': 'application/json',
         },
       });
@@ -125,26 +174,15 @@ class AuthService {
 
   async getUserInfo(): Promise<UserInfoDto> {
     try {
-      const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
-      const accessToken = tokenStore.getAccessToken();
-
-      const response = await fetch(`${API_BASE_URL}/auth/me`, {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to get user info');
-      }
-
-      return response.json();
+      return await apiClient.get<UserInfoDto>('/auth/me');
     } catch (error: any) {
-      // If API is not available in development, use mock
-      if (this.isDevelopment && (error?.message?.includes('fetch') || error?.message?.includes('Network'))) {
-        console.warn('API not available, using mock data for development');
-        return this.mockGetUserInfo();
+      // Handle 401 - redirect to login (apiClient already handles this, but we keep for clarity)
+      if (error?.statusCode === 401) {
+        tokenStore.clear();
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
+        }
+        throw new Error('Token inválido ou expirado');
       }
       throw error;
     }
@@ -160,103 +198,6 @@ class AuthService {
     return apiClient.post<{ message: string }>('/auth/resend-verification', { email }, {
       skipAuth: true,
     });
-  }
-
-  // Mock implementations for development
-  async mockLoginStep1(data: LoginRequestDto): Promise<LoginInitResponseDto> {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Mock validation
-    if (!data.email || !data.password) {
-      throw new Error('Email and password are required');
-    }
-
-    if (data.email === 'error@test.com') {
-      throw new Error('Invalid credentials');
-    }
-
-    return {
-      requiresTwoFa: true,
-      message: 'Please enter the verification code sent to your email.',
-      email: data.email,
-    };
-  }
-
-  async mockLoginComplete(data: LoginCompleteRequestDto): Promise<LoginCompleteResponseDto> {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Mock validation
-    if (data.code !== '123456') {
-      throw new Error('Invalid verification code');
-    }
-
-    const mockUser: UserInfoDto = {
-      id: '1',
-      email: data.email,
-      name: 'Mock User',
-      emailValidated: true,
-    };
-
-    return {
-      user: mockUser,
-      accessToken: 'mock_access_token_' + Date.now(),
-      refreshToken: 'mock_refresh_token_' + Date.now(),
-    };
-  }
-
-  async mockRegisterStep1(data: RegisterRequestDto): Promise<RegisterResponseDto> {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Mock validation
-    if (!data.name || !data.email || !data.password) {
-      throw new Error('All fields are required');
-    }
-
-    if (data.email === 'existing@test.com') {
-      throw new Error('Email already exists');
-    }
-
-    return {
-      user: {
-        id: '1',
-        name: data.name,
-        email: data.email,
-        emailValidated: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      },
-      message: 'Verification code sent to your email.',
-      requiresEmailVerification: true,
-    };
-  }
-
-  async mockRegisterConfirm(data: RegisterConfirmRequestDto): Promise<RegisterConfirmResponseDto> {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Mock validation
-    if (data.code !== '123456') {
-      throw new Error('Invalid verification code');
-    }
-
-    return {
-      message: 'Email verified successfully',
-    };
-  }
-
-  async mockGetUserInfo(): Promise<UserInfoDto> {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    return {
-      id: '1',
-      email: 'user@example.com',
-      name: 'Mock User',
-      emailValidated: true,
-    };
   }
 }
 

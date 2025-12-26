@@ -184,7 +184,90 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-white text-foreground;
     letter-spacing: var(--tracking-normal);
   }
+  html {
+    @apply bg-white;
+  }
+}
+
+/* Smooth transitions for loading states */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Hide textarea resize handle and scrollbars */
+textarea {
+  resize: none !important;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+textarea::-webkit-resizer {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+}
+
+textarea::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Specific rule for chat input textarea - AGGRESSIVE HIDE */
+textarea.chat-input-textarea::-webkit-resizer,
+.chat-input-textarea::-webkit-resizer,
+form.flex.items-end textarea[data-slot="textarea"]::-webkit-resizer,
+form.flex.items-end .chat-input-textarea::-webkit-resizer,
+form textarea.chat-input-textarea::-webkit-resizer {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  pointer-events: none !important;
+  clip-path: inset(100%) !important;
+  clip: rect(0, 0, 0, 0) !important;
+  position: absolute !important;
+  right: -9999px !important;
+  bottom: -9999px !important;
+}
+
+textarea.chat-input-textarea,
+.chat-input-textarea {
+  resize: none !important;
+  overflow: hidden !important;
+}
+
+/* Hide scrollbar */
+textarea.chat-input-textarea::-webkit-scrollbar,
+.chat-input-textarea::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
 }

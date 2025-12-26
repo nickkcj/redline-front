@@ -14,7 +14,7 @@ import {
   RegisterConfirmResponseDto,
   GoogleLoginDto,
   GoogleLoginResponseDto,
-} from '@/lib/types/auth.types';
+} from '@/lib/auth/types/auth.types';
 
 interface AuthContextType extends AuthState {
   isAuthenticated: boolean;

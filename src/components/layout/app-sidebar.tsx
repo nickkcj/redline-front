@@ -109,7 +109,7 @@ export function AppSidebar() {
           )}>
             <div className="h-8 w-8 shrink-0 flex items-center justify-center">
               <Image
-                src={theme === "dark" ? "/Selo-Dooor-White.png" : "/Selo-Dooor-Black.png"}
+                src={theme === "dark" ? "/seloDooorWhite.png" : "/seloDooorBlack.png"}
                 alt="Logo"
                 width={32}
                 height={32}

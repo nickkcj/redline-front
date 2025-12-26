@@ -1,4 +1,4 @@
-import { TokenData } from '@/lib/types/auth.types';
+import { TokenData } from '@/lib/auth/types/auth.types';
 
 type TokenSubscriber = () => void;
 
@@ -35,11 +35,18 @@ class TokenStore {
   setTokens(tokens: TokenData): void {
     if (!this.isClient()) return;
 
-    const expiresAt = new Date(Date.now() + tokens.expiresIn * 1000).getTime();
-
     localStorage.setItem(this.ACCESS_TOKEN_KEY, tokens.accessToken);
-    localStorage.setItem(this.REFRESH_TOKEN_KEY, tokens.refreshToken);
-    localStorage.setItem(this.EXPIRES_AT_KEY, expiresAt.toString());
+    localStorage.setItem(this.REFRESH_TOKEN_KEY, tokens.refreshToken || '');
+
+    // Set expiresAt if expiresIn is provided, otherwise set a default (24 hours)
+    if (tokens.expiresIn) {
+      const expiresAt = new Date(Date.now() + tokens.expiresIn * 1000).getTime();
+      localStorage.setItem(this.EXPIRES_AT_KEY, expiresAt.toString());
+    } else {
+      // Default to 24 hours if expiresIn is not provided
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).getTime();
+      localStorage.setItem(this.EXPIRES_AT_KEY, expiresAt.toString());
+    }
 
     this.notifySubscribers();
   }
@@ -79,6 +86,12 @@ class TokenStore {
     if (!this.isClient()) return null;
     const userData = localStorage.getItem(this.USER_KEY);
     return userData ? JSON.parse(userData) : null;
+  }
+
+  setUser(user: any): void {
+    if (!this.isClient()) return;
+    localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+    this.notifySubscribers();
   }
 
   clear(): void {

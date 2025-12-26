@@ -3,8 +3,8 @@ import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { QueryProvider } from "@/components/providers/query-provider";
+import { StoreInitializer } from "@/components/providers/store-initializer";
 import { AuthProvider } from "@/contexts/auth-context";
-import { StoreInitializer } from "@/components/store-initializer";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -17,18 +17,22 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "[App Name] | Dooor",
-  description: "A Dooor product to start your Dooor product",
-  icons: {
-    icon: [
-      { url: "/Selo-Dooor-Black.png", media: "(prefers-color-scheme: light)" },
-      { url: "/Selo-Dooor-White.png", media: "(prefers-color-scheme: dark)" },
-    ],
-    shortcut: "/Selo-Dooor-Black.png",
-    apple: "/Selo-Dooor-Black.png",
-  },
-};
+export function generateMetadata(): Metadata {
+  const appName = process.env.NEXT_PUBLIC_APP_NAME || "App Name";
+  
+  return {
+    title: `${appName} | DOOOR`,
+    description: "A Dooor product to start your Dooor product",
+    icons: {
+      icon: [
+        { url: "/seloDooorBlack.png", media: "(prefers-color-scheme: light)" },
+        { url: "/seloDooorWhite.png", media: "(prefers-color-scheme: dark)" },
+      ],
+      shortcut: "/seloDooorBlack.png",
+      apple: "/seloDooorBlack.png",
+    },
+  };
+}
 
 export default function RootLayout({
   children,
@@ -36,9 +40,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" suppressHydrationWarning>
+    <html lang="pt-BR" suppressHydrationWarning className="bg-white">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white`}
       >
         <QueryProvider>
           <AuthProvider>

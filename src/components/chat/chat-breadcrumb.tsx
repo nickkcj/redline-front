@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { ChatSelect } from "./chat-select";
-import { useRenameChat, useDeleteChat } from "@/hooks/use-chat";
+import { useRenameChat, useDeleteChat } from "@/hooks/api/use-chat";
 import { useCurrentWorkspace } from "@/store/app-store";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -123,7 +123,7 @@ export function ChatBreadcrumb({
             <BreadcrumbList>
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link href="/dashboard" className="flex items-center gap-1">
+                  <Link href="/org" className="flex items-center gap-1">
                     <Home className="h-4 w-4" />
                     <span className="sr-only">Home</span>
                   </Link>

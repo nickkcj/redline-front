@@ -1,5 +1,5 @@
 import { tokenStore } from '@/lib/auth/stores/auth.store';
-import { ApiError, TokenData } from '@/lib/types/auth.types';
+import { ApiError, TokenData } from '@/lib/auth/types/auth.types';
 
 interface RequestConfig extends RequestInit {
   skipAuth?: boolean;
@@ -11,17 +11,25 @@ class BaseApiClient {
   private isRefreshing = false;
   private refreshPromise: Promise<TokenData> | null = null;
 
-  constructor(baseUrl: string = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/v1') {
+  constructor(baseUrl: string = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001') {
     this.baseUrl = baseUrl;
+  }
+
+  private getApiKey(): string {
+    return process.env.NEXT_PUBLIC_API_KEY || '';
   }
 
   private async getAuthHeaders(): Promise<Record<string, string>> {
     const accessToken = tokenStore.getAccessToken();
-    if (!accessToken) return {};
+    const headers: Record<string, string> = {};
 
-    return {
-      'Authorization': `Bearer ${accessToken}`,
-    };
+    // Session token is required for authenticated endpoints
+    // Backend expects: x-parse-session-token header
+    if (accessToken) {
+      headers['x-parse-session-token'] = accessToken;
+    }
+
+    return headers;
   }
 
   private async refreshTokens(): Promise<TokenData> {
@@ -98,8 +106,17 @@ class BaseApiClient {
 
     const url = endpoint.startsWith('http') ? endpoint : `${this.baseUrl}${endpoint}`;
 
+    // API-KEY is ALWAYS required, even for unauthenticated endpoints
+    const apiKey = this.getApiKey();
+    
+    // Check if body is FormData - if so, don't set Content-Type (browser will set it with boundary)
+    const isFormData = requestConfig.body instanceof FormData;
+    
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      // Only set Content-Type for non-FormData requests
+      ...(!isFormData ? { 'Content-Type': 'application/json' } : {}),
+      ...(apiKey ? { 'X-API-Key': apiKey } : {}),
+      // Session token only added if not skipping auth
       ...(!skipAuth ? await this.getAuthHeaders() : {}),
       ...(requestConfig.headers as Record<string, string>),
     };
@@ -107,7 +124,8 @@ class BaseApiClient {
     const requestOptions: RequestInit = {
       ...requestConfig,
       headers,
-      credentials: 'include',
+      // Não usar credentials: 'include' para evitar envio de cookies
+      // Usamos apenas o token do localStorage através do header x-parse-session-token
     };
 
     try {
@@ -115,14 +133,53 @@ class BaseApiClient {
 
       // Handle 401 Unauthorized - attempt token refresh
       if (response.status === 401 && !skipAuth && !skipRetry) {
-        try {
-          await this.refreshTokens();
-          // Retry the request with new tokens
-          return this.request<T>(endpoint, { ...config, skipRetry: true });
-        } catch (refreshError) {
-          // Refresh failed, handle as normal error
-          return this.handleResponse<T>(response);
+        const hasRefreshToken = !!tokenStore.getRefreshToken();
+        
+        if (hasRefreshToken) {
+          try {
+            await this.refreshTokens();
+            // Retry the request with new tokens
+            return this.request<T>(endpoint, { ...config, skipRetry: true });
+          } catch (refreshError) {
+            // Refresh failed, clear tokens and redirect to login
+            console.warn('Token refresh failed, redirecting to login');
+            tokenStore.clear();
+            if (typeof window !== 'undefined') {
+              window.location.href = '/login';
+            }
+            throw refreshError;
+          }
+        } else {
+          // No refresh token available, redirect to login immediately
+          console.warn('401 Unauthorized - no refresh token available, redirecting to login');
+          tokenStore.clear();
+          if (typeof window !== 'undefined') {
+            window.location.href = '/login';
+          }
+          // Clone response to read error message before redirecting
+          const responseClone = response.clone();
+          const errorData = await responseClone.json().catch(() => ({}));
+          throw {
+            message: errorData.message || 'Token inválido ou expirado',
+            statusCode: 401,
+          } as ApiError;
         }
+      }
+
+      // Handle 401 on retry (refresh didn't work)
+      if (response.status === 401 && skipRetry) {
+        console.warn('401 Unauthorized after retry - redirecting to login');
+        tokenStore.clear();
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login';
+        }
+        // Clone response to read error message before redirecting
+        const responseClone = response.clone();
+        const errorData = await responseClone.json().catch(() => ({}));
+        throw {
+          message: errorData.message || 'Token inválido ou expirado',
+          statusCode: 401,
+        } as ApiError;
       }
 
       return this.handleResponse<T>(response);
@@ -195,7 +252,10 @@ class BaseApiClient {
 
     const url = endpoint.startsWith('http') ? endpoint : `${this.baseUrl}${endpoint}`;
 
+    // API-KEY is ALWAYS required
+    const apiKey = this.getApiKey();
     const headers: Record<string, string> = {
+      ...(apiKey ? { 'X-API-Key': apiKey } : {}),
       ...(!requestConfig.skipAuth ? await this.getAuthHeaders() : {}),
     };
 
@@ -240,12 +300,63 @@ class BaseApiClient {
       });
     }
 
-    return this.request<T>(endpoint, {
-      ...requestConfig,
-      method: 'POST',
-      body: formData,
-      headers,
-    });
+    // Use fetch directly for FormData to avoid issues with request method
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers,
+        body: formData,
+      });
+
+      // Handle 401 Unauthorized
+      if (response.status === 401 && !requestConfig.skipAuth) {
+        const hasRefreshToken = !!tokenStore.getRefreshToken();
+        
+        if (hasRefreshToken) {
+          try {
+            await this.refreshTokens();
+            // Retry the request with new tokens
+            const retryHeaders = {
+              ...headers,
+              ...(await this.getAuthHeaders()),
+            };
+            const retryResponse = await fetch(url, {
+              method: 'POST',
+              headers: retryHeaders,
+              body: formData,
+            });
+            return this.handleResponse<T>(retryResponse);
+          } catch (refreshError) {
+            tokenStore.clear();
+            if (typeof window !== 'undefined') {
+              window.location.href = '/login';
+            }
+            throw refreshError;
+          }
+        } else {
+          tokenStore.clear();
+          if (typeof window !== 'undefined') {
+            window.location.href = '/login';
+          }
+          const errorData = await response.json().catch(() => ({}));
+          throw {
+            message: errorData.message || 'Token inválido ou expirado',
+            statusCode: 401,
+          } as ApiError;
+        }
+      }
+
+      return this.handleResponse<T>(response);
+    } catch (error) {
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        const networkError: ApiError = {
+          message: 'Network error. Please check your connection.',
+          code: 'NETWORK_ERROR',
+        };
+        throw networkError;
+      }
+      throw error;
+    }
   }
 }
 
