@@ -26,22 +26,22 @@ export function ChatMessage({
   return (
     <div
       className={cn(
-        "group relative flex gap-4 py-6",
+        "group relative flex gap-4 py-4",
         isUser ? "justify-end" : "justify-start",
         className
       )}
     >
-      <div className={cn("flex gap-3 max-w-[80%]", isUser && "flex-row-reverse")}>
+      <div className={cn("flex gap-3 max-w-[85%]", isUser && "flex-row-reverse")}>
         {/* Avatar */}
         <div
           className={cn(
-            "flex size-9 shrink-0 items-center justify-center rounded-full",
+            "flex size-8 shrink-0 items-center justify-center rounded-full flex-shrink-0",
             isUser
-              ? "bg-primary text-primary-foreground"
-              : "bg-gray-100 text-gray-700"
+              ? "bg-gray-700 text-white"
+              : "bg-gray-900 text-white"
           )}
         >
-          {isUser ? <User className="size-4" /> : <Bot className="size-5" />}
+          {isUser ? <User className="size-4" /> : <Bot className="size-4" />}
         </div>
 
         {/* Content */}
@@ -50,7 +50,7 @@ export function ChatMessage({
           {documents && documents.length > 0 && (
             <div className={cn("flex flex-wrap gap-1.5", isUser && "justify-end")}>
               {documents.map((doc) => (
-                <Badge key={doc.id} variant="secondary" className="text-xs font-normal">
+                <Badge key={doc.id} variant="secondary" className="text-xs font-normal bg-blue-50 text-blue-700 hover:bg-blue-100">
                   <FileText className="mr-1 size-3" />
                   {doc.name}
                 </Badge>
@@ -59,29 +59,24 @@ export function ChatMessage({
           )}
 
           {/* Message content */}
-          <div
-            className={cn(
-              "rounded-2xl px-4 py-3 text-sm shadow-sm",
-              isUser
-                ? "bg-primary text-primary-foreground"
-                : "bg-gray-50 text-gray-900 border border-gray-200"
-            )}
-          >
-            {isUser ? (
-              <p className="whitespace-pre-wrap break-words leading-relaxed">{content}</p>
-            ) : (
-              <div className="prose prose-sm max-w-none prose-headings:font-semibold prose-p:leading-relaxed prose-pre:bg-gray-900 prose-pre:text-gray-100">
+          {isUser ? (
+            <div className="rounded-2xl px-4 py-3 text-sm bg-white border border-gray-200 shadow-sm">
+              <p className="whitespace-pre-wrap break-words leading-relaxed text-gray-900">{content}</p>
+            </div>
+          ) : (
+            <div className="text-sm">
+              <div className="prose prose-sm max-w-none prose-headings:font-semibold prose-headings:text-gray-900 prose-p:text-gray-900 prose-p:leading-relaxed prose-strong:text-gray-900 prose-code:text-gray-900 prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-ul:text-gray-900 prose-ol:text-gray-900 prose-li:text-gray-900">
                 <ReactMarkdown>{content}</ReactMarkdown>
                 {isStreaming && (
                   <span className="inline-flex items-center gap-0.5 ml-1">
-                    <span className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                    <span className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                    <span className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                    <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
                   </span>
                 )}
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

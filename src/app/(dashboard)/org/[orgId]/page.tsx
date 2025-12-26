@@ -255,7 +255,7 @@ export default function WorkspacesPage() {
         <source src="/mountain-vector-white.mp4" type="video/mp4" />
       </video>
       {/* Overlay for opacity effect */}
-      <div className="fixed inset-0 bg-white/80 z-10"></div>
+      <div className="fixed inset-0 bg-white/90 z-10"></div>
 
       <div className="relative z-20">
         <Navbar />
@@ -267,14 +267,14 @@ export default function WorkspacesPage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => router.push('/org')}
-                className="gap-2 text-base cursor-pointer"
+                className="gap-2 text-base cursor-pointer text-gray-900 hover:text-gray-900"
               >
                 <ArrowLeft className="size-5" />
                 <span>Voltar para Organizações</span>
               </Button>
               <div className="flex items-center gap-2">
-                <Building className="size-5 text-muted-foreground" />
-                <span className="text-base font-medium">
+                <Building className="size-5 text-gray-800" />
+                <span className="text-base font-medium text-gray-950">
                   {currentOrganization?.name || 'Organização'}
                 </span>
               </div>
@@ -284,10 +284,10 @@ export default function WorkspacesPage() {
               {/* Header Section */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-6">
                 <div className="flex-1">
-                  <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">
+                  <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-gray-950">
                     Projetos
                   </h1>
-                  <p className="text-muted-foreground mt-1 text-sm sm:text-base">
+                  <p className="text-gray-800 mt-1 text-sm sm:text-base">
                     Gerencie seus projetos de trabalho
                   </p>
                 </div>
@@ -304,19 +304,19 @@ export default function WorkspacesPage() {
 
               {/* Workspaces Cards */}
               {workspaces.length === 0 && !isLoading ? (
-                <p className="text-muted-foreground">Nenhum projeto disponível.</p>
+                <p className="text-gray-800 font-medium">Nenhum projeto disponível.</p>
               ) : (
                 <div className="flex flex-wrap gap-6">
                   {workspaces.map((workspace) => (
                     <div
                       key={workspace.id}
-                      className="bg-white/80 border border-gray-200 rounded-xl p-6 cursor-pointer relative group w-full sm:w-[calc(50%-12px)] sm:min-w-[320px] sm:max-w-[480px] shadow-sm hover:shadow-md transition-shadow"
+                      className="bg-white border border-gray-200 rounded-xl p-6 cursor-pointer relative group w-full sm:w-[calc(50%-12px)] sm:min-w-[320px] sm:max-w-[480px] shadow-sm hover:shadow-md transition-shadow"
                       onClick={() => handleEnterWorkspace(workspace)}
                     >
                       {/* Header */}
                       <div className="flex items-start justify-between mb-4 gap-2">
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-2xl font-semibold text-gray-900 mb-2 break-words">
+                          <h3 className="text-2xl font-semibold text-gray-950 mb-2 break-words">
                             {workspace.name}
                           </h3>
                         </div>
@@ -364,11 +364,11 @@ export default function WorkspacesPage() {
 
                       {/* Footer */}
                       <div className="space-y-1">
-                        <p className="text-sm font-medium text-gray-900 break-words">
+                        <p className="text-sm font-medium text-gray-950 break-words">
                           {workspace.description || 'Sem descrição'}
                         </p>
                         {workspace.createdAt && (
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm text-gray-700 font-medium">
                             Criado em {new Date(workspace.createdAt).toLocaleDateString()}
                           </p>
                         )}

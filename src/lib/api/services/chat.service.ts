@@ -107,12 +107,12 @@ class ChatService {
   /**
    * Stream chat response - returns a ReadableStream for streaming responses
    * Note: This method uses fetch directly because apiClient doesn't support streaming yet
+   * Note: Documents must be marked BEFORE calling this method using markDocumentInChat
    */
   async streamChat(
     workspaceId: string,
     chatId: string,
-    content: string,
-    documentIds?: string[]
+    content: string
   ): Promise<ReadableStream<Uint8Array>> {
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
     const API_KEY = process.env.NEXT_PUBLIC_API_KEY || '';
@@ -126,7 +126,7 @@ class ChatService {
         'x-parse-session-token': accessToken || '',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ content, documentIds: documentIds || [] }),
+      body: JSON.stringify({ content }),
     });
 
     // Handle 401 - redirect to login

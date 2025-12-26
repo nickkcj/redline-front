@@ -56,9 +56,22 @@ export function useStreamChat(options: UseStreamChatOptions = {}) {
 
       options.onStreamStart?.();
 
+      // Mark documents if provided (must be done BEFORE streaming)
+      if (documentIds && documentIds.length > 0) {
+        console.log('📎 Marking documents:', documentIds);
+        for (const docId of documentIds) {
+          try {
+            await chatService.markDocumentInChat(workspaceId, chatId, docId);
+          } catch (error) {
+            console.warn('Failed to mark document:', docId, error);
+            // Continue even if marking fails
+          }
+        }
+      }
+
       // Use chatService to get the stream
-      console.log('📡 Starting stream for:', { workspaceId, chatId, content, documentIds });
-      const stream = await chatService.streamChat(workspaceId, chatId, content, documentIds);
+      console.log('📡 Starting stream for:', { workspaceId, chatId, content });
+      const stream = await chatService.streamChat(workspaceId, chatId, content);
 
       const reader = stream.getReader();
       const decoder = new TextDecoder();

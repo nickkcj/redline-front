@@ -3,7 +3,6 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Send, Paperclip, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -12,7 +11,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import type { DocumentResponseDto } from "@/lib/api/services/document.service";
 
 export interface ChatInputProps {
@@ -90,7 +88,7 @@ export function ChatInput({
   }, [value]);
 
   return (
-    <form onSubmit={handleSubmit} className={cn("relative", className)}>
+    <div className={cn("relative w-full", className)}>
       {/* Attached Documents */}
       {attachedDocuments.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-2">
@@ -116,7 +114,10 @@ export function ChatInput({
       )}
 
       {/* Input Area */}
-      <div className="flex items-end gap-2 p-4 bg-background border rounded-lg shadow-sm">
+      <form
+        onSubmit={handleSubmit}
+        className="flex items-end gap-2 p-3 bg-white border border-gray-200 rounded-lg shadow-sm"
+      >
         {/* Document Attach Button */}
         {availableDocuments.length > 0 && (
           <DropdownMenu>
@@ -125,14 +126,14 @@ export function ChatInput({
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="shrink-0"
+                className="shrink-0 h-9 w-9"
                 disabled={disabled || isLoading}
               >
-                <Paperclip className="size-4" />
+                <Paperclip className="size-4 text-gray-600" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-80">
-              <ScrollArea className="max-h-[300px]">
+              <div className="max-h-[300px] overflow-y-auto">
                 {availableDocuments.map((doc) => {
                   const isAttached = attachedDocuments.some(
                     (d) => d.id === doc.id
@@ -148,7 +149,7 @@ export function ChatInput({
                           {doc.name}
                         </span>
                         {doc.description && (
-                          <span className="text-xs text-muted-foreground truncate">
+                          <span className="text-xs text-gray-500 truncate">
                             {doc.description}
                           </span>
                         )}
@@ -161,42 +162,48 @@ export function ChatInput({
                     </DropdownMenuItem>
                   );
                 })}
-              </ScrollArea>
+              </div>
             </DropdownMenuContent>
           </DropdownMenu>
         )}
 
-        {/* Textarea */}
-        <Textarea
+        {/* Textarea - Native HTML textarea with no resizer */}
+        <textarea
           ref={textareaRef}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           disabled={disabled || isLoading}
-          className="min-h-[44px] max-h-[200px] resize-none border-0 p-0 focus-visible:ring-0 focus-visible:ring-offset-0"
           rows={1}
+          className="flex-1 min-w-0 min-h-[44px] max-h-[200px] border-0 p-2 focus:outline-none focus:ring-0 bg-transparent text-sm resize-none text-gray-900 placeholder:text-gray-500"
+          style={{
+            resize: "none",
+            overflow: "hidden",
+            scrollbarWidth: "none",
+            msOverflowStyle: "none",
+          }}
         />
 
         {/* Send Button */}
         <Button
           type="submit"
           size="sm"
-          className="shrink-0"
+          className="shrink-0 h-9 w-9 bg-gray-900 hover:bg-gray-800 text-white"
           disabled={!value.trim() || disabled || isLoading}
         >
           {isLoading ? (
-            <div className="size-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+            <div className="size-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
           ) : (
             <Send className="size-4" />
           )}
         </Button>
-      </div>
+      </form>
 
       {/* Helper Text */}
-      <p className="text-xs text-muted-foreground mt-2">
+      <p className="text-xs text-gray-500 mt-2 px-1">
         Pressione Enter para enviar, Shift+Enter para nova linha
       </p>
-    </form>
+    </div>
   );
 }

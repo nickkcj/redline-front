@@ -12,27 +12,35 @@ export function useMarkedDocuments(workspaceId: string, chatId: string) {
   );
 }
 
-export function useMarkDocument(workspaceId: string, chatId: string) {
-  return useApiMutation<{ success: boolean; message: string }, string>(
-    (documentId) => chatService.markDocumentInChat(workspaceId, chatId, documentId),
+export function useMarkDocument(workspaceId: string) {
+  return useApiMutation<
+    { success: boolean; message: string },
+    { chatId: string; documentId: string }
+  >(
+    ({ chatId, documentId }) =>
+      chatService.markDocumentInChat(workspaceId, chatId, documentId),
     {
       successMessage: 'Documento marcado com sucesso!',
-      invalidateKeys: [
-        ['marked-documents', workspaceId, chatId],
-        ['chat', workspaceId, chatId],
+      invalidateKeys: (vars) => [
+        ['marked-documents', workspaceId, vars.chatId],
+        ['chat', workspaceId, vars.chatId],
       ],
     }
   );
 }
 
-export function useUnmarkDocument(workspaceId: string, chatId: string) {
-  return useApiMutation<{ success: boolean; message: string }, string>(
-    (documentId) => chatService.unmarkDocumentFromChat(workspaceId, chatId, documentId),
+export function useUnmarkDocument(workspaceId: string) {
+  return useApiMutation<
+    { success: boolean; message: string },
+    { chatId: string; documentId: string }
+  >(
+    ({ chatId, documentId }) =>
+      chatService.unmarkDocumentFromChat(workspaceId, chatId, documentId),
     {
       successMessage: 'Documento desmarcado com sucesso!',
-      invalidateKeys: [
-        ['marked-documents', workspaceId, chatId],
-        ['chat', workspaceId, chatId],
+      invalidateKeys: (vars) => [
+        ['marked-documents', workspaceId, vars.chatId],
+        ['chat', workspaceId, vars.chatId],
       ],
     }
   );

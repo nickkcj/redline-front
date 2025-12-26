@@ -26,15 +26,18 @@ import {
   Settings,
   Upload,
   Loader2,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { useChats, useDeleteChat, useRenameChat } from "@/hooks/api/use-chat";
 import { useDocuments, useDeleteDocument, useUploadDocument } from "@/hooks/api/use-documents";
-import { useUser } from "@/store/app-store";
+import { useUser, useCurrentOrganization, useCurrentWorkspace } from "@/store/app-store";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { tokenStore } from "@/lib/auth/stores/auth.store";
+import { UserInfoModal } from "./user-info-modal";
 
 export interface WorkspaceLeftSidebarProps {
   workspaceId: string;
@@ -45,6 +48,8 @@ export interface WorkspaceLeftSidebarProps {
   onNewChat: () => void;
   onDocumentClick?: (documentId: string, documentName: string) => void;
   className?: string;
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
 }
 
 export function WorkspaceLeftSidebar({
@@ -56,10 +61,15 @@ export function WorkspaceLeftSidebar({
   onNewChat,
   onDocumentClick,
   className,
+  collapsed = false,
+  onToggleCollapse,
 }: WorkspaceLeftSidebarProps) {
   const router = useRouter();
   const user = useUser();
+  const currentOrganization = useCurrentOrganization();
+  const currentWorkspace = useCurrentWorkspace();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [userInfoModalOpen, setUserInfoModalOpen] = React.useState(false);
 
   // Queries
   const { data: chatsData } = useChats(workspaceId);
@@ -169,19 +179,48 @@ export function WorkspaceLeftSidebar({
     return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
   };
 
-  return (
-    <div
-      className={cn(
-        "flex flex-col h-screen bg-white border-r w-[280px] flex-shrink-0",
-        className
-      )}
-    >
-      {/* Header */}
-      <div className="p-4 space-y-3 border-b">
+  if (collapsed) {
+    return (
+      <div className="flex flex-col h-screen bg-white border-r w-12 flex-shrink-0 items-center py-2">
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
+          className="h-8 w-8 p-0"
+          onClick={onToggleCollapse}
+          title="Expandir sidebar"
+        >
+          <ChevronRight className="size-4" />
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        "flex flex-col h-screen bg-white border-r border-gray-200 w-[280px] flex-shrink-0 relative",
+        className
+      )}
+    >
+      {/* Collapse Button */}
+      {onToggleCollapse && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="absolute -right-3 top-4 h-6 w-6 p-0 z-10 bg-white border border-gray-200 rounded-full shadow-sm hover:bg-gray-50"
+          onClick={onToggleCollapse}
+          title="Colapsar sidebar"
+        >
+          <ChevronLeft className="size-3" />
+        </Button>
+      )}
+
+      {/* Header */}
+      <div className="p-4 space-y-3 border-b border-gray-200 flex-shrink-0">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-start gap-2 text-gray-600 hover:text-gray-900"
           onClick={handleBackToWorkspaces}
         >
           <ArrowLeft className="size-4" />
@@ -189,26 +228,27 @@ export function WorkspaceLeftSidebar({
         </Button>
 
         <div>
-          <h2 className="text-sm font-semibold truncate">{workspaceName}</h2>
-          <p className="text-xs text-muted-foreground">Projeto</p>
+          <h2 className="text-sm font-semibold truncate text-gray-900">{workspaceName}</h2>
+          <p className="text-xs text-gray-600">Projeto</p>
         </div>
 
-        <Button onClick={onNewChat} className="w-full gap-2" size="sm">
+        <Button onClick={onNewChat} className="w-full gap-2 bg-gray-900 hover:bg-gray-800 text-white" size="sm">
           <Plus className="size-4" />
           <span>Novo Chat</span>
         </Button>
       </div>
 
       {/* Content */}
-      <ScrollArea className="flex-1">
-        <div className="p-4 space-y-6">
+      <div className="flex-1 min-h-0 overflow-hidden">
+        <ScrollArea className="h-full">
+          <div className="p-4 space-y-6 pb-6">
           {/* Chats Section */}
           <div className="space-y-2">
-            <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2">
+            <h3 className="text-xs font-semibold text-gray-600 uppercase tracking-wider px-2">
               Conversas
             </h3>
             {chats.length === 0 ? (
-              <p className="text-xs text-muted-foreground px-2 py-4">
+              <p className="text-xs text-gray-500 px-2 py-4">
                 Nenhum chat ainda
               </p>
             ) : (
@@ -217,19 +257,31 @@ export function WorkspaceLeftSidebar({
                   <div
                     key={chat.id}
                     className={cn(
-                      "group flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors",
+                      "group flex items-start gap-2 px-3 py-2 rounded-lg cursor-pointer transition-colors",
                       currentChatId === chat.id
-                        ? "bg-primary/10 text-primary"
-                        : "hover:bg-muted text-foreground"
+                        ? "bg-gray-100 text-gray-900"
+                        : "hover:bg-gray-50 text-gray-900"
                     )}
                     onClick={() => onChatSelect(chat.id)}
                   >
-                    <MessageSquare className="size-4 shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">
+                    <MessageSquare className="size-4 shrink-0 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1 min-w-0" style={{ maxWidth: 'calc(100% - 48px)' }}>
+                      <p className="text-sm font-medium leading-tight" style={{ 
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        display: 'block',
+                        width: '100%'
+                      }}>
                         {chat.title || "Chat sem título"}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-gray-500 mt-0.5" style={{ 
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        display: 'block',
+                        width: '100%'
+                      }}>
                         {chat.updatedAt &&
                           formatDistanceToNow(new Date(chat.updatedAt), {
                             addSuffix: true,
@@ -242,7 +294,7 @@ export function WorkspaceLeftSidebar({
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100"
+                          className="h-6 w-6 p-0 shrink-0 opacity-0 group-hover:opacity-100 flex-shrink-0"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <MoreVertical className="size-3" />
@@ -286,39 +338,40 @@ export function WorkspaceLeftSidebar({
 
           {/* Documents Section */}
           <div className="space-y-2">
-            <div className="flex items-center justify-between px-2">
-              <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            <div className="flex items-center justify-between px-2 mb-2">
+              <h3 className="text-xs font-semibold text-gray-600 uppercase tracking-wider">
                 Documentos
               </h3>
-              <label htmlFor="file-upload-sidebar">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-6 p-0"
-                  disabled={uploadDocumentMutation.isPending}
-                  asChild
-                >
-                  <span>
-                    {uploadDocumentMutation.isPending ? (
-                      <Loader2 className="size-3 animate-spin" />
-                    ) : (
-                      <Upload className="size-3" />
-                    )}
-                  </span>
-                </Button>
-                <input
-                  id="file-upload-sidebar"
-                  ref={fileInputRef}
-                  type="file"
-                  accept="application/pdf"
-                  className="hidden"
-                  onChange={handleFileUpload}
-                  disabled={uploadDocumentMutation.isPending}
-                />
-              </label>
+              <input
+                id="file-upload-sidebar"
+                ref={fileInputRef}
+                type="file"
+                accept="application/pdf"
+                className="hidden"
+                onChange={handleFileUpload}
+                disabled={uploadDocumentMutation.isPending}
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-7 w-7 p-0 hover:bg-gray-100 flex items-center justify-center"
+                disabled={uploadDocumentMutation.isPending}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  fileInputRef.current?.click();
+                }}
+                title="Enviar documento PDF"
+              >
+                {uploadDocumentMutation.isPending ? (
+                  <Loader2 className="size-4 animate-spin text-gray-600" />
+                ) : (
+                  <Upload className="size-4 text-gray-600" />
+                )}
+              </Button>
             </div>
             {documents.length === 0 ? (
-              <p className="text-xs text-muted-foreground px-2 py-4">
+              <p className="text-xs text-gray-500 px-2 py-4">
                 Nenhum documento
               </p>
             ) : (
@@ -326,13 +379,27 @@ export function WorkspaceLeftSidebar({
                 {documents.map((doc) => (
                   <div
                     key={doc.id}
-                    className="group flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer hover:bg-muted transition-colors"
+                    className="group flex items-start gap-2 px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
                     onClick={() => onDocumentClick?.(doc.id, doc.name)}
                   >
-                    <FileText className="size-4 shrink-0 text-muted-foreground" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{doc.name}</p>
-                      <p className="text-xs text-muted-foreground">
+                    <FileText className="size-4 shrink-0 text-gray-500 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1 min-w-0" style={{ maxWidth: 'calc(100% - 48px)' }}>
+                      <p className="text-sm font-medium text-gray-900 leading-tight" style={{ 
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        display: 'block',
+                        width: '100%'
+                      }}>
+                        {doc.name}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-0.5" style={{ 
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        display: 'block',
+                        width: '100%'
+                      }}>
                         {formatFileSize(doc.sizeBytes)}
                       </p>
                     </div>
@@ -341,7 +408,7 @@ export function WorkspaceLeftSidebar({
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100"
+                          className="h-6 w-6 p-0 shrink-0 opacity-0 group-hover:opacity-100 flex-shrink-0"
                           onClick={(e) => e.stopPropagation()}
                         >
                           <MoreVertical className="size-3" />
@@ -363,51 +430,39 @@ export function WorkspaceLeftSidebar({
             )}
           </div>
         </div>
-      </ScrollArea>
+        </ScrollArea>
+      </div>
 
       {/* Footer - User Area */}
-      <div className="p-4 border-t">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              className="w-full justify-start gap-3 h-auto py-3 px-3"
-            >
-              <Avatar className="size-8">
-                <AvatarImage src={user?.avatar} />
-                <AvatarFallback>{getUserInitials()}</AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0 text-left">
-                <p className="text-sm font-medium truncate">
-                  {user?.name || user?.email || "Usuário"}
-                </p>
-                {user?.email && (
-                  <p className="text-xs text-muted-foreground truncate">
-                    {user.email}
-                  </p>
-                )}
-              </div>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuItem onClick={() => router.push("/profile")}>
-              <UserIcon className="mr-2 size-4" />
-              Meu Perfil
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => router.push("/settings")}>
-              <Settings className="mr-2 size-4" />
-              Configurações
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={handleLogout}
-              className="text-destructive"
-            >
-              <LogOut className="mr-2 size-4" />
-              Sair
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+      <div className="p-4 border-t border-gray-200 flex-shrink-0">
+        <Button
+          variant="ghost"
+          className="w-full justify-start gap-3 h-auto py-3 px-3"
+          onClick={() => setUserInfoModalOpen(true)}
+        >
+          <Avatar className="size-8">
+            <AvatarImage src={user?.avatar} />
+            <AvatarFallback>{getUserInitials()}</AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0 text-left">
+            <p className="text-sm font-medium truncate text-gray-900">
+              {user?.name || user?.email || "Usuário"}
+            </p>
+            {user?.email && (
+              <p className="text-xs text-gray-500 truncate">
+                {user.email}
+              </p>
+            )}
+          </div>
+        </Button>
+
+        <UserInfoModal
+          open={userInfoModalOpen}
+          onOpenChange={setUserInfoModalOpen}
+          user={user}
+          organizationName={currentOrganization?.name}
+          workspaceName={currentWorkspace?.name || workspaceName}
+        />
       </div>
     </div>
   );

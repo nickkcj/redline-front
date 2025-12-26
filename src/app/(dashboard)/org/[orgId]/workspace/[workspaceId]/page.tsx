@@ -24,6 +24,7 @@ export default function WorkspacePage({ params }: WorkspacePageProps) {
     id: string;
     name: string;
   } | null>(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
 
   React.useEffect(() => {
     params.then(setResolvedParams);
@@ -57,20 +58,24 @@ export default function WorkspacePage({ params }: WorkspacePageProps) {
 
   return (
     <>
-      <div className="h-screen bg-background flex overflow-hidden">
+      <div className="h-screen bg-white flex overflow-hidden">
         {/* Left Sidebar */}
-        <WorkspaceLeftSidebar
-          workspaceId={resolvedParams.workspaceId}
-          workspaceName={currentWorkspace?.name || "Workspace"}
-          organizationId={resolvedParams.orgId}
-          currentChatId={currentChatId}
-          onChatSelect={setCurrentChatId}
-          onNewChat={handleNewChat}
-          onDocumentClick={handleDocumentClick}
-        />
+        <div className="flex-shrink-0">
+          <WorkspaceLeftSidebar
+            workspaceId={resolvedParams.workspaceId}
+            workspaceName={currentWorkspace?.name || "Workspace"}
+            organizationId={resolvedParams.orgId}
+            currentChatId={currentChatId}
+            onChatSelect={setCurrentChatId}
+            onNewChat={handleNewChat}
+            onDocumentClick={handleDocumentClick}
+            collapsed={sidebarCollapsed}
+            onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+          />
+        </div>
 
         {/* Main Chat Area */}
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 min-w-0 overflow-hidden bg-white">
           <ChatArea
             workspaceId={resolvedParams.workspaceId}
             chatId={currentChatId}
