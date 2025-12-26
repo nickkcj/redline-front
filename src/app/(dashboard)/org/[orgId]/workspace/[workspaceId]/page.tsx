@@ -24,7 +24,6 @@ export default function WorkspacePage({ params }: WorkspacePageProps) {
     id: string;
     name: string;
   } | null>(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
 
   React.useEffect(() => {
     params.then(setResolvedParams);
@@ -69,8 +68,6 @@ export default function WorkspacePage({ params }: WorkspacePageProps) {
             onChatSelect={setCurrentChatId}
             onNewChat={handleNewChat}
             onDocumentClick={handleDocumentClick}
-            collapsed={sidebarCollapsed}
-            onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
           />
         </div>
 

@@ -48,11 +48,14 @@ export function WorkspaceProvider({ children, orgId, workspaceId }: WorkspacePro
     }
 
     // Create UserWorkspace object
+    // Note: roles array should be fetched from backend in the future
+    // For now, permission checks use usePermissions hook which fetches directly from API
     const userWorkspace = {
       id: workspace.id,
       name: workspace.name,
       description: workspace.description,
-      role: 'MEMBER' as const,
+      role: 'MEMBER' as const, // Legacy field, kept for backward compatibility
+      roles: undefined, // TODO: Fetch from backend when available
       organization: {
         id: org.id,
         name: org.name,

@@ -68,11 +68,11 @@ export default function MagicLinkContent() {
         // Wait a bit for tokenStore subscribers to update and auth context to sync
         await new Promise((resolve) => setTimeout(resolve, 500))
 
-        // Step 3: Redirect to dashboard
+        // Step 3: Redirect to organizations
         setLoadingMessage('Redirecionando')
         await new Promise((resolve) => setTimeout(resolve, 300))
 
-        router.replace('/dashboard')
+        router.replace('/org')
       } catch (error) {
         console.error('Magic link verification failed:', error)
         

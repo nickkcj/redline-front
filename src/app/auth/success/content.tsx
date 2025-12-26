@@ -62,11 +62,11 @@ export default function AuthSuccessContent() {
         // Wait for store to sync
         await new Promise((resolve) => setTimeout(resolve, 200))
 
-        // Redirect to dashboard
+        // Redirect to organizations
         setLoadingMessage('Redirecionando')
         await new Promise((resolve) => setTimeout(resolve, 300))
 
-        router.replace('/dashboard')
+        router.replace('/org')
       } catch (error) {
         console.error('Google OAuth callback failed:', error)
         toast.error('Falha no processamento', {

@@ -34,6 +34,7 @@ export interface UserWorkspace {
   id: string
   name: string
   description?: string
-  role: 'ADMIN' | 'MEMBER' | 'OWNER'
+  role: 'ADMIN' | 'MEMBER' | 'OWNER' // Legacy field (kept for backward compatibility)
+  roles?: import('./permissions').RoleLight[] // RBAC roles array
   organization: Organization
 }
