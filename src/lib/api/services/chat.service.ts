@@ -111,7 +111,8 @@ class ChatService {
   async streamChat(
     workspaceId: string,
     chatId: string,
-    content: string
+    content: string,
+    documentIds?: string[]
   ): Promise<ReadableStream<Uint8Array>> {
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
     const API_KEY = process.env.NEXT_PUBLIC_API_KEY || '';
@@ -125,7 +126,7 @@ class ChatService {
         'x-parse-session-token': accessToken || '',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ content }),
+      body: JSON.stringify({ content, documentIds: documentIds || [] }),
     });
 
     // Handle 401 - redirect to login

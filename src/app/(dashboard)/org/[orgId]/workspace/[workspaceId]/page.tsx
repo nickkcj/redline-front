@@ -2,8 +2,9 @@
 
 import * as React from "react";
 import { useCurrentWorkspace } from "@/store/app-store";
-import { WorkspaceChat } from "@/components/workspace/workspace-chat";
-import { WorkspaceSidebar } from "@/components/workspace/workspace-sidebar";
+import { WorkspaceLeftSidebar } from "@/components/workspace/workspace-left-sidebar";
+import { ChatArea } from "@/components/chat/chat-area";
+import { PdfViewer } from "@/components/workspace/pdf-viewer";
 
 interface WorkspacePageProps {
   params: Promise<{
@@ -18,13 +19,30 @@ export default function WorkspacePage({ params }: WorkspacePageProps) {
     orgId: string;
     workspaceId: string;
   } | null>(null);
-  const [sidebarOpen, setSidebarOpen] = React.useState(false);
-  const [currentChatId, setCurrentChatId] = React.useState<string | undefined>(undefined);
-  const documentContextRef = React.useRef<((documentId: string, documentName: string) => void) | null>(null);
+  const [currentChatId, setCurrentChatId] = React.useState<string | null>(null);
+  const [selectedDocument, setSelectedDocument] = React.useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   React.useEffect(() => {
     params.then(setResolvedParams);
   }, [params]);
+
+  const handleNewChat = React.useCallback(() => {
+    setCurrentChatId(null);
+  }, []);
+
+  const handleChatCreated = React.useCallback((chatId: string) => {
+    setCurrentChatId(chatId);
+  }, []);
+
+  const handleDocumentClick = React.useCallback(
+    (documentId: string, documentName: string) => {
+      setSelectedDocument({ id: documentId, name: documentName });
+    },
+    []
+  );
 
   if (!resolvedParams) {
     return (
@@ -38,34 +56,39 @@ export default function WorkspacePage({ params }: WorkspacePageProps) {
   }
 
   return (
-    <div className="h-screen bg-white overflow-hidden relative">
-      <div className="flex h-full">
+    <>
+      <div className="h-screen bg-background flex overflow-hidden">
+        {/* Left Sidebar */}
+        <WorkspaceLeftSidebar
+          workspaceId={resolvedParams.workspaceId}
+          workspaceName={currentWorkspace?.name || "Workspace"}
+          organizationId={resolvedParams.orgId}
+          currentChatId={currentChatId}
+          onChatSelect={setCurrentChatId}
+          onNewChat={handleNewChat}
+          onDocumentClick={handleDocumentClick}
+        />
+
         {/* Main Chat Area */}
-        <div className="flex-1 transition-all duration-300">
-          <WorkspaceChat
+        <div className="flex-1 overflow-hidden">
+          <ChatArea
             workspaceId={resolvedParams.workspaceId}
-            onSidebarToggle={() => setSidebarOpen(!sidebarOpen)}
-            sidebarOpen={sidebarOpen}
             chatId={currentChatId}
-            onChatIdChange={setCurrentChatId}
-            onDocumentContextRef={documentContextRef}
+            onChatCreated={handleChatCreated}
           />
         </div>
-
-        {/* Sidebar */}
-        <WorkspaceSidebar
-          open={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-          workspaceId={resolvedParams.workspaceId}
-          onChatSelect={setCurrentChatId}
-          currentChatId={currentChatId}
-          onDocumentContext={(documentId, documentName) => {
-            if (documentContextRef.current) {
-              documentContextRef.current(documentId, documentName);
-            }
-          }}
-        />
       </div>
-    </div>
+
+      {/* PDF Viewer Modal */}
+      {selectedDocument && (
+        <PdfViewer
+          open={!!selectedDocument}
+          onClose={() => setSelectedDocument(null)}
+          documentId={selectedDocument.id}
+          workspaceId={resolvedParams.workspaceId}
+          documentName={selectedDocument.name}
+        />
+      )}
+    </>
   );
 }

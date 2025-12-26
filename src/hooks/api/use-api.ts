@@ -16,6 +16,9 @@ export function useApiQuery<T>(
   options?: {
     enabled?: boolean
     staleTime?: number
+    gcTime?: number
+    refetchOnMount?: boolean
+    refetchOnWindowFocus?: boolean
     onSuccess?: (data: T) => void
     onError?: (error: unknown) => void
   }
@@ -25,6 +28,9 @@ export function useApiQuery<T>(
     queryFn: fetcher,
     enabled: options?.enabled,
     staleTime: options?.staleTime,
+    gcTime: options?.gcTime,
+    refetchOnMount: options?.refetchOnMount,
+    refetchOnWindowFocus: options?.refetchOnWindowFocus,
   })
 
   // Handle success callback

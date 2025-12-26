@@ -17,7 +17,11 @@ export function useChats(workspaceId: string, params?: ListChatsDto) {
     ['chats', workspaceId, params?.page?.toString() || '1', params?.limit?.toString() || '20'],
     () => chatService.listChats(workspaceId, params),
     {
+      enabled: !!workspaceId,
       staleTime: 1000 * 60 * 5, // 5 minutes
+      gcTime: 1000 * 60 * 10, // 10 minutes garbage collection
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
     }
   )
 }
@@ -41,7 +45,10 @@ export function useChatMessages(workspaceId: string, chatId: string, params?: Li
     () => chatService.getChatMessages(workspaceId, chatId, params),
     {
       enabled: !!workspaceId && !!chatId,
-      staleTime: 1000 * 30, // 30 seconds
+      staleTime: 1000 * 60 * 2, // 2 minutes
+      gcTime: 1000 * 60 * 5, // 5 minutes
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
     }
   )
 }

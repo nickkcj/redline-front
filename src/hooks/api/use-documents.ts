@@ -7,7 +7,10 @@ export function useDocuments(workspaceId: string, params?: ListDocumentsParams) 
     () => documentService.listDocuments(workspaceId, params),
     {
       enabled: !!workspaceId,
-      staleTime: 1000 * 60 * 2, // 2 minutes
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      gcTime: 1000 * 60 * 10, // 10 minutes garbage collection
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
     }
   );
 }

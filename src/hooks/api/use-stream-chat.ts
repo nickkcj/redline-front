@@ -31,9 +31,10 @@ export function useStreamChat(options: UseStreamChatOptions = {}) {
   const startStream = useCallback(async (
     workspaceId: string,
     chatId: string,
-    content: string
+    content: string,
+    documentIds?: string[]
   ) => {
-    console.log('🚀 Starting stream:', { workspaceId, chatId, content });
+    console.log('🚀 Starting stream:', { workspaceId, chatId, content, documentIds });
 
     // Cleanup any existing stream
     if (eventSourceRef.current) {
@@ -56,8 +57,8 @@ export function useStreamChat(options: UseStreamChatOptions = {}) {
       options.onStreamStart?.();
 
       // Use chatService to get the stream
-      console.log('📡 Starting stream for:', { workspaceId, chatId, content });
-      const stream = await chatService.streamChat(workspaceId, chatId, content);
+      console.log('📡 Starting stream for:', { workspaceId, chatId, content, documentIds });
+      const stream = await chatService.streamChat(workspaceId, chatId, content, documentIds);
 
       const reader = stream.getReader();
       const decoder = new TextDecoder();
