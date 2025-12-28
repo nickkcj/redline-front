@@ -1,15 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { toast } from 'sonner'
-import { ApiError } from '@/lib/auth/types/auth.types'
-
-interface UseApiOptions {
-  onSuccess?: (data: any) => void
-  onError?: (error: unknown) => void
-  showSuccessToast?: boolean
-  showErrorToast?: boolean
-  successMessage?: string
-}
+import { ApiError } from '@/lib/api/types'
 
 export function useApiQuery<T>(
   key: string[],
@@ -20,6 +12,7 @@ export function useApiQuery<T>(
     gcTime?: number
     refetchOnMount?: boolean
     refetchOnWindowFocus?: boolean
+    showErrorToast?: boolean
     onSuccess?: (data: T) => void
     onError?: (error: unknown) => void
   }
@@ -34,72 +27,78 @@ export function useApiQuery<T>(
     refetchOnWindowFocus: options?.refetchOnWindowFocus,
   })
 
-  // Handle success callback
   useEffect(() => {
     if (queryResult.data && queryResult.isSuccess && options?.onSuccess) {
       options.onSuccess(queryResult.data)
     }
   }, [queryResult.data, queryResult.isSuccess, options?.onSuccess])
 
-  // Handle error callback
   useEffect(() => {
-    if (queryResult.error && queryResult.isError && options?.onError) {
-      console.error('Query error:', queryResult.error)
-      options.onError(queryResult.error)
+    if (queryResult.error && queryResult.isError) {
+      const errorInfo = extractErrorInfo(queryResult.error)
+      
+      if (options?.showErrorToast !== false && errorInfo.statusCode !== 401) {
+        toast.error(errorInfo.message)
+      }
+
+      console.error('Query error:', {
+        message: errorInfo.message,
+        code: errorInfo.code,
+        statusCode: errorInfo.statusCode,
+        details: errorInfo.details,
+      })
+
+      options?.onError?.(queryResult.error)
     }
-  }, [queryResult.error, queryResult.isError, options?.onError])
+  }, [queryResult.error, queryResult.isError, options?.onError, options?.showErrorToast])
 
   return queryResult
 }
 
 /**
  * Safely extracts error information from various error types
+ * Converts unknown errors to ApiError format for consistent handling
  */
-function extractErrorInfo(error: unknown): {
-  message: string
-  code?: string
-  statusCode?: number
-  details?: any
-  stack?: string
-  type: string
-} {
-  const errorInfo: ReturnType<typeof extractErrorInfo> = {
-    message: 'Erro desconhecido',
-    type: typeof error,
-  }
-
-  if (error instanceof Error) {
-    errorInfo.message = error.message
-    errorInfo.stack = error.stack
-    errorInfo.type = error.constructor.name
-  } else if (error && typeof error === 'object') {
-    // Handle ApiError or similar objects
+function extractErrorInfo(error: unknown): ApiError {
+  if (error && typeof error === 'object') {
     const errorObj = error as Record<string, any>
     
     if ('message' in errorObj && typeof errorObj.message === 'string') {
-      errorInfo.message = errorObj.message
+      return {
+        message: errorObj.message,
+        code: typeof errorObj.code === 'string' ? errorObj.code : undefined,
+        statusCode: typeof errorObj.statusCode === 'number' ? errorObj.statusCode : undefined,
+        details: errorObj.details,
+      }
     }
-    
-    if ('code' in errorObj && typeof errorObj.code === 'string') {
-      errorInfo.code = errorObj.code
-    }
-    
-    if ('statusCode' in errorObj && typeof errorObj.statusCode === 'number') {
-      errorInfo.statusCode = errorObj.statusCode
-    }
-    
-    if ('details' in errorObj) {
-      errorInfo.details = errorObj.details
-    }
-    
-    if ('stack' in errorObj && typeof errorObj.stack === 'string') {
-      errorInfo.stack = errorObj.stack
-    }
-  } else if (typeof error === 'string') {
-    errorInfo.message = error
   }
 
-  return errorInfo
+  if (error instanceof Error) {
+    return {
+      message: error.message || 'Erro desconhecido',
+      code: 'UNKNOWN_ERROR',
+    }
+  }
+
+  if (typeof error === 'string') {
+    return {
+      message: error,
+      code: 'UNKNOWN_ERROR',
+    }
+  }
+
+  return {
+    message: 'Erro desconhecido',
+    code: 'UNKNOWN_ERROR',
+  }
+}
+
+interface UseApiOptions {
+  showSuccessToast?: boolean
+  showErrorToast?: boolean
+  successMessage?: string
+  onSuccess?: (data: any, variables?: any) => void
+  onError?: (error: unknown) => void
 }
 
 export function useApiMutation<TData, TVariables>(
@@ -112,7 +111,7 @@ export function useApiMutation<TData, TVariables>(
 
   return useMutation({
     mutationFn,
-    onSuccess: (data) => {
+    onSuccess: (data, variables) => {
       if (options?.showSuccessToast !== false) {
         toast.success(options?.successMessage || 'Operação realizada com sucesso!')
       }
@@ -123,22 +122,21 @@ export function useApiMutation<TData, TVariables>(
         })
       }
 
-      options?.onSuccess?.(data)
+      options?.onSuccess?.(data, variables)
     },
     onError: (error: unknown) => {
       const errorInfo = extractErrorInfo(error)
 
-      if (options?.showErrorToast !== false) {
+      if (options?.showErrorToast !== false && errorInfo.statusCode !== 401) {
         toast.error(errorInfo.message)
       }
 
-      // Log error with extracted information (avoid logging the raw error object which may not serialize)
-      console.error('Mutation error:', errorInfo)
-      
-      // Also log the raw error for debugging if it's an Error instance
-      if (error instanceof Error) {
-        console.error('Raw error:', error)
-      }
+      console.error('Mutation error:', {
+        message: errorInfo.message,
+        code: errorInfo.code,
+        statusCode: errorInfo.statusCode,
+        details: errorInfo.details,
+      })
       
       options?.onError?.(error)
     },

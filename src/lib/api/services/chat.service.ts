@@ -1,5 +1,5 @@
 import { apiClient } from '@/lib/api/client/base.client'
-import { tokenStore } from '@/lib/store/token.store'
+import { tokenStore } from '@/lib/stores/token.store'
 import type {
   ChatResponseDto,
   ListChatsResponseDto,

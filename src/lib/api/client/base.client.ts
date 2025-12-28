@@ -1,4 +1,4 @@
-import { tokenStore } from '@/lib/store/token.store'
+import { tokenStore } from '@/lib/stores/token.store'
 import { ApiError } from '@/lib/api/types'
 
 interface RequestConfig extends RequestInit {

@@ -6,7 +6,7 @@
 
 import { QueryClientProvider } from "@tanstack/react-query"
 import { useState } from "react"
-import { createQueryClient } from "@/lib/query-client"
+import { createQueryClient } from "@/lib/react-query/query-client"
 
 interface QueryProviderProps {
   children: React.ReactNode

@@ -1,192 +1,179 @@
-import { useApiQuery, useApiMutation } from '@/hooks/api/use-api'
-import { tokenStore } from '@/lib/auth/stores/auth.store'
-import {
-  organizationService,
-  type OrganizationWithWorkspaces,
-  type CreateOrganizationDto,
-  type UpdateOrganizationDto,
-  type CreateWorkspaceDto,
-  type UpdateWorkspaceDto,
-  type WorkspaceSummary,
-} from '@/lib/api/services/organization.service'
-import type { Organization } from '@/types/common'
+/**
+ * Organization Hooks
+ *
+ * Hooks for organization and workspace management
+ * Uses React Query for caching and automatic invalidation
+ */
 
-// Re-export types for backward compatibility
-export type {
+import { useApiQuery, useApiMutation } from './use-api'
+import { organizationService } from '@/lib/api/services/organization.service'
+import type {
+  OrganizationResponseDto,
   OrganizationWithWorkspaces,
   WorkspaceSummary,
   CreateOrganizationDto,
   UpdateOrganizationDto,
+} from '@/lib/api/types/organization.types'
+import type {
   CreateWorkspaceDto,
   UpdateWorkspaceDto,
-}
+} from '@/lib/api/types/workspace.types'
 
-// Hook para listar organizações
+
+// ============================================================================
+// Organization Queries
+// ============================================================================
+
+/**
+ * List all organizations with their workspaces
+ * @returns Query result with organizations array
+ *
+ * @example
+ * const { data: organizations, isLoading } = useOrganizations()
+ */
 export function useOrganizations() {
-  const accessToken = tokenStore.getAccessToken()
-  const isAuthenticated = !!accessToken
-
-  const query = useApiQuery<OrganizationWithWorkspaces[]>(
+  return useApiQuery<OrganizationWithWorkspaces[]>(
     ['organizations'],
-    async () => {
-      return organizationService.getOrganizations()
-    },
+    () => organizationService.getOrganizations(),
     {
-      enabled: isAuthenticated,
-      staleTime: 2 * 60 * 1000, // 2 minutes
+      staleTime: 1000 * 60 * 2, // 2 minutes
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
     }
   )
-
-  return {
-    organizations: query.data || [],
-    loading: query.isLoading,
-    error: query.error,
-    refetch: query.refetch,
-  }
 }
 
-// Hook para criar organização
+// ============================================================================
+// Organization Mutations
+// ============================================================================
+
+/**
+ * Create a new organization
+ * @returns Mutation function and state
+ *
+ * @example
+ * const { mutate: createOrganization, isPending } = useCreateOrganization()
+ * createOrganization({ name: "My Org", description: "Description" })
+ */
 export function useCreateOrganization() {
-  const mutation = useApiMutation<Organization, CreateOrganizationDto>(
-    async (data) => {
-      return organizationService.createOrganization(data)
-    },
+  return useApiMutation<OrganizationResponseDto, CreateOrganizationDto>(
+    (data) => organizationService.createOrganization(data),
     {
+      successMessage: 'Organização criada com sucesso!',
       invalidateKeys: [['organizations']],
-      showSuccessToast: false, // Vamos mostrar toast manualmente
     }
   )
-
-  return {
-    createOrganization: mutation.mutateAsync,
-    creating: mutation.isPending,
-    error: mutation.error instanceof Error ? mutation.error.message : null,
-  }
 }
 
-// Hook para atualizar organização
+/**
+ * Update an organization
+ * @returns Mutation function and state
+ *
+ * @example
+ * const { mutate: updateOrganization } = useUpdateOrganization()
+ * updateOrganization({ id: "123", data: { name: "New Name" } })
+ */
 export function useUpdateOrganization() {
-  const mutation = useApiMutation<Organization, { id: string; data: UpdateOrganizationDto }>(
-    async ({ id, data }) => {
-      return organizationService.updateOrganization(id, data)
-    },
+  return useApiMutation<OrganizationResponseDto, { id: string; data: UpdateOrganizationDto }>(
+    ({ id, data }) => organizationService.updateOrganization(id, data),
     {
+      successMessage: 'Organização atualizada com sucesso!',
       invalidateKeys: [['organizations']],
-      showSuccessToast: false,
     }
   )
-
-  return {
-    updateOrganization: (id: string, data: UpdateOrganizationDto) => 
-      mutation.mutateAsync({ id, data }),
-    updating: mutation.isPending,
-    error: mutation.error instanceof Error ? mutation.error.message : null,
-  }
 }
 
-// Hook para deletar organização
+/**
+ * Delete an organization
+ * @returns Mutation function and state
+ *
+ * @example
+ * const { mutate: deleteOrganization } = useDeleteOrganization()
+ * deleteOrganization("org-id-123")
+ */
 export function useDeleteOrganization() {
-  const mutation = useApiMutation<void, string>(
-    async (id) => {
-      return organizationService.deleteOrganization(id)
-    },
+  return useApiMutation<void, string>(
+    (id) => organizationService.deleteOrganization(id),
     {
+      successMessage: 'Organização excluída com sucesso!',
       invalidateKeys: [['organizations']],
-      showSuccessToast: false,
     }
   )
-
-  return {
-    deleteOrganization: mutation.mutateAsync,
-    deleting: mutation.isPending,
-    error: mutation.error instanceof Error ? mutation.error.message : null,
-  }
 }
 
-// Hook para verificar disponibilidade de slug (removido - não vamos usar slug)
-export function useCheckSlugAvailability() {
-  // Retornar sempre disponível já que não usamos mais slug
-  return {
-    checkSlug: async () => {},
-    checking: false,
-    isAvailable: true,
-  }
-}
+// ============================================================================
+// Workspace Mutations (via Organization Service)
+// ============================================================================
 
-// Hook para criar workspace
-export function useCreateWorkspace() {
-  const mutation = useApiMutation<WorkspaceSummary, CreateWorkspaceDto>(
-    async (data) => {
-      return organizationService.createWorkspace(data)
-    },
+/**
+ * Create a new workspace in an organization (via organization service)
+ * @returns Mutation function and state
+ *
+ * @example
+ * const { mutate: createWorkspace, isPending } = useCreateWorkspaceInOrganization()
+ * createWorkspace({ name: "My Workspace", organizationId: "org-123" })
+ */
+export function useCreateWorkspaceInOrganization() {
+  return useApiMutation<WorkspaceSummary, CreateWorkspaceDto>(
+    (data) => organizationService.createWorkspace(data),
     {
-      invalidateKeys: [['organizations'], ['users']],
-      showSuccessToast: false,
+      successMessage: 'Workspace criado com sucesso!',
+      invalidateKeys: [['organizations']],
     }
   )
-
-  return {
-    createWorkspace: mutation.mutateAsync,
-    creating: mutation.isPending,
-    error: mutation.error instanceof Error ? mutation.error.message : null,
-  }
 }
 
-// Hook para atualizar workspace
-export function useUpdateWorkspace() {
-  const mutation = useApiMutation<WorkspaceSummary, { id: string; data: UpdateWorkspaceDto }>(
-    async ({ id, data }) => {
-      return organizationService.updateWorkspace(id, data)
-    },
+/**
+ * Update a workspace (via organization service)
+ * @returns Mutation function and state
+ *
+ * @example
+ * const { mutate: updateWorkspace } = useUpdateWorkspaceInOrganization()
+ * updateWorkspace({ id: "123", data: { name: "New Name" } })
+ */
+export function useUpdateWorkspaceInOrganization() {
+  return useApiMutation<WorkspaceSummary, { id: string; data: UpdateWorkspaceDto }>(
+    ({ id, data }) => organizationService.updateWorkspace(id, data),
     {
-      invalidateKeys: [['organizations'], ['users']],
-      showSuccessToast: false,
+      successMessage: 'Workspace atualizado com sucesso!',
+      invalidateKeys: [['organizations']],
     }
   )
-
-  return {
-    updateWorkspace: (id: string, data: UpdateWorkspaceDto) => 
-      mutation.mutateAsync({ id, data }),
-    updating: mutation.isPending,
-    error: mutation.error instanceof Error ? mutation.error.message : null,
-  }
 }
 
-// Hook para deletar workspace
-export function useDeleteWorkspace() {
-  const mutation = useApiMutation<void, string>(
-    async (id) => {
-      return organizationService.deleteWorkspace(id)
-    },
+/**
+ * Delete a workspace (via organization service)
+ * @returns Mutation function and state
+ *
+ * @example
+ * const { mutate: deleteWorkspace } = useDeleteWorkspaceInOrganization()
+ * deleteWorkspace("workspace-id-123")
+ */
+export function useDeleteWorkspaceInOrganization() {
+  return useApiMutation<void, string>(
+    (id) => organizationService.deleteWorkspace(id),
     {
-      invalidateKeys: [['organizations'], ['users']],
-      showSuccessToast: false,
+      successMessage: 'Workspace excluído com sucesso!',
+      invalidateKeys: [['organizations']],
     }
   )
-
-  return {
-    deleteWorkspace: mutation.mutateAsync,
-    deleting: mutation.isPending,
-    error: mutation.error instanceof Error ? mutation.error.message : null,
-  }
 }
 
-// Hook para sair do workspace
+/**
+ * Leave a workspace
+ * @returns Mutation function and state
+ *
+ * @example
+ * const { mutate: leaveWorkspace } = useLeaveWorkspace()
+ * leaveWorkspace("workspace-id-123")
+ */
 export function useLeaveWorkspace() {
-  const mutation = useApiMutation<void, string>(
-    async (id) => {
-      return organizationService.leaveWorkspace(id)
-    },
+  return useApiMutation<void, string>(
+    (id) => organizationService.leaveWorkspace(id),
     {
-      invalidateKeys: [['organizations'], ['users']],
-      showSuccessToast: false,
+      successMessage: 'Você saiu do workspace!',
+      invalidateKeys: [['organizations']],
     }
   )
-
-  return {
-    leaveWorkspace: mutation.mutateAsync,
-    leaving: mutation.isPending,
-    error: mutation.error instanceof Error ? mutation.error.message : null,
-  }
 }
 

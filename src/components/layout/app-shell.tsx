@@ -7,7 +7,7 @@ import { AppSidebar } from "./app-sidebar";
 import { ChatSheet } from "./chat-sheet";
 import { CommandPaletteProvider } from "@/components/providers/command-palette-provider";
 import { CommandPaletteContextProvider } from "@/contexts/command-palette-context";
-import { useAuthGuard } from "@/lib/auth/hooks/use-auth-guard";
+import { useAuthGuard } from "@/hooks/auth/use-auth-guard";
 import { Loader2 } from "lucide-react";
 import { Breadcrumbs } from "./breadcrumbs";
 

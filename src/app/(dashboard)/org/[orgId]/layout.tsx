@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { OrganizationProvider } from "./organization-provider";
+import { OrganizationProvider } from "../../../../providers/organization-provider";
 
 interface OrgLayoutProps {
   children: React.ReactNode;

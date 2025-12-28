@@ -5,9 +5,15 @@
  * Uses React Query for caching and automatic invalidation
  */
 
+import { useQueryClient } from '@tanstack/react-query'
 import { useApiQuery, useApiMutation } from './use-api'
-import PermissionService from '@/lib/api/services/permission.service'
-import type { Role, CreateRoleDto, UpdateRoleDto, PermissionDto } from '@/types/permissions'
+import { permissionService } from '@/lib/api/services/permission.service'
+import type {
+  RoleDto,
+  PermissionDto,
+  CreateRoleDto,
+  UpdateRoleDto,
+} from '@/lib/api/types/permission.types'
 
 // ============================================================================
 // Role Queries
@@ -22,12 +28,13 @@ import type { Role, CreateRoleDto, UpdateRoleDto, PermissionDto } from '@/types/
  * const { data: roles, isLoading } = useRoles(workspaceId)
  */
 export function useRoles(workspaceId: string) {
-  return useApiQuery(
+  return useApiQuery<RoleDto[]>(
     ['roles', 'list', workspaceId],
-    () => PermissionService.listRoles(workspaceId),
+    () => permissionService.listRoles(workspaceId),
     {
       enabled: !!workspaceId,
-      staleTime: 60000, // 1 minute
+      staleTime: 1000 * 60, // 1 minute
+      refetchOnMount: false,
       refetchOnWindowFocus: false,
     }
   )
@@ -43,12 +50,13 @@ export function useRoles(workspaceId: string) {
  * const { data: role } = useRole(workspaceId, roleId)
  */
 export function useRole(workspaceId: string, roleId: string) {
-  return useApiQuery(
+  return useApiQuery<RoleDto>(
     ['roles', roleId, workspaceId],
-    () => PermissionService.getRole(workspaceId, roleId),
+    () => permissionService.getRole(workspaceId, roleId),
     {
       enabled: !!workspaceId && !!roleId,
-      staleTime: 60000, // 1 minute
+      staleTime: 1000 * 60, // 1 minute
+      refetchOnMount: false,
       refetchOnWindowFocus: false,
     }
   )
@@ -73,8 +81,8 @@ export function useRole(workspaceId: string, roleId: string) {
  * })
  */
 export function useCreateRole(workspaceId: string) {
-  return useApiMutation(
-    (data: CreateRoleDto) => PermissionService.createRole(workspaceId, data),
+  return useApiMutation<RoleDto, CreateRoleDto>(
+    (data) => permissionService.createRole(workspaceId, data),
     {
       successMessage: 'Função criada com sucesso!',
       invalidateKeys: [
@@ -95,15 +103,18 @@ export function useCreateRole(workspaceId: string) {
  * updateRole({ roleId: "123", data: { displayName: "New Name" } })
  */
 export function useUpdateRole(workspaceId: string) {
-  return useApiMutation(
-    ({ roleId, data }: { roleId: string; data: UpdateRoleDto }) =>
-      PermissionService.updateRole(workspaceId, roleId, data),
+  const queryClient = useQueryClient()
+
+  return useApiMutation<RoleDto, { roleId: string; data: UpdateRoleDto }>(
+    ({ roleId, data }) => permissionService.updateRole(workspaceId, roleId, data),
     {
       successMessage: 'Função atualizada com sucesso!',
-      invalidateKeys: [
-        ['roles', 'list', workspaceId],
-        // Invalidate specific role query as well
-      ],
+      onSuccess: (_data, variables) => {
+        if (variables) {
+          queryClient.invalidateQueries({ queryKey: ['roles', 'list', workspaceId] })
+          queryClient.invalidateQueries({ queryKey: ['roles', variables.roleId, workspaceId] })
+        }
+      },
     }
   )
 }
@@ -118,8 +129,8 @@ export function useUpdateRole(workspaceId: string) {
  * deleteRole("role-id-123")
  */
 export function useDeleteRole(workspaceId: string) {
-  return useApiMutation(
-    (roleId: string) => PermissionService.deleteRole(workspaceId, roleId),
+  return useApiMutation<void, string>(
+    (roleId) => permissionService.deleteRole(workspaceId, roleId),
     {
       successMessage: 'Função deletada com sucesso!',
       invalidateKeys: [
@@ -148,15 +159,19 @@ export function useDeleteRole(workspaceId: string) {
  * })
  */
 export function useAddPermissionToRole(workspaceId: string) {
-  return useApiMutation(
-    ({ roleId, permission }: { roleId: string; permission: PermissionDto }) =>
-      PermissionService.addPermissionToRole(workspaceId, roleId, permission),
+  const queryClient = useQueryClient()
+
+  return useApiMutation<RoleDto, { roleId: string; permission: PermissionDto }>(
+    ({ roleId, permission }) => permissionService.addPermissionToRole(workspaceId, roleId, permission),
     {
       successMessage: 'Permissão adicionada com sucesso!',
-      invalidateKeys: [
-        ['roles', 'list', workspaceId],
-        ['permissions', 'me', workspaceId],
-      ],
+      onSuccess: (_data, variables) => {
+        if (variables) {
+          queryClient.invalidateQueries({ queryKey: ['roles', 'list', workspaceId] })
+          queryClient.invalidateQueries({ queryKey: ['roles', variables.roleId, workspaceId] })
+          queryClient.invalidateQueries({ queryKey: ['permissions', 'me', workspaceId] })
+        }
+      },
     }
   )
 }
@@ -171,15 +186,19 @@ export function useAddPermissionToRole(workspaceId: string) {
  * removePermission({ roleId: "123", permissionId: "456" })
  */
 export function useRemovePermissionFromRole(workspaceId: string) {
-  return useApiMutation(
-    ({ roleId, permissionId }: { roleId: string; permissionId: string }) =>
-      PermissionService.removePermissionFromRole(workspaceId, roleId, permissionId),
+  const queryClient = useQueryClient()
+
+  return useApiMutation<RoleDto, { roleId: string; permissionId: string }>(
+    ({ roleId, permissionId }) => permissionService.removePermissionFromRole(workspaceId, roleId, permissionId),
     {
       successMessage: 'Permissão removida com sucesso!',
-      invalidateKeys: [
-        ['roles', 'list', workspaceId],
-        ['permissions', 'me', workspaceId],
-      ],
+      onSuccess: (_data, variables) => {
+        if (variables) {
+          queryClient.invalidateQueries({ queryKey: ['roles', 'list', workspaceId] })
+          queryClient.invalidateQueries({ queryKey: ['roles', variables.roleId, workspaceId] })
+          queryClient.invalidateQueries({ queryKey: ['permissions', 'me', workspaceId] })
+        }
+      },
     }
   )
 }

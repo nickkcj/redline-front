@@ -1,6 +1,6 @@
 import { apiClient } from '@/lib/api/client/base.client'
-import { tokenStore } from '@/lib/store/token.store'
-import type { UserInfoDto } from '@/lib/api/types/auth.types'
+import { UserInfoDto, UserDTO } from '../types';
+
 
 export class AuthService {
   private readonly appUrl: string
@@ -16,8 +16,19 @@ export class AuthService {
     )
   }
 
+  static async googleCallback(code: string, callbackUrl: string): Promise<{ success: boolean; sessionToken: string; user: UserInfoDto }> {
+    return apiClient.post<{ success: boolean; sessionToken: string; user: UserInfoDto }>(
+      '/auth/google/callback',
+      {
+        code,
+        callback_url: callbackUrl,
+      },
+      { skipAuth: true }
+    )
+  }
+
   async requestMagicLink(email: string): Promise<{ success: boolean; message: string }> {
-    const callbackUrl = `${this.appUrl}/auth/magic-link` // TODO: add callback url to the request when backend is ready
+    const callbackUrl = `${this.appUrl}/auth/magic-link`
 
     return apiClient.post<{ success: boolean; message: string }>(
       '/auth/email/init',
@@ -45,8 +56,8 @@ export class AuthService {
     }
   }
 
-  static async getUserInfo(): Promise<UserInfoDto> {
-    return apiClient.get<UserInfoDto>('/auth/me')
+  static async getUserInfo(): Promise<UserDTO> {
+    return apiClient.get<UserDTO>('/auth/me')
   }
 }
 

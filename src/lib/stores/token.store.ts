@@ -3,11 +3,9 @@
 // Alinhado com backend: usa sessionToken (não accessToken/refreshToken)
 // ============================================================
 
-import { TokenData } from '@/lib/api/types'
+import type { ITokenStore, TokenSubscriber, TokenData } from './types'
 
-type TokenSubscriber = () => void
-
-class TokenStore {
+class TokenStore implements ITokenStore {
   private static instance: TokenStore
   private subscribers: Set<TokenSubscriber> = new Set()
 

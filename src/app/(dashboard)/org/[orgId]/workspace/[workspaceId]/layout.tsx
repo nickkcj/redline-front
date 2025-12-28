@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { WorkspaceProvider } from "./workspace-provider";
+import { WorkspaceProvider } from "../../../../../../providers/workspace-provider";
 
 interface WorkspaceLayoutProps {
   children: React.ReactNode;

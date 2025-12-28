@@ -6,12 +6,12 @@
  */
 
 import { useApiQuery, useApiMutation } from './use-api'
-import MemberService from '@/lib/api/services/member.service'
+import { MemberService } from '@/lib/api/services/member.service'
 import type {
-  WorkspaceMemberWithRoles,
+  MemberDto,
   AddMemberDto,
   UpdateMemberRoleDto,
-} from '@/types/permissions'
+} from '@/lib/api/types/permission.types'
 
 // ============================================================================
 // Member Queries
@@ -26,12 +26,13 @@ import type {
  * const { data: members, isLoading } = useMembers(workspaceId)
  */
 export function useMembers(workspaceId: string) {
-  return useApiQuery(
+  return useApiQuery<MemberDto[]>(
     ['members', 'list', workspaceId],
     () => MemberService.listMembers(workspaceId),
     {
       enabled: !!workspaceId,
-      staleTime: 60000, // 1 minute
+      staleTime: 1000 * 60, // 1 minute
+      refetchOnMount: false,
       refetchOnWindowFocus: false,
     }
   )
@@ -54,13 +55,13 @@ export function useMembers(workspaceId: string) {
  * })
  */
 export function useAddMember(workspaceId: string) {
-  return useApiMutation(
-    (data: AddMemberDto) => MemberService.addMember(workspaceId, data),
+  return useApiMutation<MemberDto, AddMemberDto>(
+    (data) => MemberService.addMember(workspaceId, data),
     {
       successMessage: 'Membro adicionado com sucesso!',
       invalidateKeys: [
         ['members', 'list', workspaceId],
-        ['roles', 'list', workspaceId], // Update role member counts
+        ['roles', 'list', workspaceId],
       ],
     }
   )
@@ -76,13 +77,13 @@ export function useAddMember(workspaceId: string) {
  * removeMember("member-id-123")
  */
 export function useRemoveMember(workspaceId: string) {
-  return useApiMutation(
-    (memberId: string) => MemberService.removeMember(workspaceId, memberId),
+  return useApiMutation<void, string>(
+    (memberId) => MemberService.removeMember(workspaceId, memberId),
     {
       successMessage: 'Membro removido com sucesso!',
       invalidateKeys: [
         ['members', 'list', workspaceId],
-        ['roles', 'list', workspaceId], // Update role member counts
+        ['roles', 'list', workspaceId],
       ],
     }
   )
@@ -101,9 +102,8 @@ export function useRemoveMember(workspaceId: string) {
  * })
  */
 export function useUpdateMemberRole(workspaceId: string) {
-  return useApiMutation(
-    ({ memberId, data }: { memberId: string; data: UpdateMemberRoleDto }) =>
-      MemberService.updateMemberRole(workspaceId, memberId, data),
+  return useApiMutation<MemberDto, { memberId: string; data: UpdateMemberRoleDto }>(
+    ({ memberId, data }) => MemberService.updateMemberRole(workspaceId, memberId, data),
     {
       successMessage: 'Função atualizada com sucesso!',
       invalidateKeys: [['members', 'list', workspaceId]],
@@ -125,15 +125,14 @@ export function useUpdateMemberRole(workspaceId: string) {
  * assignRole({ memberId: "123", roleId: "456" })
  */
 export function useAssignRole(workspaceId: string) {
-  return useApiMutation(
-    ({ memberId, roleId }: { memberId: string; roleId: string }) =>
-      MemberService.assignRole(workspaceId, memberId, roleId),
+  return useApiMutation<MemberDto, { memberId: string; roleId: string }>(
+    ({ memberId, roleId }) => MemberService.assignRole(workspaceId, memberId, roleId),
     {
       successMessage: 'Função atribuída com sucesso!',
       invalidateKeys: [
         ['members', 'list', workspaceId],
-        ['roles', 'list', workspaceId], // Update role member counts
-        ['permissions', 'me', workspaceId], // Refresh user's own permissions
+        ['roles', 'list', workspaceId],
+        ['permissions', 'me', workspaceId],
       ],
     }
   )
@@ -149,15 +148,14 @@ export function useAssignRole(workspaceId: string) {
  * removeRole({ memberId: "123", roleId: "456" })
  */
 export function useRemoveRole(workspaceId: string) {
-  return useApiMutation(
-    ({ memberId, roleId }: { memberId: string; roleId: string }) =>
-      MemberService.removeRole(workspaceId, memberId, roleId),
+  return useApiMutation<MemberDto, { memberId: string; roleId: string }>(
+    ({ memberId, roleId }) => MemberService.removeRole(workspaceId, memberId, roleId),
     {
       successMessage: 'Função removida com sucesso!',
       invalidateKeys: [
         ['members', 'list', workspaceId],
-        ['roles', 'list', workspaceId], // Update role member counts
-        ['permissions', 'me', workspaceId], // Refresh user's own permissions
+        ['roles', 'list', workspaceId],
+        ['permissions', 'me', workspaceId],
       ],
     }
   )

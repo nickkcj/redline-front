@@ -1,7 +1,4 @@
-// ============================================================
-// PROVIDERS - Barrel export
-// ============================================================
-
 export { QueryProvider } from './query-provider'
-export { ThemeProvider } from './theme-provider'
-export { AuthProvider, useAuth } from './auth-provider'
+export { AuthProvider } from './auth-provider'
+export { OrganizationProvider } from './organization-provider'
+export { WorkspaceProvider } from './workspace-provider'

@@ -1,79 +1,132 @@
-// ============================================================
-// USE WORKSPACE - Hooks para Workspaces
-// ============================================================
+/**
+ * Workspace Hooks
+ *
+ * Hooks for workspace management (CRUD operations)
+ * Uses React Query for caching and automatic invalidation
+ */
 
+import { useQueryClient } from '@tanstack/react-query'
 import { useApiQuery, useApiMutation } from './use-api'
-import { WorkspaceService } from '@/lib/api/services'
+import { workspaceService } from '@/lib/api/services/workspace.service'
 import type {
   CreateWorkspaceDto,
   UpdateWorkspaceDto,
-} from '@/lib/api/types'
+  WorkspaceResponseDto,
+  WorkspaceListResponse,
+} from '@/lib/api/types/workspace.types'
+
+// ============================================================================
+// Workspace Queries
+// ============================================================================
 
 /**
- * Lista todos workspaces do usuário
+ * List all workspaces for the current user
+ * @returns Query result with workspaces list
+ *
+ * @example
+ * const { data: workspaces, isLoading } = useWorkspaces()
  */
 export function useWorkspaces() {
-  return useApiQuery(
+  return useApiQuery<WorkspaceListResponse>(
     ['workspaces'],
-    () => WorkspaceService.list(),
+    () => workspaceService.list(),
     {
-      staleTime: 300000, // 5 minutos
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
     }
   )
 }
 
 /**
- * Lista workspaces de uma organization
+ * List workspaces by organization
+ * @param organizationId - Organization ID
+ * @returns Query result with workspaces list
+ *
+ * @example
+ * const { data: workspaces } = useOrganizationWorkspaces(orgId)
  */
 export function useOrganizationWorkspaces(organizationId: string) {
-  return useApiQuery(
+  return useApiQuery<WorkspaceListResponse>(
     ['workspaces', 'organization', organizationId],
-    () => WorkspaceService.listByOrganization(organizationId),
+    () => workspaceService.listByOrganization(organizationId),
     {
       enabled: !!organizationId,
-      staleTime: 300000, // 5 minutos
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
     }
   )
 }
 
 /**
- * Busca workspace por ID
+ * Get a specific workspace by ID
+ * @param workspaceId - Workspace ID
+ * @returns Query result with workspace data
+ *
+ * @example
+ * const { data: workspace } = useWorkspace(workspaceId)
  */
 export function useWorkspace(workspaceId: string) {
-  return useApiQuery(
+  return useApiQuery<WorkspaceResponseDto>(
     ['workspaces', workspaceId],
-    () => WorkspaceService.getById(workspaceId),
+    () => workspaceService.getById(workspaceId),
     {
       enabled: !!workspaceId,
-      staleTime: 300000, // 5 minutos
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
     }
   )
 }
 
+// ============================================================================
+// Workspace Mutations
+// ============================================================================
+
 /**
- * Cria novo workspace
+ * Create a new workspace
+ * @returns Mutation function and state
+ *
+ * @example
+ * const { mutate: createWorkspace, isPending } = useCreateWorkspace()
+ * createWorkspace({
+ *   name: "My Workspace",
+ *   organizationId: "org-123"
+ * })
  */
 export function useCreateWorkspace() {
-  return useApiMutation(
-    (data: CreateWorkspaceDto) => WorkspaceService.create(data),
+  const queryClient = useQueryClient()
+
+  return useApiMutation<WorkspaceResponseDto, CreateWorkspaceDto>(
+    (data) => workspaceService.create(data),
     {
-      successMessage: 'Workspace created successfully!',
-      invalidateKeys: [
-        ['workspaces'],
-        ['workspaces', 'organization', (vars: any) => vars.organizationId],
-      ],
+      successMessage: 'Workspace criado com sucesso!',
+      onSuccess: (_data, variables) => {
+        queryClient.invalidateQueries({ queryKey: ['workspaces'] })
+        queryClient.invalidateQueries({ queryKey: ['organizations'] })
+        if (variables.organizationId) {
+          queryClient.invalidateQueries({ queryKey: ['workspaces', 'organization', variables.organizationId] })
+        }
+      },
     }
   )
 }
 
 /**
- * Atualiza workspace
+ * Update workspace details
+ * @param workspaceId - Workspace ID
+ * @returns Mutation function and state
+ *
+ * @example
+ * const { mutate: updateWorkspace } = useUpdateWorkspace(workspaceId)
+ * updateWorkspace({ name: "New Name" })
  */
 export function useUpdateWorkspace(workspaceId: string) {
-  return useApiMutation(
-    (data: UpdateWorkspaceDto) => WorkspaceService.update(workspaceId, data),
+  return useApiMutation<WorkspaceResponseDto, UpdateWorkspaceDto>(
+    (data) => workspaceService.update(workspaceId, data),
     {
-      successMessage: 'Workspace updated successfully!',
+      successMessage: 'Workspace atualizado com sucesso!',
       invalidateKeys: [
         ['workspaces'],
         ['workspaces', workspaceId],
@@ -83,14 +136,25 @@ export function useUpdateWorkspace(workspaceId: string) {
 }
 
 /**
- * Remove workspace
+ * Delete a workspace
+ * @returns Mutation function and state
+ *
+ * @example
+ * const { mutate: deleteWorkspace } = useDeleteWorkspace()
+ * deleteWorkspace("workspace-id-123")
  */
 export function useDeleteWorkspace() {
-  return useApiMutation(
-    (workspaceId: string) => WorkspaceService.delete(workspaceId),
+  const queryClient = useQueryClient()
+
+  return useApiMutation<void, string>(
+    (workspaceId) => workspaceService.delete(workspaceId),
     {
-      successMessage: 'Workspace deleted successfully!',
-      invalidateKeys: [['workspaces']],
+      successMessage: 'Workspace deletado com sucesso!',
+      onSuccess: (_data, deletedWorkspaceId) => {
+        queryClient.invalidateQueries({ queryKey: ['workspaces'] })
+        queryClient.invalidateQueries({ queryKey: ['organizations'] })
+        queryClient.invalidateQueries({ queryKey: ['workspaces', deletedWorkspaceId] })
+      },
     }
   )
 }
