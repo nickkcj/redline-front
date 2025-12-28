@@ -47,10 +47,10 @@ export function OrganizationProvider({ children, orgId }: OrganizationProviderPr
   // Não renderizar nada até estar montado no cliente
   if (!isMounted) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-8 h-8 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin"></div>
-          <p className="text-sm text-gray-500">Carregando organização...</p>
+          <div className="w-8 h-8 border-4 border-border border-t-gray-900 rounded-full animate-spin"></div>
+          <p className="text-sm text-muted-foreground">Carregando organização...</p>
         </div>
       </div>
     );
@@ -58,10 +58,10 @@ export function OrganizationProvider({ children, orgId }: OrganizationProviderPr
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-8 h-8 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin"></div>
-          <p className="text-sm text-gray-500">Carregando organização...</p>
+          <div className="w-8 h-8 border-4 border-border border-t-gray-900 rounded-full animate-spin"></div>
+          <p className="text-sm text-muted-foreground">Carregando organização...</p>
         </div>
       </div>
     );
@@ -69,9 +69,9 @@ export function OrganizationProvider({ children, orgId }: OrganizationProviderPr
 
   if (!currentOrganization) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
-          <p className="text-sm text-gray-500">Organização não encontrada</p>
+          <p className="text-sm text-muted-foreground">Organização não encontrada</p>
           <button
             onClick={() => router.push('/org')}
             className="text-sm text-blue-600 hover:text-blue-800"

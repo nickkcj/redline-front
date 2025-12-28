@@ -163,12 +163,12 @@ export function ChatArea({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
             <Button
               variant="outline"
-              className="h-auto py-3 px-4 text-left justify-start border-gray-200 text-gray-900 hover:bg-gray-50"
+              className="h-auto py-3 px-4 text-left justify-start border-border text-gray-900 hover:bg-muted/50"
               onClick={() =>
                 setInputValue("Me ajude a entender este documento...")
               }
             >
-              <MessageSquare className="size-4 mr-2 shrink-0 text-gray-500 flex-shrink-0" />
+              <MessageSquare className="size-4 mr-2 shrink-0 text-muted-foreground flex-shrink-0" />
               <span className="text-sm text-left flex-1 min-w-0" style={{ 
                 display: '-webkit-box',
                 WebkitLineClamp: 2,
@@ -182,12 +182,12 @@ export function ChatArea({
             </Button>
             <Button
               variant="outline"
-              className="h-auto py-3 px-4 text-left justify-start border-gray-200 text-gray-900 hover:bg-gray-50"
+              className="h-auto py-3 px-4 text-left justify-start border-border text-gray-900 hover:bg-muted/50"
               onClick={() =>
                 setInputValue("Resuma os principais pontos deste arquivo...")
               }
             >
-              <MessageSquare className="size-4 mr-2 shrink-0 text-gray-500 flex-shrink-0" />
+              <MessageSquare className="size-4 mr-2 shrink-0 text-muted-foreground flex-shrink-0" />
               <span className="text-sm text-left flex-1 min-w-0" style={{ 
                 display: '-webkit-box',
                 WebkitLineClamp: 2,
@@ -201,12 +201,12 @@ export function ChatArea({
             </Button>
             <Button
               variant="outline"
-              className="h-auto py-3 px-4 text-left justify-start border-gray-200 text-gray-900 hover:bg-gray-50"
+              className="h-auto py-3 px-4 text-left justify-start border-border text-gray-900 hover:bg-muted/50"
               onClick={() =>
                 setInputValue("Quais são as informações mais relevantes?")
               }
             >
-              <MessageSquare className="size-4 mr-2 shrink-0 text-gray-500 flex-shrink-0" />
+              <MessageSquare className="size-4 mr-2 shrink-0 text-muted-foreground flex-shrink-0" />
               <span className="text-sm text-left flex-1 min-w-0" style={{ 
                 display: '-webkit-box',
                 WebkitLineClamp: 2,
@@ -220,12 +220,12 @@ export function ChatArea({
             </Button>
             <Button
               variant="outline"
-              className="h-auto py-3 px-4 text-left justify-start border-gray-200 text-gray-900 hover:bg-gray-50"
+              className="h-auto py-3 px-4 text-left justify-start border-border text-gray-900 hover:bg-muted/50"
               onClick={() =>
                 setInputValue("Crie um relatório baseado nestes dados...")
               }
             >
-              <MessageSquare className="size-4 mr-2 shrink-0 text-gray-500 flex-shrink-0" />
+              <MessageSquare className="size-4 mr-2 shrink-0 text-muted-foreground flex-shrink-0" />
               <span className="text-sm text-left flex-1 min-w-0" style={{ 
                 display: '-webkit-box',
                 WebkitLineClamp: 2,
@@ -265,7 +265,7 @@ export function ChatArea({
           <div className="max-w-3xl mx-auto py-6 space-y-4">
           {loadingMessages ? (
             <div className="flex items-center justify-center py-8">
-              <div className="size-8 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin" />
+              <div className="size-8 border-4 border-border border-t-gray-900 rounded-full animate-spin" />
             </div>
           ) : (
             <>
@@ -292,7 +292,7 @@ export function ChatArea({
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-gray-200 bg-white p-4 flex-shrink-0">
+      <div className="border-t border-border bg-white p-4 flex-shrink-0">
         <div className="max-w-3xl mx-auto space-y-3">
           {/* Document Marker */}
           <DocumentMarker

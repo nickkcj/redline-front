@@ -138,8 +138,8 @@ export function LoginContent() {
           className="w-16 h-16 object-contain"
         />
         <div className="flex flex-col">
-          <div className="text-4xl font-serif font-bold text-gray-900 leading-tight">{appName}</div>
-          <div className="text-sm font-serif font-bold text-gray-600 mt-1">by dooor</div>
+          <div className="text-4xl font-serif font-bold text-foreground leading-tight">{appName}</div>
+          <div className="text-sm font-serif font-bold text-muted-foreground mt-1">by dooor</div>
         </div>
       </div>
       <video
@@ -152,7 +152,7 @@ export function LoginContent() {
         <source src="/mountain-vector-white.mp4" type="video/mp4" />
       </video>
       {/* Overlay for opacity effect */}
-      <div className="w-screen h-screen absolute bottom-0 left-0 bg-white opacity-70 pointer-events-none"></div>
+      <div className="w-screen h-screen absolute bottom-0 left-0 bg-background opacity-70 pointer-events-none"></div>
       <div className="flex flex-col items-center gap-4 relative z-10 max-w-md w-full">
         {!magicLinkSent ? (
           <>
@@ -174,7 +174,7 @@ export function LoginContent() {
               <Button
                 type="submit"
                 disabled={isMagicLinkLoading || !email || !isValidEmail(email)}
-                className="w-full transition-all cursor-pointer duration-200 hover:shadow-md bg-gray-900 hover:bg-gray-800 text-white rounded-xl px-5 py-3 h-auto"
+                className="w-full transition-all cursor-pointer duration-200 hover:shadow-md bg-primary hover:bg-gray-800 text-white rounded-xl px-5 py-3 h-auto"
               >
                 {isMagicLinkLoading ? <Loader2 size={20} className="animate-spin" /> : <Mail size={20} />}
                 <span className="text-sm font-medium">
@@ -184,9 +184,9 @@ export function LoginContent() {
             </form>
 
             <div className="flex items-center gap-3 w-full">
-              <div className="flex-1 h-px bg-gray-300"></div>
+              <div className="flex-1 h-px bg-muted"></div>
               <span className="text-sm text-gray-500">ou</span>
-              <div className="flex-1 h-px bg-gray-300"></div>
+              <div className="flex-1 h-px bg-muted"></div>
             </div>
 
             <button

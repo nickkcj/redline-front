@@ -115,7 +115,7 @@ export function DocumentMarker({
             type="button"
             variant="outline"
             size="sm"
-            className="h-9 gap-2 border-gray-200 text-gray-700 hover:bg-gray-50"
+            className="h-9 gap-2 border-border text-foreground hover:bg-gray-50"
             disabled={disabled || documents.length === 0}
           >
             <Paperclip className="size-4" />
@@ -136,7 +136,7 @@ export function DocumentMarker({
           <ScrollArea className="h-[400px] pr-4">
             <div className="space-y-2">
               {documents.length === 0 ? (
-                <p className="text-sm text-gray-500 text-center py-8">
+                <p className="text-sm text-muted-foreground text-center py-8">
                   Nenhum documento disponível
                 </p>
               ) : (
@@ -151,7 +151,7 @@ export function DocumentMarker({
                         "flex items-start gap-3 p-3 rounded-lg border transition-colors",
                         isMarked
                           ? "bg-blue-50 border-blue-200"
-                          : "bg-white border-gray-200 hover:bg-gray-50"
+                          : "bg-background border-border hover:bg-gray-50"
                       )}
                     >
                       <Checkbox
@@ -166,18 +166,18 @@ export function DocumentMarker({
                         className="flex-1 min-w-0 cursor-pointer"
                       >
                         <div className="flex items-center gap-2 mb-1">
-                          <FileText className="size-4 text-gray-500 flex-shrink-0" />
+                          <FileText className="size-4 text-muted-foreground flex-shrink-0" />
                           <span className="text-sm font-medium text-gray-900 truncate">
                             {doc.name}
                           </span>
                         </div>
                         {doc.description && (
-                          <p className="text-xs text-gray-500 line-clamp-2">
+                          <p className="text-xs text-muted-foreground line-clamp-2">
                             {doc.description}
                           </p>
                         )}
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-muted-foreground">
                             {formatFileSize(doc.sizeBytes)}
                           </span>
                           {doc.isProcessed && (

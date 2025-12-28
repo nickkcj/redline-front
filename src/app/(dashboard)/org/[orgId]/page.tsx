@@ -268,7 +268,7 @@ export default function WorkspacesPage() {
         <source src="/mountain-vector-white.mp4" type="video/mp4" />
       </video>
       {/* Overlay for opacity effect */}
-      <div className="fixed inset-0 bg-white/90 z-10"></div>
+      <div className="fixed inset-0 bg-background/90 z-10"></div>
 
       <div className="relative z-20">
         <Navbar />
@@ -280,14 +280,14 @@ export default function WorkspacesPage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => router.push('/org')}
-                className="gap-2 text-base cursor-pointer text-gray-900 hover:text-gray-900"
+                className="gap-2 text-base cursor-pointer text-foreground hover:text-foreground"
               >
                 <ArrowLeft className="size-5" />
                 <span>Voltar para Organizações</span>
               </Button>
               <div className="flex items-center gap-2">
-                <Building className="size-5 text-gray-800" />
-                <span className="text-base font-medium text-gray-950">
+                <Building className="size-5 text-foreground" />
+                <span className="text-base font-medium text-foreground">
                   {currentOrganization?.name || 'Organização'}
                 </span>
               </div>
@@ -297,17 +297,17 @@ export default function WorkspacesPage() {
               {/* Header Section */}
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-6">
                 <div className="flex-1">
-                  <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-gray-950">
+                  <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
                     Projetos
                   </h1>
-                  <p className="text-gray-800 mt-1 text-sm sm:text-base">
+                  <p className="text-foreground mt-1 text-sm sm:text-base">
                     Gerencie seus projetos de trabalho
                   </p>
                 </div>
                 {canCreateWorkspace && (
                   <Button
                     onClick={() => setShowNewWorkspaceModal(true)}
-                    className="w-full sm:w-auto transition-all cursor-pointer duration-200 hover:shadow-md bg-gray-900 hover:bg-gray-800 text-white"
+                    className="w-full sm:w-auto transition-all cursor-pointer duration-200 hover:shadow-md bg-primary hover:bg-primary/90 text-white"
                   >
                     <Plus className="size-4 mr-2" />
                     <span className="sm:inline">Novo Projeto</span>
@@ -317,19 +317,19 @@ export default function WorkspacesPage() {
 
               {/* Workspaces Cards */}
               {workspaces.length === 0 && !isLoading ? (
-                <p className="text-gray-800 font-medium">Nenhum projeto disponível.</p>
+                <p className="text-foreground font-medium">Nenhum projeto disponível.</p>
               ) : (
                 <div className="flex flex-wrap gap-6">
                   {workspaces.map((workspace) => (
                     <div
                       key={workspace.id}
-                      className="bg-white border border-gray-200 rounded-xl p-6 cursor-pointer relative group w-full sm:w-[calc(50%-12px)] sm:min-w-[320px] sm:max-w-[480px] shadow-sm hover:shadow-md transition-shadow"
+                      className="bg-background border border-border rounded-xl p-6 cursor-pointer relative group w-full sm:w-[calc(50%-12px)] sm:min-w-[320px] sm:max-w-[480px] shadow-sm hover:shadow-md transition-shadow"
                       onClick={() => handleEnterWorkspace(workspace)}
                     >
                       {/* Header */}
                       <div className="flex items-start justify-between mb-4 gap-2">
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-2xl font-semibold text-gray-950 mb-2 break-words">
+                          <h3 className="text-2xl font-semibold text-foreground mb-2 break-words">
                             {workspace.name}
                           </h3>
                         </div>
@@ -339,18 +339,18 @@ export default function WorkspacesPage() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                                className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground hover:bg-accent"
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="start" className="w-40 !bg-white !border-gray-200">
+                            <DropdownMenuContent align="start" className="w-40 !bg-background !border-border">
                               {canCreateWorkspace && (
                                 <>
                                   <DropdownMenuItem
                                     onClick={(e) => handleEditWorkspace(workspace, e)}
-                                    className="text-gray-900 hover:bg-gray-100"
+                                    className="text-foreground hover:bg-accent"
                                   >
                                     <Edit className="mr-2 h-4 w-4" />
                                     Editar
@@ -378,11 +378,11 @@ export default function WorkspacesPage() {
 
                       {/* Footer */}
                       <div className="space-y-1">
-                        <p className="text-sm font-medium text-gray-950 break-words">
+                        <p className="text-sm font-medium text-foreground break-words">
                           {workspace.description || 'Sem descrição'}
                         </p>
                         {workspace.createdAt && (
-                          <p className="text-sm text-gray-700 font-medium">
+                          <p className="text-sm text-muted-foreground font-medium">
                             Criado em {new Date(workspace.createdAt).toLocaleDateString()}
                           </p>
                         )}
@@ -397,14 +397,14 @@ export default function WorkspacesPage() {
 
         {/* New Workspace Modal */}
         <Dialog open={showNewWorkspaceModal} onOpenChange={setShowNewWorkspaceModal}>
-          <DialogContent className="sm:max-w-[400px] !bg-white !border-gray-200">
+          <DialogContent className="sm:max-w-[400px] !bg-background !border-border">
             <DialogHeader>
-              <DialogTitle className="text-xl font-semibold text-gray-900">Novo Projeto</DialogTitle>
+              <DialogTitle className="text-xl font-semibold text-foreground">Novo Projeto</DialogTitle>
             </DialogHeader>
 
             <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
                   Nome do Projeto
                 </label>
                 <input
@@ -412,13 +412,13 @@ export default function WorkspacesPage() {
                   value={workspaceName}
                   onChange={(e) => setWorkspaceName(e.target.value)}
                   placeholder="Digite o nome do projeto"
-                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all bg-white text-gray-900 placeholder-gray-400"
+                  className="w-full px-3 py-2.5 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring transition-all bg-background text-foreground placeholder:text-muted-foreground"
                   maxLength={100}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
                   Descrição (Opcional)
                 </label>
                 <textarea
@@ -426,7 +426,7 @@ export default function WorkspacesPage() {
                   onChange={(e) => setWorkspaceDescription(e.target.value)}
                   placeholder="Digite uma descrição para o projeto"
                   rows={3}
-                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 resize-none transition-all bg-white text-gray-900 placeholder-gray-400"
+                  className="w-full px-3 py-2.5 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring resize-none transition-all bg-background text-foreground placeholder:text-muted-foreground"
                   maxLength={500}
                 />
               </div>
@@ -459,14 +459,14 @@ export default function WorkspacesPage() {
 
         {/* Edit Workspace Modal */}
         <Dialog open={showEditWorkspaceModal} onOpenChange={setShowEditWorkspaceModal}>
-          <DialogContent className="sm:max-w-[400px] !bg-white !border-gray-200">
+          <DialogContent className="sm:max-w-[400px] !bg-background !border-border">
             <DialogHeader>
-              <DialogTitle className="text-xl font-semibold text-gray-900">Editar Projeto</DialogTitle>
+              <DialogTitle className="text-xl font-semibold text-foreground">Editar Projeto</DialogTitle>
             </DialogHeader>
 
             <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
                   Nome do Projeto
                 </label>
                 <input
@@ -474,13 +474,13 @@ export default function WorkspacesPage() {
                   value={editWorkspaceName}
                   onChange={(e) => setEditWorkspaceName(e.target.value)}
                   placeholder="Digite o nome do projeto"
-                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all bg-white text-gray-900 placeholder-gray-400"
+                  className="w-full px-3 py-2.5 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring transition-all bg-background text-foreground placeholder:text-muted-foreground"
                   maxLength={100}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
                   Descrição (Opcional)
                 </label>
                 <textarea
@@ -488,7 +488,7 @@ export default function WorkspacesPage() {
                   onChange={(e) => setEditWorkspaceDescription(e.target.value)}
                   placeholder="Digite uma descrição para o projeto"
                   rows={3}
-                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 resize-none transition-all bg-white text-gray-900 placeholder-gray-400"
+                  className="w-full px-3 py-2.5 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring resize-none transition-all bg-background text-foreground placeholder:text-muted-foreground"
                   maxLength={500}
                 />
               </div>
@@ -523,16 +523,16 @@ export default function WorkspacesPage() {
 
         {/* Delete Confirmation Modal */}
         <Dialog open={showDeleteConfirmation} onOpenChange={setShowDeleteConfirmation}>
-          <DialogContent className="sm:max-w-[400px] !bg-white !border-gray-200">
+          <DialogContent className="sm:max-w-[400px] !bg-background !border-border">
             <DialogHeader>
-              <DialogTitle className="text-xl font-semibold text-gray-900">Excluir Projeto</DialogTitle>
+              <DialogTitle className="text-xl font-semibold text-foreground">Excluir Projeto</DialogTitle>
             </DialogHeader>
 
             <div className="space-y-4">
-              <p className="text-sm text-gray-700 leading-relaxed">
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 Tem certeza que deseja excluir o projeto <strong className="font-semibold">&ldquo;{deletingWorkspace?.name}&rdquo;</strong>?
               </p>
-              <p className="text-sm text-gray-600 font-medium">
+              <p className="text-sm text-muted-foreground font-medium">
                 Todo o conteúdo do projeto será excluído.
               </p>
               <p className="text-sm text-red-600 font-medium">
@@ -571,16 +571,16 @@ export default function WorkspacesPage() {
 
         {/* Leave Workspace Confirmation Modal */}
         <Dialog open={showLeaveConfirmation} onOpenChange={setShowLeaveConfirmation}>
-          <DialogContent className="sm:max-w-[400px] !bg-white !border-gray-200">
+          <DialogContent className="sm:max-w-[400px] !bg-background !border-border">
             <DialogHeader>
-              <DialogTitle className="text-xl font-semibold text-gray-900">Sair do Projeto</DialogTitle>
+              <DialogTitle className="text-xl font-semibold text-foreground">Sair do Projeto</DialogTitle>
             </DialogHeader>
 
             <div className="space-y-4">
-              <p className="text-sm text-gray-700 leading-relaxed">
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 Tem certeza que deseja sair do projeto <strong className="font-semibold">&ldquo;{leavingWorkspace?.name}&rdquo;</strong>?
               </p>
-              <p className="text-sm text-gray-600 font-medium">
+              <p className="text-sm text-muted-foreground font-medium">
                 Você perderá acesso a este projeto e precisará ser convidado novamente para retornar.
               </p>
 

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useCurrentWorkspace } from "@/store/app-store";
-import { WorkspaceLeftSidebar } from "@/components/workspace/workspace-left-sidebar";
+import { Sidebar } from "@/components/workspace/sidebar";
 import { ChatArea } from "@/components/chat/chat-area";
 import { PdfViewer } from "@/components/workspace/pdf-viewer";
 
@@ -46,10 +46,10 @@ export default function WorkspacePage({ params }: WorkspacePageProps) {
 
   if (!resolvedParams) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-sm text-gray-500">Carregando workspace...</p>
+          <div className="w-8 h-8 border-4 border-border border-t-gray-900 rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-sm text-muted-foreground">Carregando workspace...</p>
         </div>
       </div>
     );
@@ -57,10 +57,10 @@ export default function WorkspacePage({ params }: WorkspacePageProps) {
 
   return (
     <>
-      <div className="h-screen bg-white flex overflow-hidden">
+      <div className="h-screen bg-background flex overflow-hidden">
         {/* Left Sidebar */}
         <div className="flex-shrink-0">
-          <WorkspaceLeftSidebar
+          <Sidebar
             workspaceId={resolvedParams.workspaceId}
             workspaceName={currentWorkspace?.name || "Workspace"}
             organizationId={resolvedParams.orgId}
@@ -72,7 +72,7 @@ export default function WorkspacePage({ params }: WorkspacePageProps) {
         </div>
 
         {/* Main Chat Area */}
-        <div className="flex-1 min-w-0 overflow-hidden bg-white">
+        <div className="flex-1 min-w-0 overflow-hidden bg-background">
           <ChatArea
             workspaceId={resolvedParams.workspaceId}
             chatId={currentChatId}

@@ -40,9 +40,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" suppressHydrationWarning className="bg-white">
+    <html lang="pt-BR" suppressHydrationWarning className="bg-background">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background`}
       >
         <QueryProvider>
           <AuthProvider>

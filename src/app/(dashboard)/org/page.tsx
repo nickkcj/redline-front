@@ -210,7 +210,7 @@ export default function OrganizationsListPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white relative">
+      <div className="min-h-screen bg-background relative">
         {/* Background video - only render on client to avoid hydration mismatch */}
         {isMounted && (
           <>
@@ -224,7 +224,7 @@ export default function OrganizationsListPage() {
               <source src="/mountain-vector-white.mp4" type="video/mp4" />
             </video>
             {/* Overlay for opacity effect */}
-            <div className="fixed inset-0 bg-white/80 z-10"></div>
+            <div className="fixed inset-0 bg-background/80 z-10"></div>
           </>
         )}
         <div className="relative z-20">
@@ -232,37 +232,37 @@ export default function OrganizationsListPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="@container/main flex flex-col gap-6 py-6">
               <div>
-                <Skeleton className="h-9 w-64 bg-gray-200/60" />
+                <Skeleton className="h-9 w-64 bg-muted" />
               </div>
               <div className="space-y-6 mt-6">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3">
-                      <Skeleton className="h-8 w-40 bg-gray-200/60" />
-                      <Skeleton className="h-6 w-8 rounded-full bg-gray-200/60" />
+                      <Skeleton className="h-8 w-40 bg-muted" />
+                      <Skeleton className="h-6 w-8 rounded-full bg-muted" />
                     </div>
-                    <Skeleton className="h-5 w-64 mt-2 bg-gray-200/60" />
+                    <Skeleton className="h-5 w-64 mt-2 bg-muted" />
                   </div>
-                  <Skeleton className="h-10 w-48 bg-gray-200/60" />
+                  <Skeleton className="h-10 w-48 bg-muted" />
                 </div>
                 <div className="flex flex-wrap gap-6">
                   {Array.from({ length: 3 }).map((_, i) => (
                     <div
                       key={i}
-                      className="bg-white/80 border border-gray-200 rounded-xl p-6 w-full sm:w-[calc(50%-12px)] sm:min-w-[320px] sm:max-w-[480px] shadow-sm"
+                      className="bg-background/80 border border-border rounded-xl p-6 w-full sm:w-[calc(50%-12px)] sm:min-w-[320px] sm:max-w-[480px] shadow-sm"
                     >
                       <div className="space-y-4">
                         <div className="flex items-start justify-between">
                           <div className="flex-1 space-y-2">
-                            <Skeleton className="h-4 w-24 bg-gray-200/60" />
-                            <Skeleton className="h-7 w-32 bg-gray-200/60" />
+                            <Skeleton className="h-4 w-24 bg-muted" />
+                            <Skeleton className="h-7 w-32 bg-muted" />
                           </div>
-                          <Skeleton className="h-6 w-20 rounded-full bg-gray-200/60" />
+                          <Skeleton className="h-6 w-20 rounded-full bg-muted" />
                         </div>
                         <div className="space-y-2">
-                          <Skeleton className="h-4 w-full bg-gray-200/60" />
-                          <Skeleton className="h-4 w-3/4 bg-gray-200/60" />
-                          <Skeleton className="h-4 w-1/2 bg-gray-200/60" />
+                          <Skeleton className="h-4 w-full bg-muted" />
+                          <Skeleton className="h-4 w-3/4 bg-muted" />
+                          <Skeleton className="h-4 w-1/2 bg-muted" />
                         </div>
                       </div>
                     </div>
@@ -277,7 +277,7 @@ export default function OrganizationsListPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white relative">
+    <div className="min-h-screen bg-background relative">
       {/* Background video - only render on client to avoid hydration mismatch */}
       {isMounted && (
         <>
@@ -292,7 +292,7 @@ export default function OrganizationsListPage() {
             <source src="/mountain-vector-white.mp4" type="video/mp4" />
           </video>
           {/* Overlay for opacity effect */}
-          <div className="fixed inset-0 bg-white/80 z-10"></div>
+          <div className="fixed inset-0 bg-background/80 z-10"></div>
         </>
       )}
 
@@ -301,7 +301,7 @@ export default function OrganizationsListPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="@container/main flex flex-col gap-6 py-6 animate-in fade-in duration-500">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-gray-900">
+              <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
                 {`Bem-vindo${displayName ? ` ao ${appName}, ${displayName}!` : ` ao ${appName}!`}`}
               </h1>
             </div>
@@ -311,20 +311,20 @@ export default function OrganizationsListPage() {
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-6">
                 <div className="flex-1">
                   <div className="flex items-center gap-3">
-                    <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-gray-900">
+                    <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
                       Organizações
                     </h2>
-                    <Badge variant="secondary" className="text-sm font-medium bg-gray-100 text-gray-700 border-gray-200">
+                    <Badge variant="secondary" className="text-sm font-medium bg-muted text-foreground border-border">
                       {organizations.length}
                     </Badge>
                   </div>
-                  <p className="text-gray-600 mt-1.5 text-sm sm:text-base">
+                  <p className="text-muted-foreground mt-1.5 text-sm sm:text-base">
                     Gerencie suas organizações e acesse seus projetos
                   </p>
                 </div>
                 <Button
                   onClick={() => setShowNewOrgModal(true)}
-                  className="w-full sm:w-auto transition-all cursor-pointer duration-200 hover:shadow-lg hover:scale-[1.02] bg-gray-900 hover:bg-gray-800 text-white shadow-sm"
+                  className="w-full sm:w-auto transition-all cursor-pointer duration-200 hover:shadow-lg hover:scale-[1.02] bg-primary hover:bg-primary/90 text-white shadow-sm"
                 >
                   <Plus className="size-4 mr-2" />
                   <span className="sm:inline">Nova Organização</span>
@@ -334,13 +334,13 @@ export default function OrganizationsListPage() {
               {/* Organizations Cards */}
               {organizations.length === 0 && !isLoading ? (
                 <div className="flex flex-col items-center justify-center py-12 px-4">
-                  <div className="bg-white/90 border border-gray-200 rounded-xl p-8 text-center max-w-md">
-                    <Building className="size-12 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600 text-base font-medium mb-2">Nenhuma organização disponível</p>
-                    <p className="text-gray-500 text-sm mb-6">Crie sua primeira organização para começar</p>
+                  <div className="bg-background/90 border border-border rounded-xl p-8 text-center max-w-md">
+                    <Building className="size-12 text-muted-foreground mx-auto mb-4" />
+                    <p className="text-muted-foreground text-base font-medium mb-2">Nenhuma organização disponível</p>
+                    <p className="text-muted-foreground text-sm mb-6">Crie sua primeira organização para começar</p>
                     <Button
                       onClick={() => setShowNewOrgModal(true)}
-                      className="bg-gray-900 hover:bg-gray-800 text-white"
+                      className="bg-primary hover:bg-primary/90 text-white"
                     >
                       <Plus className="size-4 mr-2" />
                       Criar Organização
@@ -351,7 +351,7 @@ export default function OrganizationsListPage() {
                 <div className="relative">
                   <div
                     ref={scrollContainerRef}
-                    className="flex flex-wrap gap-6 max-h-[calc(100vh-300px)] overflow-y-auto pb-8 pr-2 scroll-smooth scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400"
+                    className="flex flex-wrap gap-6 max-h-[calc(100vh-300px)] overflow-y-auto pb-8 pr-2 scroll-smooth scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/30"
                   >
                     {organizations.map((org: OrganizationWithWorkspaces) => {
                       const workspaceCount = org.workspaces?.length || 0;
@@ -359,17 +359,17 @@ export default function OrganizationsListPage() {
                       return (
                         <div
                           key={org.id}
-                          className="bg-white/90 backdrop-blur-sm border border-gray-200 rounded-xl p-6 cursor-pointer relative group w-full sm:w-[calc(50%-12px)] sm:min-w-[320px] sm:max-w-[480px] shadow-sm hover:shadow-lg hover:border-gray-300 transition-all duration-200 hover:-translate-y-0.5"
+                          className="bg-background/90 backdrop-blur-sm border border-border rounded-xl p-6 cursor-pointer relative group w-full sm:w-[calc(50%-12px)] sm:min-w-[320px] sm:max-w-[480px] shadow-sm hover:shadow-lg hover:border-border transition-all duration-200 hover:-translate-y-0.5"
                           onClick={() => handleEnterOrganization(org)}
                         >
                         {/* Header */}
                         <div className="flex items-start justify-between mb-4 gap-2">
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 text-xs text-gray-500 mb-2 font-medium">
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2 font-medium">
                               <Building className="size-3.5" />
                               <span>Organização</span>
                             </div>
-                            <h3 className="text-2xl font-semibold text-gray-900 mb-2 break-words group-hover:text-gray-700 transition-colors">
+                            <h3 className="text-2xl font-semibold text-foreground mb-2 break-words group-hover:text-foreground transition-colors">
                               {org.name}
                             </h3>
                           </div>
@@ -380,7 +380,7 @@ export default function OrganizationsListPage() {
                                 Proprietário
                               </Badge>
                             ) : (
-                              <Badge variant="outline" className="text-xs bg-gray-50 text-gray-700 border-gray-200 font-medium">
+                              <Badge variant="outline" className="text-xs bg-muted/50 text-foreground border-border font-medium">
                                 Membro
                               </Badge>
                             )}
@@ -391,16 +391,16 @@ export default function OrganizationsListPage() {
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                                    className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-foreground hover:text-foreground hover:bg-muted"
                                     onClick={(e) => e.stopPropagation()}
                                   >
                                     <MoreVertical className="h-4 w-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="start" className="w-40 !bg-white !border-gray-200">
+                                <DropdownMenuContent align="start" className="w-40 !bg-background !border-border">
                                   <DropdownMenuItem
                                     onClick={(e) => handleEditOrganization(org, e)}
-                                    className="text-gray-900 hover:bg-gray-100"
+                                    className="text-foreground hover:bg-muted"
                                   >
                                     <Edit className="mr-2 h-4 w-4" />
                                     Editar
@@ -420,10 +420,10 @@ export default function OrganizationsListPage() {
 
                         {/* Footer */}
                         <div className="space-y-1.5 mt-4">
-                          <p className="text-sm text-gray-600 break-words line-clamp-2">
-                            {org.description || <span className="text-gray-400 italic">Sem descrição</span>}
+                          <p className="text-sm text-muted-foreground break-words line-clamp-2">
+                            {org.description || <span className="text-muted-foreground italic">Sem descrição</span>}
                           </p>
-                          <div className="flex items-center gap-4 text-sm text-gray-500 pt-1">
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground pt-1">
                             <span className="font-medium">{workspaceCount} projeto{workspaceCount !== 1 ? 's' : ''}</span>
                             {org.createdAt && (
                               <span className="text-xs">
@@ -439,7 +439,7 @@ export default function OrganizationsListPage() {
                   {/* Scroll indicator - shows when there are more cards below */}
                   {organizations.length > 4 && (
                     <div className={`absolute bottom-2 left-0 right-0 pointer-events-none flex items-end justify-center transition-opacity duration-300 ${showScrollIndicator ? 'opacity-100' : 'opacity-0'}`}>
-                      <div className="text-xs text-gray-600 flex items-center gap-1.5 animate-bounce bg-white/95 backdrop-blur-sm px-4 py-2 rounded-full shadow-md border border-gray-200 font-medium">
+                      <div className="text-xs text-muted-foreground flex items-center gap-1.5 animate-bounce bg-background/95 backdrop-blur-sm px-4 py-2 rounded-full shadow-md border border-border font-medium">
                         <span>↓</span>
                         <span>Role para ver mais</span>
                       </div>
@@ -453,14 +453,14 @@ export default function OrganizationsListPage() {
 
         {/* New Organization Modal */}
         <Dialog open={showNewOrgModal} onOpenChange={setShowNewOrgModal}>
-          <DialogContent className="sm:max-w-[400px] !bg-white !border-gray-200">
+          <DialogContent className="sm:max-w-[400px] !bg-background !border-border">
             <DialogHeader>
-              <DialogTitle className="text-xl font-semibold text-gray-900">Nova Organização</DialogTitle>
+              <DialogTitle className="text-xl font-semibold text-foreground">Nova Organização</DialogTitle>
             </DialogHeader>
 
             <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   Nome da Organização <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -468,13 +468,13 @@ export default function OrganizationsListPage() {
                   value={orgName}
                   onChange={(e) => setOrgName(e.target.value)}
                   placeholder="Digite o nome da organização"
-                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all bg-white text-gray-900 placeholder-gray-400"
+                  className="w-full px-3 py-2.5 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring transition-all bg-background text-foreground placeholder:text-muted-foreground"
                   maxLength={100}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   Descrição (Opcional)
                 </label>
                 <textarea
@@ -482,7 +482,7 @@ export default function OrganizationsListPage() {
                   onChange={(e) => setOrgDescription(e.target.value)}
                   placeholder="Digite uma descrição para a organização"
                   rows={3}
-                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 resize-none transition-all bg-white text-gray-900 placeholder-gray-400"
+                  className="w-full px-3 py-2.5 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring resize-none transition-all bg-background text-foreground placeholder:text-muted-foreground"
                   maxLength={500}
                 />
               </div>
@@ -506,7 +506,7 @@ export default function OrganizationsListPage() {
                   onClick={handleCreateOrganization}
                   disabled={!canCreate || creating}
                   size="default"
-                  className="cursor-pointer bg-gray-900 hover:bg-gray-800 text-white"
+                  className="cursor-pointer bg-primary hover:bg-primary/90 text-white"
                 >
                   {creating ? 'Criando...' : 'Criar Organização'}
                 </Button>
@@ -517,14 +517,14 @@ export default function OrganizationsListPage() {
 
         {/* Edit Organization Modal */}
         <Dialog open={showEditOrgModal} onOpenChange={setShowEditOrgModal}>
-          <DialogContent className="sm:max-w-[400px] !bg-white !border-gray-200">
+          <DialogContent className="sm:max-w-[400px] !bg-background !border-border">
             <DialogHeader>
-              <DialogTitle className="text-xl font-semibold text-gray-900">Editar Organização</DialogTitle>
+              <DialogTitle className="text-xl font-semibold text-foreground">Editar Organização</DialogTitle>
             </DialogHeader>
 
             <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   Nome da Organização
                 </label>
                 <input
@@ -532,13 +532,13 @@ export default function OrganizationsListPage() {
                   value={editOrgName}
                   onChange={(e) => setEditOrgName(e.target.value)}
                   placeholder="Digite o nome da organização"
-                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 transition-all bg-white text-gray-900 placeholder-gray-400"
+                  className="w-full px-3 py-2.5 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring transition-all bg-background text-foreground placeholder:text-muted-foreground"
                   maxLength={100}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   Descrição (Opcional)
                 </label>
                 <textarea
@@ -546,7 +546,7 @@ export default function OrganizationsListPage() {
                   onChange={(e) => setEditOrgDescription(e.target.value)}
                   placeholder="Digite uma descrição para a organização"
                   rows={3}
-                  className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-gray-900 resize-none transition-all bg-white text-gray-900 placeholder-gray-400"
+                  className="w-full px-3 py-2.5 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring resize-none transition-all bg-background text-foreground placeholder:text-muted-foreground"
                   maxLength={500}
                 />
               </div>
@@ -570,7 +570,7 @@ export default function OrganizationsListPage() {
                   onClick={handleUpdateOrganization}
                   disabled={!editOrgName?.trim() || updating}
                   size="default"
-                  className="cursor-pointer bg-gray-900 hover:bg-gray-800 text-white"
+                  className="cursor-pointer bg-primary hover:bg-primary/90 text-white"
                 >
                   {updating ? 'Salvando...' : 'Salvar'}
                 </Button>
@@ -581,16 +581,16 @@ export default function OrganizationsListPage() {
 
         {/* Delete Confirmation Modal */}
         <Dialog open={showDeleteConfirmation} onOpenChange={setShowDeleteConfirmation}>
-          <DialogContent className="sm:max-w-[400px] !bg-white !border-gray-200">
+          <DialogContent className="sm:max-w-[400px] !bg-background !border-border">
             <DialogHeader>
-              <DialogTitle className="text-xl font-semibold text-gray-900">Excluir Organização</DialogTitle>
+              <DialogTitle className="text-xl font-semibold text-foreground">Excluir Organização</DialogTitle>
             </DialogHeader>
 
             <div className="space-y-4">
-              <p className="text-sm text-gray-700 leading-relaxed">
+              <p className="text-sm text-foreground leading-relaxed">
                 Tem certeza que deseja excluir a organização <strong className="font-semibold">&ldquo;{deletingOrg?.name}&rdquo;</strong>?
               </p>
-              <p className="text-sm text-gray-600 font-medium">
+              <p className="text-sm text-muted-foreground font-medium">
                 Todos os workspaces e conteúdos da organização serão excluídos.
               </p>
               <p className="text-sm text-red-600 font-medium">

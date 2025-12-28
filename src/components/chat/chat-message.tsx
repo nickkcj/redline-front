@@ -60,7 +60,7 @@ export function ChatMessage({
 
           {/* Message content */}
           {isUser ? (
-            <div className="rounded-2xl px-4 py-3 text-sm bg-white border border-gray-200 shadow-sm">
+            <div className="rounded-2xl px-4 py-3 text-sm bg-background border border-border shadow-sm">
               <p className="whitespace-pre-wrap break-words leading-relaxed text-gray-900">{content}</p>
             </div>
           ) : (

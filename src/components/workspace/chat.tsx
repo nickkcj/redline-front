@@ -19,8 +19,9 @@ import { useMarkedDocuments, useUnmarkDocument } from "@/hooks/api/use-chat-docu
 import { toast } from "sonner";
 import type { ChatMessageResponseDto } from "@/types/chat";
 import { Badge } from "@/components/ui/badge";
+import { parseSSEStream } from "@/lib/streaming/parse-sse";
 
-interface WorkspaceChatProps {
+interface ChatProps {
   workspaceId: string;
   onSidebarToggle: () => void;
   sidebarOpen: boolean;
@@ -29,14 +30,14 @@ interface WorkspaceChatProps {
   onDocumentContextRef?: React.MutableRefObject<((documentId: string, documentName: string) => void) | null>;
 }
 
-export function WorkspaceChat({ 
+export function Chat({ 
   workspaceId, 
   onSidebarToggle,
   sidebarOpen,
   chatId,
   onChatIdChange,
   onDocumentContextRef
-}: WorkspaceChatProps) {
+}: ChatProps) {
   const messagesEndRef = React.useRef<HTMLDivElement>(null);
   const [messages, setMessages] = React.useState<Array<{ id: string; role: "user" | "assistant"; content: string }>>([]);
   const [input, setInput] = React.useState("");
@@ -108,63 +109,26 @@ export function WorkspaceChat({
 
       // Stream da resposta da IA
       const stream = await chatService.streamChat(workspaceId, activeChatId, messageContent);
-      const reader = stream.getReader();
-      const decoder = new TextDecoder();
       let assistantMessage = "";
       const assistantMessageId = (Date.now() + 1).toString();
-      let buffer = "";
 
       setMessages((prev) => [
         ...prev,
         { id: assistantMessageId, role: "assistant", content: "" },
       ]);
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        // Decodificar chunk e adicionar ao buffer
-        buffer += decoder.decode(value, { stream: true });
-        
-        // Processar linhas completas (terminadas com \n)
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || ""; // Manter última linha incompleta no buffer
-        
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(line.slice(6));
-              if (data.event === 'content_chunk' && data.data?.content) {
-                assistantMessage += data.data.content;
-                setMessages((prev) =>
-                  prev.map((msg) =>
-                    msg.id === assistantMessageId
-                      ? { ...msg, content: assistantMessage }
-                      : msg
-                  )
-                );
-              }
-            } catch (e) {
-              // Se não for JSON válido, ignorar (pode ser um evento diferente)
-              console.debug('SSE line não é JSON válido:', line);
-            }
-          }
-        }
-      }
-      
-      // Processar qualquer conteúdo restante no buffer
-      if (buffer.trim()) {
-        if (buffer.startsWith('data: ')) {
-          try {
-            const data = JSON.parse(buffer.slice(6));
-            if (data.event === 'content_chunk' && data.data?.content) {
-              assistantMessage += data.data.content;
-            }
-          } catch (e) {
-            // Ignorar
-          }
-        }
-      }
+      await parseSSEStream(stream, {
+        onContent: (content) => {
+          assistantMessage += content;
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === assistantMessageId
+                ? { ...msg, content: assistantMessage }
+                : msg
+            )
+          );
+        },
+      });
     } catch (error) {
       console.error("Chat error:", error);
       toast.error("Erro ao processar sua mensagem. Por favor, tente novamente.");
@@ -234,56 +198,26 @@ export function WorkspaceChat({
     try {
       // Stream da resposta da IA
       const stream = await chatService.streamChat(workspaceId, activeChatId, contextMessage);
-      const reader = stream.getReader();
-      const decoder = new TextDecoder();
       let assistantMessage = "";
       const assistantMessageId = (Date.now() + 1).toString();
-      let buffer = "";
 
       setMessages((prev) => [
         ...prev,
         { id: assistantMessageId, role: "assistant", content: "" },
       ]);
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || "";
-        
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(line.slice(6));
-              if (data.event === 'content_chunk' && data.data?.content) {
-                assistantMessage += data.data.content;
-                setMessages((prev) =>
-                  prev.map((msg) =>
-                    msg.id === assistantMessageId
-                      ? { ...msg, content: assistantMessage }
-                      : msg
-                  )
-                );
-              }
-            } catch (e) {
-              console.debug('SSE line não é JSON válido:', line);
-            }
-          }
-        }
-      }
-      
-      if (buffer.trim() && buffer.startsWith('data: ')) {
-        try {
-          const data = JSON.parse(buffer.slice(6));
-          if (data.event === 'content_chunk' && data.data?.content) {
-            assistantMessage += data.data.content;
-          }
-        } catch (e) {
-          // Ignorar
-        }
-      }
+      await parseSSEStream(stream, {
+        onContent: (content) => {
+          assistantMessage += content;
+          setMessages((prev) =>
+            prev.map((msg) =>
+              msg.id === assistantMessageId
+                ? { ...msg, content: assistantMessage }
+                : msg
+            )
+          );
+        },
+      });
     } catch (error) {
       console.error("Chat error:", error);
       toast.error("Erro ao processar sua mensagem. Por favor, tente novamente.");
@@ -314,9 +248,9 @@ export function WorkspaceChat({
   }, [onDocumentContextRef, handleDocumentContext]);
 
   return (
-    <div className="flex flex-col h-screen bg-white">
+    <div className="flex flex-col h-screen bg-background">
       {/* Header */}
-      <div className="flex flex-col border-b border-gray-200 bg-white">
+      <div className="flex flex-col border-b border-border bg-background">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-3">
             <Button
@@ -328,16 +262,16 @@ export function WorkspaceChat({
               <Menu className="h-5 w-5" />
             </Button>
             <div>
-              <h1 className="text-lg font-semibold text-gray-900">Chat</h1>
+              <h1 className="text-lg font-semibold text-foreground">Chat</h1>
             </div>
           </div>
         </div>
         
         {/* Documentos Marcados */}
         {currentChatId && markedDocuments.length > 0 && (
-          <div className="px-4 pb-3 border-t border-gray-100">
+          <div className="px-4 pb-3 border-t border-border/50">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs font-medium text-gray-500">Documentos marcados:</span>
+              <span className="text-xs font-medium text-muted-foreground">Documentos marcados:</span>
               {markedDocuments.map((doc: any) => (
                 <Badge
                   key={doc.id}
@@ -354,7 +288,7 @@ export function WorkspaceChat({
                         console.error('Erro ao desmarcar documento:', error);
                       }
                     }}
-                    className="ml-1 hover:bg-gray-300 rounded-full p-0.5 transition-colors"
+                    className="ml-1 hover:bg-accent rounded-full p-0.5 transition-colors"
                     disabled={unmarkDocumentMutation.isPending}
                   >
                     <X className="h-3 w-3" />
@@ -371,13 +305,13 @@ export function WorkspaceChat({
         <div className="max-w-3xl mx-auto space-y-6">
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-                <Send className="h-8 w-8 text-gray-400" />
+              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+                <Send className="h-8 w-8 text-muted-foreground" />
               </div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+              <h2 className="text-xl font-semibold text-foreground mb-2">
                 Comece uma conversa
               </h2>
-              <p className="text-sm text-gray-500 max-w-md">
+              <p className="text-sm text-muted-foreground max-w-md">
                 Faça uma pergunta ou envie uma mensagem para começar a conversar com a IA.
               </p>
             </div>
@@ -424,7 +358,7 @@ export function WorkspaceChat({
       </ScrollArea>
 
       {/* Input Area */}
-      <div className="border-t border-gray-200 bg-white p-4">
+      <div className="border-t border-border bg-background p-4">
         <div className="max-w-3xl mx-auto">
           <PromptInput onSubmit={handleSubmit}>
             <PromptInputBody>

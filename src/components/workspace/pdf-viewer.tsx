@@ -122,7 +122,7 @@ export function PdfViewer({
               <div className="flex flex-col items-center gap-4">
                 <Loader2 className="size-10 animate-spin text-gray-400" />
                 <div className="text-center">
-                  <p className="text-sm font-medium text-gray-700">Carregando documento...</p>
+                  <p className="text-sm font-medium text-foreground">Carregando documento...</p>
                   <p className="text-xs text-gray-500 mt-1">Aguarde enquanto obtemos o PDF</p>
                 </div>
               </div>

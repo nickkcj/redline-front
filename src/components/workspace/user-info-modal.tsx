@@ -64,7 +64,7 @@ export function UserInfoModal({
               <AvatarFallback className="text-lg">{getUserInitials()}</AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-lg text-gray-900 truncate">
+              <h3 className="font-semibold text-lg text-foreground truncate">
                 {user.name || "Usuário"}
               </h3>
               <p className="text-sm text-gray-600 truncate">{user.email}</p>
@@ -80,8 +80,8 @@ export function UserInfoModal({
                 <Mail className="size-4 text-gray-600" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-gray-500 mb-0.5">Email</p>
-                <p className="text-gray-900 truncate">{user.email}</p>
+                <p className="text-xs text-muted-foreground mb-0.5">Email</p>
+                <p className="text-foreground truncate">{user.email}</p>
               </div>
             </div>
 
@@ -91,8 +91,8 @@ export function UserInfoModal({
                   <Building2 className="size-4 text-gray-600" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-gray-500 mb-0.5">Organização</p>
-                  <p className="text-gray-900 truncate">{organizationName}</p>
+                  <p className="text-xs text-muted-foreground mb-0.5">Organização</p>
+                  <p className="text-foreground truncate">{organizationName}</p>
                 </div>
               </div>
             )}
@@ -103,8 +103,8 @@ export function UserInfoModal({
                   <FolderKanban className="size-4 text-gray-600" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-gray-500 mb-0.5">Workspace Atual</p>
-                  <p className="text-gray-900 truncate">{workspaceName}</p>
+                  <p className="text-xs text-muted-foreground mb-0.5">Workspace Atual</p>
+                  <p className="text-foreground truncate">{workspaceName}</p>
                 </div>
               </div>
             )}
@@ -115,8 +115,8 @@ export function UserInfoModal({
                   <User className="size-4 text-gray-600" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-gray-500 mb-0.5">ID do Usuário</p>
-                  <p className="text-gray-900 truncate font-mono text-xs">{user.id}</p>
+                  <p className="text-xs text-muted-foreground mb-0.5">ID do Usuário</p>
+                  <p className="text-foreground truncate font-mono text-xs">{user.id}</p>
                 </div>
               </div>
             )}

@@ -116,7 +116,7 @@ export function ChatInput({
       {/* Input Area */}
       <form
         onSubmit={handleSubmit}
-        className="flex items-end gap-2 p-3 bg-white border border-gray-200 rounded-lg shadow-sm"
+        className="flex items-end gap-2 p-3 bg-background border border-gray-200 rounded-lg shadow-sm"
       >
         {/* Document Attach Button */}
         {availableDocuments.length > 0 && (
@@ -149,7 +149,7 @@ export function ChatInput({
                           {doc.name}
                         </span>
                         {doc.description && (
-                          <span className="text-xs text-gray-500 truncate">
+                          <span className="text-xs text-muted-foreground truncate">
                             {doc.description}
                           </span>
                         )}
@@ -176,7 +176,7 @@ export function ChatInput({
           placeholder={placeholder}
           disabled={disabled || isLoading}
           rows={1}
-          className="flex-1 min-w-0 min-h-[44px] max-h-[200px] border-0 p-2 focus:outline-none focus:ring-0 bg-transparent text-sm resize-none text-gray-900 placeholder:text-gray-500"
+          className="flex-1 min-w-0 min-h-[44px] max-h-[200px] border-0 p-2 focus:outline-none focus:ring-0 bg-transparent text-sm resize-none text-foreground placeholder:text-muted-foreground"
           style={{
             resize: "none",
             overflow: "hidden",
@@ -201,7 +201,7 @@ export function ChatInput({
       </form>
 
       {/* Helper Text */}
-      <p className="text-xs text-gray-500 mt-2 px-1">
+      <p className="text-xs text-muted-foreground mt-2 px-1">
         Pressione Enter para enviar, Shift+Enter para nova linha
       </p>
     </div>
