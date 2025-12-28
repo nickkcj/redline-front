@@ -86,21 +86,18 @@ export interface MagicLinkCallbackResponse {
   user: UserDTO
 }
 
-// ========== COMMON AUTH ==========
+export interface UserInfoDto {
+  id: string
+  email: string
+  name?: string
+  [key: string]: any
+}
 
-/**
- * POST /auth/logout
- * Response do logout
- */
 export interface LogoutResponse {
   success: boolean
   message: string
 }
 
-/**
- * GET /auth/me
- * Response com dados do usuário atual (retorna User do Prisma)
- */
 export type MeResponse = UserDTO
 
 // ========== TOKEN STORAGE ==========

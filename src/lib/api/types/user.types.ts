@@ -22,12 +22,6 @@ export interface WorkspaceDTO {
   organization: OrganizationDTO
 }
 
-// ========== USER DTO ==========
-
-/**
- * GET /users
- * Response com dados completos do usuário autenticado
- */
 export interface UserDTO {
   id: string
   google_id: string | null
@@ -36,6 +30,10 @@ export interface UserDTO {
   image: string | null
   createdAt: Date
   updatedAt: Date
+  workspaces: WorkspaceDTO[]
+}
+
+export interface UserWithWorkspaces extends UserDTO {
   workspaces: WorkspaceDTO[]
 }
 

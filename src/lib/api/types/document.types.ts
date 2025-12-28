@@ -2,8 +2,6 @@
 // DOCUMENT TYPES - Alinhado com documents.controller.ts do backend
 // ============================================================
 
-// ========== DOCUMENT RESPONSE ==========
-
 export interface DocumentResponseDto {
   id: string
   name: string
@@ -13,39 +11,29 @@ export interface DocumentResponseDto {
   cortexdbCollection: string
   contentType: string
   sizeBytes: number
-  checksum?: string
+  checksum: string
   isProcessed: boolean
-  processedAt?: Date
-  createdAt: Date
-  updatedAt: Date
+  processedAt?: string
+  createdAt: string
+  updatedAt: string
+  description?: string
+  tags?: string[]
+  metadata?: Record<string, any>
 }
 
-// ========== UPLOAD DOCUMENT ==========
-
-/**
- * POST /documents/upload/:workspaceId
- * Request para upload de documento (FormData)
- */
 export interface UploadDocumentDto {
+  file: File
   name: string
   description?: string
   tags?: string[]
   metadata?: Record<string, any>
 }
 
-/**
- * FormData para upload (usado no service)
- */
-export interface UploadDocumentFormData extends UploadDocumentDto {
-  file: File
+export interface ListDocumentsParams {
+  take?: number
+  skip?: number
 }
 
-// ========== QUERY DOCUMENTS ==========
-
-/**
- * GET /documents/list/:workspaceId
- * Query params para listar documentos
- */
 export interface QueryDocumentDto {
   limit?: number
   offset?: number
@@ -87,17 +75,11 @@ export interface SearchResponseDto {
   query: string
 }
 
-// ========== VIEW DOCUMENT ==========
-
-/**
- * GET /documents/view/:documentId/:workspaceId
- * Response com URL presigned para visualizar documento
- */
 export interface ViewDocumentResponseDto {
-  url: string
-  expiresIn: number
-  documentId: string
-  contentType: string
+  viewUrl: string
+  filename: string
+  mimeType: string
+  expiresAt?: string
 }
 
 // ========== DOWNLOAD DOCUMENT ==========

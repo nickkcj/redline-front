@@ -26,11 +26,6 @@ export interface UpdateOrganizationDto {
   description?: string
 }
 
-// ========== ORGANIZATION RESPONSE ==========
-
-/**
- * Response padrão de organization
- */
 export interface OrganizationResponseDto {
   id: string
   name: string
@@ -40,18 +35,25 @@ export interface OrganizationResponseDto {
   updatedAt: Date
 }
 
-/**
- * GET /organizations/:id
- * Response de organization com workspaces
- */
-export interface OrganizationWithWorkspacesResponseDto {
+export interface WorkspaceSummary {
   id: string
   name: string
   description?: string
-  ownerId: string
-  createdAt: Date
-  updatedAt: Date
-  workspaces: WorkspaceSummaryDto[]
+  membersCount?: number
+  teamsCount?: number
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface OrganizationWithWorkspaces {
+  id: string
+  name: string
+  description?: string
+  ownerId?: string
+  masterMemberId?: string
+  createdAt?: string
+  updatedAt?: string
+  workspaces?: WorkspaceSummary[]
 }
 
 // ========== ORGANIZATION STATS ==========

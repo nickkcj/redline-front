@@ -1,134 +1,53 @@
-import { tokenStore } from '@/lib/store/token.store';
+import { apiClient } from '@/lib/api/client/base.client'
+import { tokenStore } from '@/lib/store/token.store'
+import type { UserInfoDto } from '@/lib/api/types/auth.types'
 
-interface UserInfoDto {
-  id: string;
-  email: string;
-  name?: string;
-  [key: string]: any;
-}
+export class AuthService {
+  private readonly appUrl: string
 
-class AuthService {
-  private isDevelopment = process.env.NODE_ENV === 'development';
+  constructor(appUrl: string = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000') {
+    this.appUrl = appUrl
+  }
 
-  async getGoogleOAuthUrl(callbackUrl: string): Promise<{ authUrl: string }> {
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
-    const API_KEY = process.env.NEXT_PUBLIC_API_KEY || '';
-    
-    const response = await fetch(`${API_BASE_URL}/auth/google/init?callback_url=${encodeURIComponent(callbackUrl)}`, {
-      headers: {
-        'X-API-Key': API_KEY,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error('Erro ao obter URL de autenticação');
-    }
-
-    return response.json();
+  static async getGoogleOAuthUrl(callbackUrl: string): Promise<{ authUrl: string }> {
+    return apiClient.get<{ authUrl: string }>(
+      `/auth/google/init?callback_url=${encodeURIComponent(callbackUrl)}`,
+      { skipAuth: true }
+    )
   }
 
   async requestMagicLink(email: string): Promise<{ success: boolean; message: string }> {
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
-    const API_KEY = process.env.NEXT_PUBLIC_API_KEY || '';
-    
-    // Set the callback URL for magic link
-    const callbackUrl = typeof window !== 'undefined' 
-      ? `${window.location.origin}/auth/magic-link`
-      : 'http://localhost:3000/auth/magic-link';
-    
-    const response = await fetch(`${API_BASE_URL}/auth/email/init`, {
-      method: 'POST',
-      headers: {
-        'X-API-Key': API_KEY,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ 
+    const callbackUrl = `${this.appUrl}/auth/magic-link` // TODO: add callback url to the request when backend is ready
+
+    return apiClient.post<{ success: boolean; message: string }>(
+      '/auth/email/init',
+      {
         email,
         callback_url: callbackUrl,
-      }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Erro ao enviar magic link');
-    }
-
-    return response.json();
-  }
-
-  async verifyMagicLink(token: string): Promise<{ success: boolean; sessionToken: string; user: UserInfoDto }> {
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
-    const API_KEY = process.env.NEXT_PUBLIC_API_KEY || '';
-    
-    const response = await fetch(`${API_BASE_URL}/auth/email/callback`, {
-      method: 'POST',
-      headers: {
-        'X-API-Key': API_KEY,
-        'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ token }),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Magic link inválido ou expirado');
-    }
-
-    return response.json();
+      { skipAuth: true }
+    )
   }
 
-  async logout(): Promise<void> {
+  static async verifyMagicLink(token: string): Promise<{ success: boolean; sessionToken: string; user: UserInfoDto }> {
+    return apiClient.post<{ success: boolean; sessionToken: string; user: UserInfoDto }>(
+      '/auth/email/callback',
+      { token },
+      { skipAuth: true }
+    )
+  }
+
+  static async logout(): Promise<void> {
     try {
-      const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
-      const API_KEY = process.env.NEXT_PUBLIC_API_KEY || '';
-      const sessionToken = tokenStore.getSessionToken();
-
-      const response = await fetch(`${API_BASE_URL}/auth/logout`, {
-        method: 'POST',
-        headers: {
-          'X-API-Key': API_KEY,
-          'x-parse-session-token': sessionToken || '',
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Logout failed');
-      }
+      await apiClient.post<void>('/auth/logout')
     } catch (error) {
-      // Ignore logout errors, clear tokens anyway
-      console.warn('Logout API call failed:', error);
+      console.warn('Logout API call failed:', error)
     }
   }
 
-
-  async getUserInfo(): Promise<UserInfoDto> {
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
-    const API_KEY = process.env.NEXT_PUBLIC_API_KEY || '';
-    const sessionToken = tokenStore.getSessionToken();
-
-    const response = await fetch(`${API_BASE_URL}/auth/me`, {
-      headers: {
-        'X-API-Key': API_KEY,
-        'x-parse-session-token': sessionToken || '',
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      if (response.status === 401) {
-        tokenStore.clear();
-        if (typeof window !== 'undefined') {
-          window.location.href = '/login';
-        }
-        throw new Error('Token inválido ou expirado');
-      }
-      throw new Error('Erro ao buscar informações do usuário');
-    }
-
-    return response.json();
+  static async getUserInfo(): Promise<UserInfoDto> {
+    return apiClient.get<UserInfoDto>('/auth/me')
   }
 }
 
-export const authService = new AuthService();
+export const authService = AuthService

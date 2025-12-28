@@ -1,19 +1,10 @@
-import { apiClient } from '@/lib/api/client/base.client';
-import type { User, UserWorkspace } from '@/types/common';
+import { apiClient } from '@/lib/api/client/base.client'
+import type { UserWithWorkspaces } from '@/lib/api/types/user.types'
 
-export interface UserWithWorkspaces extends User {
-  workspaces?: UserWorkspace[];
-}
-
-class UserService {
-  async getUserWithWorkspaces(): Promise<UserWithWorkspaces> {
-    try {
-      return await apiClient.get<UserWithWorkspaces>('/users');
-    } catch (error: any) {
-      throw error;
-    }
+export class UserService {
+  static async getUserWithWorkspaces(): Promise<UserWithWorkspaces> {
+    return apiClient.get<UserWithWorkspaces>('/users')
   }
 }
 
-export const userService = new UserService();
-
+export const userService = UserService

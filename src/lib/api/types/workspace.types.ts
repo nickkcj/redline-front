@@ -1,26 +1,5 @@
-// ============================================================
-// WORKSPACE TYPES - Alinhado com workspace.controller.ts do backend
-// ============================================================
-
 import { WorkspaceRole } from './common.types'
-
-// ========== WORKSPACE MEMBER ==========
-
-export interface WorkspaceMemberResponseDto {
-  id: string
-  userId: string
-  workspaceId: string
-  role: WorkspaceRole
-  joinedAt: Date
-  user?: {
-    id: string
-    name: string | null
-    email: string
-    image: string | null
-  }
-}
-
-// ========== CREATE WORKSPACE ==========
+import type { WorkspaceMemberResponseDto } from './member.types'
 
 /**
  * POST /workspaces
