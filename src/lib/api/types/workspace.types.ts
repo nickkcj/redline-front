@@ -1,0 +1,80 @@
+// ============================================================
+// WORKSPACE TYPES - Alinhado com workspace.controller.ts do backend
+// ============================================================
+
+import { WorkspaceRole } from './common.types'
+
+// ========== WORKSPACE MEMBER ==========
+
+export interface WorkspaceMemberResponseDto {
+  id: string
+  userId: string
+  workspaceId: string
+  role: WorkspaceRole
+  joinedAt: Date
+  user?: {
+    id: string
+    name: string | null
+    email: string
+    image: string | null
+  }
+}
+
+// ========== CREATE WORKSPACE ==========
+
+/**
+ * POST /workspaces
+ * Request para criar workspace
+ */
+export interface CreateWorkspaceDto {
+  name: string
+  description?: string
+  organizationId: string
+}
+
+// ========== UPDATE WORKSPACE ==========
+
+/**
+ * PATCH /workspaces/:workspaceId
+ * Request para atualizar workspace
+ */
+export interface UpdateWorkspaceDto {
+  name?: string
+  description?: string
+}
+
+// ========== WORKSPACE RESPONSE ==========
+
+/**
+ * Response padrão de workspace
+ */
+export interface WorkspaceResponseDto {
+  id: string
+  name: string
+  description?: string
+  organizationId: string
+  members?: WorkspaceMemberResponseDto[]
+  createdAt: Date
+  updatedAt: Date
+}
+
+/**
+ * Summary de workspace (usado em listas)
+ */
+export interface WorkspaceSummaryDto {
+  id: string
+  name: string
+  description?: string
+  organizationId: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+// ========== WORKSPACE LIST ==========
+
+/**
+ * GET /workspaces
+ * GET /workspaces/organization/:organizationId
+ * Response com lista de workspaces
+ */
+export type WorkspaceListResponse = WorkspaceResponseDto[]

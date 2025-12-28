@@ -2,8 +2,8 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
-import { useAuthContext } from "@/contexts/auth-context";
+import { cn } from "@/lib/utils/date.utils";
+import { useAuth } from "@/providers/auth-provider";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,7 +19,7 @@ interface LoginFormProps extends React.ComponentProps<"div"> {
 }
 
 export function LoginForm({ className, onSuccess, ...props }: LoginFormProps) {
-    const { googleLogin, isLoading } = useAuthContext();
+    const { isLoading } = useAuth();
     const router = useRouter();
 
     const [state, setState] = React.useState<LoginState>({

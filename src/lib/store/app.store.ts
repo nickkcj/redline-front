@@ -1,15 +1,19 @@
+// ============================================================
+// APP STORE - Gerenciamento de estado global da aplicação
+// ============================================================
+
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { User, Organization, UserWorkspace } from '@/types/common'
+import type { UserDTO, OrganizationResponseDto, WorkspaceResponseDto } from '@/lib/api/types'
 
 interface AppState {
   // User state
-  user: User | null
+  user: UserDTO | null
   isAuthenticated: boolean
 
-  // Organization & Workspace state
-  currentOrganization: Organization | null
-  currentWorkspace: UserWorkspace | null
+  // Organization & Workspace state (driven by URL, not persisted)
+  currentOrganization: OrganizationResponseDto | null
+  currentWorkspace: WorkspaceResponseDto | null
 
   // UI state
   theme: 'light' | 'dark' | 'system'
@@ -19,7 +23,7 @@ interface AppState {
   isLoading: boolean
 
   // Actions
-  setUser: (user: User | null) => void
+  setUser: (user: UserDTO | null) => void
   setAuthenticated: (authenticated: boolean) => void
   setTheme: (theme: 'light' | 'dark' | 'system') => void
   setSidebarOpen: (open: boolean) => void
@@ -28,8 +32,8 @@ interface AppState {
   reset: () => void
 
   // Organization & Workspace actions
-  setCurrentOrganization: (org: Organization | null) => void
-  setCurrentWorkspace: (workspace: UserWorkspace | null) => void
+  setCurrentOrganization: (org: OrganizationResponseDto | null) => void
+  setCurrentWorkspace: (workspace: WorkspaceResponseDto | null) => void
 }
 
 export const useAppStore = create<AppState>()(

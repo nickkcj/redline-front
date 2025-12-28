@@ -2,7 +2,7 @@
 
 import { Loader2 } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils/date.utils"
 
 interface LoadingStateProps {
   /**

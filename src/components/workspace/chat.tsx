@@ -19,7 +19,7 @@ import { useMarkedDocuments, useUnmarkDocument } from "@/hooks/api/use-chat-docu
 import { toast } from "sonner";
 import type { ChatMessageResponseDto } from "@/types/chat";
 import { Badge } from "@/components/ui/badge";
-import { parseSSEStream } from "@/lib/streaming/parse-sse";
+import { parseSSEStream } from "@/lib/utils/streaming.utils";
 
 interface ChatProps {
   workspaceId: string;

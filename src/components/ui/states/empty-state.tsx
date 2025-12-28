@@ -2,7 +2,7 @@
 
 import { LucideIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils/date.utils"
 import { ReactNode } from "react"
 
 interface EmptyStateProps {

@@ -5,11 +5,14 @@
  * Implements scope hierarchy: "all" grants access to "own"
  */
 
-import { PermissionResource } from '@/types/permissions'
 
-// ============================================================================
-// Permission Parsing
-// ============================================================================
+const PermissionResource = {
+  CHAT: 'chat',
+  WORKSPACE: 'workspace',
+  DOCUMENT: 'document',
+  MEMBER: 'member',
+  ROLE: 'role',
+} as const
 
 /**
  * Parse a permission string into its components

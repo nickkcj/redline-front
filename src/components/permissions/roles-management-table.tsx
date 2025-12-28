@@ -37,7 +37,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { useRoles, useCreateRole, useUpdateRole, useDeleteRole } from '@/hooks/api/use-roles'
 import { useAllPermissions } from '@/hooks/api/use-permissions'
 import type { CreateRoleDto, UpdateRoleDto, PermissionEntity } from '@/types/permissions'
-import { getPermissionDescription, groupPermissionsByResource } from '@/lib/permissions/permission.utils'
+import { getPermissionDescription, groupPermissionsByResource } from '@/lib/utils/permission.utils'
 
 interface RolesManagementTableProps {
   workspaceId: string

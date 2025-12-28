@@ -7,7 +7,7 @@ import { useCurrentOrganization, useSetCurrentOrganization, useSetCurrentWorkspa
 import { organizationService } from "@/lib/api/services/organization.service";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Navbar } from "@/components/navigation/navbar";
-import { useAuthContext } from "@/contexts/auth-context";
+import { useAuth } from "@/providers/auth-provider";
 import {
   Dialog,
   DialogContent,
@@ -32,7 +32,7 @@ export default function WorkspacesPage() {
   const queryClient = useQueryClient();
   const currentOrganization = useCurrentOrganization();
   const currentUser = useUser();
-  const { user: authUser } = useAuthContext();
+  const { user: authUser } = useAuth();
   const setCurrentOrganization = useSetCurrentOrganization();
   const setCurrentWorkspace = useSetCurrentWorkspace();
 

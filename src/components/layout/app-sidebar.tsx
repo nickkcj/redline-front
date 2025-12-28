@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import { useCommandPaletteContext } from "@/contexts/command-palette-context"
-import { useAuthContext } from "@/contexts/auth-context"
+import { useAuth } from "@/providers/auth-provider"
 import Image from "next/image"
 import {
   House,
@@ -21,7 +21,7 @@ import {
   Sun,
   List
 } from "@phosphor-icons/react"
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils/date.utils"
 import { useTheme } from "next-themes"
 import {
   Sidebar,
@@ -66,7 +66,7 @@ export function AppSidebar() {
   const router = useRouter()
   const { theme, setTheme } = useTheme()
   const { openPalette } = useCommandPaletteContext()
-  const { logout } = useAuthContext()
+  const { logout } = useAuth()
   const [isHoveringHeader, setIsHoveringHeader] = useState(false)
 
   const handleNavigation = (href: string) => {

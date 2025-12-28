@@ -7,7 +7,7 @@ import { useUser, useSetCurrentOrganization, useSetCurrentWorkspace } from "@/st
 import { useOrganizations, useCreateOrganization, useUpdateOrganization, useDeleteOrganization } from "@/hooks/api/use-organization";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Navbar } from "@/components/navigation/navbar";
-import { useAuthContext } from "@/contexts/auth-context";
+import { useAuth } from "@/providers/auth-provider";
 import {
   Dialog,
   DialogContent,
@@ -28,7 +28,7 @@ import { Badge } from "@/components/ui/badge";
 export default function OrganizationsListPage() {
   const router = useRouter();
   const currentUser = useUser();
-  const { user: authUser } = useAuthContext();
+  const { user: authUser } = useAuth();
   const setCurrentOrganization = useSetCurrentOrganization();
   const setCurrentWorkspace = useSetCurrentWorkspace();
 

@@ -2,13 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { useAuthContext } from "@/contexts/auth-context";
+import { useAuth } from "@/providers/auth-provider";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 
 export function Navbar() {
   const router = useRouter();
-  const { logout } = useAuthContext();
+  const { logout } = useAuth();
   const appName = process.env.NEXT_PUBLIC_APP_NAME || "App Name";
 
   const handleLogout = async () => {

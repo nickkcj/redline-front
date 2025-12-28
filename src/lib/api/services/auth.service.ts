@@ -1,66 +1,14 @@
-import { apiClient } from '@/lib/api/client/base.client';
-import { tokenStore } from '@/lib/auth/stores/auth.store';
-import {
-  LoginRequestDto,
-  LoginInitResponseDto,
-  LoginCompleteRequestDto,
-  LoginCompleteResponseDto,
-  RegisterRequestDto,
-  RegisterResponseDto,
-  RegisterConfirmRequestDto,
-  RegisterConfirmResponseDto,
-  GoogleLoginDto,
-  GoogleLoginResponseDto,
-  ForgotPasswordRequestDto,
-  ForgotPasswordResponseDto,
-  ResetPasswordRequestDto,
-  ResetPasswordResponseDto,
-  RefreshDto,
-  RefreshResponseDto,
-  UserInfoDto,
-  TokenData,
-} from '@/lib/auth/types/auth.types';
+import { tokenStore } from '@/lib/store/token.store';
+
+interface UserInfoDto {
+  id: string;
+  email: string;
+  name?: string;
+  [key: string]: any;
+}
 
 class AuthService {
   private isDevelopment = process.env.NODE_ENV === 'development';
-
-  async loginStep1(data: LoginRequestDto): Promise<LoginInitResponseDto> {
-    try {
-      return await apiClient.post<LoginInitResponseDto>('/auth/login', data, {
-        skipAuth: true,
-      });
-    } catch (error: any) {
-      throw error;
-    }
-  }
-
-  async loginComplete(data: LoginCompleteRequestDto): Promise<LoginCompleteResponseDto> {
-    try {
-      return await apiClient.post<LoginCompleteResponseDto>('/auth/login/complete', data, {
-        skipAuth: true,
-      });
-    } catch (error: any) {
-      throw error;
-    }
-  }
-
-  async registerStep1(data: RegisterRequestDto): Promise<RegisterResponseDto> {
-    return apiClient.post<RegisterResponseDto>('/auth/register', data, {
-      skipAuth: true,
-    });
-  }
-
-  async registerConfirm(data: RegisterConfirmRequestDto): Promise<RegisterConfirmResponseDto> {
-    return apiClient.post<RegisterConfirmResponseDto>('/auth/register/confirm', data, {
-      skipAuth: true,
-    });
-  }
-
-  async googleLogin(data: GoogleLoginDto): Promise<GoogleLoginResponseDto> {
-    return apiClient.post<GoogleLoginResponseDto>('/auth/google', data, {
-      skipAuth: true,
-    });
-  }
 
   async getGoogleOAuthUrl(callbackUrl: string): Promise<{ authUrl: string }> {
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
@@ -134,13 +82,13 @@ class AuthService {
     try {
       const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
       const API_KEY = process.env.NEXT_PUBLIC_API_KEY || '';
-      const accessToken = tokenStore.getAccessToken();
+      const sessionToken = tokenStore.getSessionToken();
 
       const response = await fetch(`${API_BASE_URL}/auth/logout`, {
         method: 'POST',
         headers: {
           'X-API-Key': API_KEY,
-          'x-parse-session-token': accessToken || '',
+          'x-parse-session-token': sessionToken || '',
           'Content-Type': 'application/json',
         },
       });
@@ -154,50 +102,32 @@ class AuthService {
     }
   }
 
-  async refreshToken(data: RefreshDto): Promise<RefreshResponseDto> {
-    return apiClient.post<RefreshResponseDto>('/auth/refresh', data, {
-      skipAuth: true,
-    });
-  }
-
-  async forgotPassword(data: ForgotPasswordRequestDto): Promise<ForgotPasswordResponseDto> {
-    return apiClient.post<ForgotPasswordResponseDto>('/auth/forgot-password', data, {
-      skipAuth: true,
-    });
-  }
-
-  async resetPassword(data: ResetPasswordRequestDto): Promise<ResetPasswordResponseDto> {
-    return apiClient.post<ResetPasswordResponseDto>('/auth/reset-password', data, {
-      skipAuth: true,
-    });
-  }
 
   async getUserInfo(): Promise<UserInfoDto> {
-    try {
-      return await apiClient.get<UserInfoDto>('/auth/me');
-    } catch (error: any) {
-      // Handle 401 - redirect to login (apiClient already handles this, but we keep for clarity)
-      if (error?.statusCode === 401) {
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
+    const API_KEY = process.env.NEXT_PUBLIC_API_KEY || '';
+    const sessionToken = tokenStore.getSessionToken();
+
+    const response = await fetch(`${API_BASE_URL}/auth/me`, {
+      headers: {
+        'X-API-Key': API_KEY,
+        'x-parse-session-token': sessionToken || '',
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      if (response.status === 401) {
         tokenStore.clear();
         if (typeof window !== 'undefined') {
           window.location.href = '/login';
         }
         throw new Error('Token inválido ou expirado');
       }
-      throw error;
+      throw new Error('Erro ao buscar informações do usuário');
     }
-  }
 
-  async verifyEmail(token: string): Promise<{ message: string }> {
-    return apiClient.post<{ message: string }>('/auth/verify-email', { token }, {
-      skipAuth: true,
-    });
-  }
-
-  async resendVerificationEmail(email: string): Promise<{ message: string }> {
-    return apiClient.post<{ message: string }>('/auth/resend-verification', { email }, {
-      skipAuth: true,
-    });
+    return response.json();
   }
 }
 

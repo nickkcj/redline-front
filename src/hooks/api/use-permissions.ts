@@ -11,7 +11,7 @@ import {
   hasPermission as hasPermissionUtil,
   hasAnyPermission as hasAnyPermissionUtil,
   hasAllPermissions as hasAllPermissionsUtil,
-} from '@/lib/permissions/permission.utils'
+} from '@/lib/utils/permission.utils'
 import type { PermissionEntity } from '@/types/permissions'
 
 // ============================================================================

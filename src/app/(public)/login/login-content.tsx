@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useAuthContext } from '@/contexts/auth-context'
+import { useAuth } from '@/providers/auth-provider'
 import { authService } from '@/lib/api/services/auth.service'
 import { toast } from 'sonner'
 import { Loader2, Mail } from 'lucide-react'
@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
 export function LoginContent() {
-  const { isAuthenticated, user, isLoading: authLoading } = useAuthContext()
+  const { isAuthenticated, user, isLoading: authLoading } = useAuth()
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
   const [isMagicLinkLoading, setIsMagicLinkLoading] = useState(false)
   const [email, setEmail] = useState('')
