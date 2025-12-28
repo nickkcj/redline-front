@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ThemeProvider } from "@/components/providers/theme-provider";
 import { QueryProvider } from "@/components/providers/query-provider";
-import { StoreInitializer } from "@/components/providers/store-initializer";
-import { AuthProvider } from "@/contexts/auth-context";
-import "./globals.css";
+import { AuthProvider } from "@/components/providers/auth-provider";
+import { DocumentViewerProvider } from "@/contexts/document-viewer-context";
+import { UnifiedDocumentViewer } from "@/components/shared/viewers";
+import "../styles/globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,23 +40,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" suppressHydrationWarning className="bg-white">
+    <html lang="pt-BR" suppressHydrationWarning className="bg-background">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background`}
       >
         <QueryProvider>
           <AuthProvider>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
+            <DocumentViewerProvider>
               <Suspense fallback={null}>
-                <StoreInitializer />
               </Suspense>
               {children}
-            </ThemeProvider>
+              <UnifiedDocumentViewer />
+            </DocumentViewerProvider>
           </AuthProvider>
         </QueryProvider>
       </body>

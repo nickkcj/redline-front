@@ -1,117 +1,55 @@
-import { apiClient } from '@/lib/api/client/base.client';
-import type { Organization } from '@/types/common';
+import { apiClient } from '@/lib/api/client/base.client'
+import type {
+  OrganizationResponseDto,
+  OrganizationWithWorkspaces,
+  WorkspaceSummary,
+  CreateOrganizationDto,
+  UpdateOrganizationDto,
+} from '@/lib/api/types/organization.types'
+import type {
+  CreateWorkspaceDto,
+  UpdateWorkspaceDto,
+} from '@/lib/api/types/workspace.types'
 
-export interface OrganizationWithWorkspaces extends Organization {
-  workspaces?: WorkspaceSummary[];
-  ownerId?: string;
-  masterMemberId?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface WorkspaceSummary {
-  id: string;
-  name: string;
-  description?: string;
-  membersCount?: number;
-  teamsCount?: number;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface CreateOrganizationDto {
-  name: string;
-  description?: string;
-}
-
-export interface UpdateOrganizationDto {
-  name?: string;
-  description?: string;
-}
-
-export interface CreateWorkspaceDto {
-  name: string;
-  description?: string;
-  organizationId: string;
-}
-
-export interface UpdateWorkspaceDto {
-  name?: string;
-  description?: string;
-}
-
-class OrganizationService {
-  async getOrganizations(): Promise<OrganizationWithWorkspaces[]> {
-    try {
-      return await apiClient.get<OrganizationWithWorkspaces[]>('/organizations');
-    } catch (error: any) {
-      throw error;
-    }
+export class OrganizationService {
+  static async getOrganizations(): Promise<OrganizationWithWorkspaces[]> {
+    return apiClient.get<OrganizationWithWorkspaces[]>('/organizations')
   }
 
-  async createOrganization(data: CreateOrganizationDto): Promise<Organization> {
-    try {
-      return await apiClient.post<Organization>('/organizations', data);
-    } catch (error: any) {
-      throw error;
-    }
+  static async createOrganization(data: CreateOrganizationDto): Promise<OrganizationResponseDto> {
+    return apiClient.post<OrganizationResponseDto>('/organizations', data)
   }
 
-  async updateOrganization(id: string, data: UpdateOrganizationDto): Promise<Organization> {
-    try {
-      return await apiClient.patch<Organization>(`/organizations/${id}`, data);
-    } catch (error: any) {
-      throw error;
-    }
+  static async updateOrganization(id: string, data: UpdateOrganizationDto): Promise<OrganizationResponseDto> {
+    return apiClient.patch<OrganizationResponseDto>(`/organizations/${id}`, data)
   }
 
-  async deleteOrganization(id: string): Promise<void> {
-    try {
-      return await apiClient.delete<void>(`/organizations/${id}`);
-    } catch (error: any) {
-      throw error;
-    }
+  static async deleteOrganization(id: string): Promise<void> {
+    return apiClient.delete<void>(`/organizations/${id}`)
   }
 
-  async createWorkspace(data: CreateWorkspaceDto): Promise<WorkspaceSummary> {
-    try {
-      return await apiClient.post<WorkspaceSummary>(
-        `/workspaces`,
-        {
-          name: data.name,
-          description: data.description,
-          organizationId: data.organizationId,
-        }
-      );
-    } catch (error: any) {
-      throw error;
-    }
+  static async createWorkspace(data: CreateWorkspaceDto): Promise<WorkspaceSummary> {
+    return apiClient.post<WorkspaceSummary>(
+      `/workspaces`,
+      {
+        name: data.name,
+        description: data.description,
+        organizationId: data.organizationId,
+      }
+    )
   }
 
-  async updateWorkspace(id: string, data: UpdateWorkspaceDto): Promise<WorkspaceSummary> {
-    try {
-      return await apiClient.patch<WorkspaceSummary>(`/workspaces/${id}`, data);
-    } catch (error: any) {
-      throw error;
-    }
+  static async updateWorkspace(id: string, data: UpdateWorkspaceDto): Promise<WorkspaceSummary> {
+    return apiClient.patch<WorkspaceSummary>(`/workspaces/${id}`, data)
   }
 
-  async deleteWorkspace(id: string): Promise<void> {
-    try {
-      return await apiClient.delete<void>(`/workspaces/${id}`);
-    } catch (error: any) {
-      throw error;
-    }
+  static async deleteWorkspace(id: string): Promise<void> {
+    return apiClient.delete<void>(`/workspaces/${id}`)
   }
 
-  async leaveWorkspace(id: string): Promise<void> {
-    try {
-      return await apiClient.post<void>(`/workspaces/${id}/leave`);
-    } catch (error: any) {
-      throw error;
-    }
+  static async leaveWorkspace(id: string): Promise<void> {
+    return apiClient.post<void>(`/workspaces/${id}/leave`)
   }
 }
 
-export const organizationService = new OrganizationService();
-
+export const organizationService = OrganizationService

@@ -6,13 +6,13 @@
  */
 
 import { useApiQuery } from './use-api'
-import PermissionService from '@/lib/api/services/permission.service'
+import { permissionService } from '@/lib/api/services/permission.service'
 import {
   hasPermission as hasPermissionUtil,
   hasAnyPermission as hasAnyPermissionUtil,
   hasAllPermissions as hasAllPermissionsUtil,
-} from '@/lib/permissions/permission.utils'
-import type { PermissionEntity } from '@/types/permissions'
+} from '@/lib/utils/permission.utils'
+import type { PermissionDto } from '@/lib/api/types/permission.types'
 
 // ============================================================================
 // User Permissions
@@ -28,12 +28,13 @@ import type { PermissionEntity } from '@/types/permissions'
  * // permissions = ["chat.read.all", "document.write.own", ...]
  */
 export function usePermissions(workspaceId: string) {
-  return useApiQuery(
+  return useApiQuery<string[]>(
     ['permissions', 'me', workspaceId],
-    () => PermissionService.getMyPermissions(workspaceId),
+    () => permissionService.getMyPermissions(workspaceId),
     {
       enabled: !!workspaceId,
-      staleTime: 0, // Always fresh (like Veris implementation)
+      staleTime: 0,
+      refetchOnMount: false,
       refetchOnWindowFocus: false,
     }
   )
@@ -48,12 +49,13 @@ export function usePermissions(workspaceId: string) {
  * const { data: allPermissions } = useAllPermissions(workspaceId)
  */
 export function useAllPermissions(workspaceId: string) {
-  return useApiQuery(
+  return useApiQuery<PermissionDto[]>(
     ['permissions', 'all', workspaceId],
-    () => PermissionService.getAllPermissions(workspaceId),
+    () => permissionService.getAllPermissions(workspaceId),
     {
       enabled: !!workspaceId,
-      staleTime: 600000, // 10 minutes (permissions list doesn't change often)
+      staleTime: 1000 * 60 * 10, // 10 minutes
+      refetchOnMount: false,
       refetchOnWindowFocus: false,
     }
   )

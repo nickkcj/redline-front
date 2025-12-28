@@ -1,19 +1,23 @@
-"use client";
+// ============================================================
+// QUERY PROVIDER - React Query Provider
+// ============================================================
 
-import { QueryClientProvider } from "@tanstack/react-query";
-import { useState } from "react";
-import { createQueryClient } from "@/lib/query-client";
+"use client"
+
+import { QueryClientProvider } from "@tanstack/react-query"
+import { useState } from "react"
+import { createQueryClient } from "@/lib/react-query/query-client"
 
 interface QueryProviderProps {
-  children: React.ReactNode;
+  children: React.ReactNode
 }
 
 export function QueryProvider({ children }: QueryProviderProps) {
-  const [queryClient] = useState(() => createQueryClient());
+  const [queryClient] = useState(() => createQueryClient())
 
   return (
     <QueryClientProvider client={queryClient}>
       {children}
     </QueryClientProvider>
-  );
+  )
 }
