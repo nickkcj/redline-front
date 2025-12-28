@@ -116,7 +116,7 @@ export default function WorkspacesPage() {
     setCurrentWorkspace(userWorkspace);
 
     // Navigate to workspace using IDs
-    router.push(`/org/${currentOrganization.id}/workspace/${workspace.id}`);
+    router.push(`/${currentOrganization.id}/workspace/${workspace.id}`);
   };
 
   const handleCreateWorkspace = async () => {
@@ -279,7 +279,7 @@ export default function WorkspacesPage() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => router.push('/org')}
+                onClick={() => router.push('/')}
                 className="gap-2 text-base cursor-pointer text-foreground hover:text-foreground"
               >
                 <ArrowLeft className="size-5" />

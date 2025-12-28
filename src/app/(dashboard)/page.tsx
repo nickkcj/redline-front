@@ -124,7 +124,7 @@ export default function OrganizationsListPage() {
   const handleEnterOrganization = (org: OrganizationWithWorkspaces) => {
     setCurrentWorkspace(null);
     setCurrentOrganization(org);
-    router.push(`/org/${org.id}`);
+    router.push(`/${org.id}`);
   };
 
   const canCreate = orgName.trim().length > 0;

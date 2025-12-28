@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { tokenStore } from '@/lib/auth/stores/auth.store'
-import { authService } from '@/lib/api/services/auth.service'
+import { useAuth } from '@/components/providers/auth-provider'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 
-export default function MagicLinkContent() {
+export function MagicLinkHandler() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { verifyMagicLink } = useAuth()
   const [loadingMessage, setLoadingMessage] = useState('Verificando magic link')
 
   useEffect(() => {
@@ -42,45 +42,28 @@ export default function MagicLinkContent() {
       }
 
       try {
-        // Step 1: Verify magic link token
+        // Verify magic link using auth provider
         setLoadingMessage('Verificando token')
+        await verifyMagicLink(token)
 
-        const authResult = await authService.verifyMagicLink(token)
+        console.log('[MagicLink] User authenticated successfully')
 
-        if (!authResult || !authResult.success || !authResult.sessionToken || !authResult.user) {
-          throw new Error('Invalid response from server')
-        }
-
-        // Step 2: Save authentication data using tokenStore
-        setLoadingMessage('Salvando credenciais')
-
-        // Save session token in localStorage
-        tokenStore.setTokens({
-          accessToken: authResult.sessionToken,
-          refreshToken: '',
-        })
-
-        // Save user info
-        tokenStore.setUser(authResult.user)
-
-        console.log('[MagicLink] User authenticated successfully:', authResult.user.email)
-
-        // Wait a bit for tokenStore subscribers to update and auth context to sync
+        // Wait a bit for auth context to sync
         await new Promise((resolve) => setTimeout(resolve, 500))
 
-        // Step 3: Redirect to organizations
+        // Redirect to organizations
         setLoadingMessage('Redirecionando')
         await new Promise((resolve) => setTimeout(resolve, 300))
 
-        router.replace('/org')
+        // Router push will be handled by auth provider
       } catch (error) {
         console.error('Magic link verification failed:', error)
-        
+
         // Check if it's a "magic link already used" error
         const errorMessage = error instanceof Error ? error.message : 'Não foi possível verificar o magic link'
-        const isAlreadyUsed = errorMessage.toLowerCase().includes('already used') || 
+        const isAlreadyUsed = errorMessage.toLowerCase().includes('already used') ||
                              errorMessage.toLowerCase().includes('já utilizado')
-        
+
         if (isAlreadyUsed) {
           toast.error('Link já utilizado', {
             description: 'Este magic link já foi usado. Por favor, solicite um novo link.',
@@ -90,7 +73,7 @@ export default function MagicLinkContent() {
             description: errorMessage,
           })
         }
-        
+
         setLoadingMessage('Erro na verificação. Redirecionando...')
         await new Promise((resolve) => setTimeout(resolve, 2000))
         router.replace('/login')
@@ -98,7 +81,7 @@ export default function MagicLinkContent() {
     }
 
     handleMagicLinkVerification()
-  }, [router, searchParams])
+  }, [router, searchParams, verifyMagicLink])
 
   return (
     <div className="w-screen h-screen flex flex-col items-center justify-center bg-background">

@@ -2,19 +2,19 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { tokenStore } from '@/lib/auth/stores/auth.store'
+import { useAuth } from '@/components/providers/auth-provider'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 
-export default function AuthSuccessContent() {
+export function OAuthCallback() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { handleGoogleCallback } = useAuth()
   const [loadingMessage, setLoadingMessage] = useState('Autenticando')
 
   useEffect(() => {
-    const handleGoogleCallback = async () => {
-      const token = searchParams.get('token')
-      const userParam = searchParams.get('user')
+    const handleCallback = async () => {
+      const code = searchParams.get('code')
       const error = searchParams.get('error')
 
       // Case 1: Error in URL
@@ -29,12 +29,12 @@ export default function AuthSuccessContent() {
         return
       }
 
-      // Case 2: Missing token or user
-      if (!token || !userParam) {
-        console.log('Missing token or user in callback')
+      // Case 2: Missing code
+      if (!code) {
+        console.log('Missing code in OAuth callback')
         setLoadingMessage('Dados incompletos. Redirecionando...')
         toast.error('Autenticação incompleta', {
-          description: 'Dados necessários não foram recebidos',
+          description: 'Código de autenticação não foi recebido',
         })
         await new Promise((resolve) => setTimeout(resolve, 2000))
         router.replace('/login')
@@ -42,31 +42,22 @@ export default function AuthSuccessContent() {
       }
 
       try {
-        // Parse user data
-        const user = JSON.parse(decodeURIComponent(userParam))
-
-        // Save authentication data
+        // Handle Google OAuth callback using auth provider
         setLoadingMessage('Salvando credenciais')
 
-        // Save session token in localStorage
-        tokenStore.setTokens({
-          accessToken: token,
-          refreshToken: '',
-        })
+        const callbackUrl = `${window.location.origin}/auth/success`
+        await handleGoogleCallback(code, callbackUrl)
 
-        // Save user info
-        tokenStore.setUser(user)
+        console.log('[GoogleOAuth] User authenticated successfully')
 
-        console.log('[GoogleOAuth] User authenticated successfully:', user.email)
-
-        // Wait for store to sync
+        // Wait for auth context to sync
         await new Promise((resolve) => setTimeout(resolve, 200))
 
         // Redirect to organizations
         setLoadingMessage('Redirecionando')
         await new Promise((resolve) => setTimeout(resolve, 300))
 
-        router.replace('/org')
+        // Router push will be handled by auth provider
       } catch (error) {
         console.error('Google OAuth callback failed:', error)
         toast.error('Falha no processamento', {
@@ -78,8 +69,8 @@ export default function AuthSuccessContent() {
       }
     }
 
-    handleGoogleCallback()
-  }, [router, searchParams])
+    handleCallback()
+  }, [router, searchParams, handleGoogleCallback])
 
   return (
     <div className="w-screen h-screen flex flex-col items-center justify-center bg-background">

@@ -1,17 +1,11 @@
 import { Suspense } from 'react'
-import { LoginContent } from './login-content'
-import { Loader2 } from 'lucide-react'
+import { LoginPage as LoginPageComponent } from '@/components/features/auth'
+import { LoadingState } from '@/components/shared/states'
 
-export default function LoginPage() {
+export default function Login() {
   return (
-    <Suspense
-      fallback={
-        <div className="w-screen h-screen flex items-center justify-center bg-[#FCFCFD]">
-          <Loader2 size={40} className="text-[#5C6570] animate-spin" />
-        </div>
-      }
-    >
-      <LoginContent />
+    <Suspense fallback={<LoadingState variant="fullPage" text="Carregando..." />}>
+      <LoginPageComponent />
     </Suspense>
   )
 }

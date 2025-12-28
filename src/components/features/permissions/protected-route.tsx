@@ -72,7 +72,7 @@ export function ProtectedRoute({
       // If no fallback provided, redirect to workspace home
       if (!fallback) {
         toast.error('Você não tem permissão para acessar esta página')
-        router.push(`/org/${orgId}/workspace/${workspaceId}`)
+        router.push(`/${orgId}/workspace/${workspaceId}`)
       }
     }
   }, [isLoading, hasAnyPermission, workspaceId, orgId, fallback, router])

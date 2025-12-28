@@ -62,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (response.user) {
         setUser(response.user)
-        router.push('/org')
+        router.push('/')
       }
     } catch (err: any) {
       setError(err.message || 'Google authentication failed')
@@ -91,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (response.user) {
         setUser(response.user)
-        router.push('/org')
+        router.push('/')
       }
     } catch (err: any) {
       setError(err.message || 'Magic link verification failed')

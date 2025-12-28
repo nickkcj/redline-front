@@ -3,14 +3,13 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/components/providers/auth-provider'
-import { authService } from '@/lib/api/services/auth.service'
 import { toast } from 'sonner'
 import { Loader2, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
-export function LoginContent() {
-  const { isAuthenticated, user, isLoading: authLoading } = useAuth()
+export function LoginPage() {
+  const { isAuthenticated, user, isLoading: authLoading, requestMagicLink, initGoogleAuth } = useAuth()
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
   const [isMagicLinkLoading, setIsMagicLinkLoading] = useState(false)
   const [email, setEmail] = useState('')
@@ -51,29 +50,20 @@ export function LoginContent() {
 
     if (isAuthenticated && user) {
       console.log('User authenticated, redirecting...')
-      router.push('/org')
+      router.push('/')
     }
   }, [mounted, isAuthenticated, user, authLoading, router])
 
   const handleGoogleLogin = async () => {
     try {
       setIsGoogleLoading(true)
-
       const frontendCallbackUrl = `${window.location.origin}/auth/success`
-
-      const data = await authService.getGoogleOAuthUrl(frontendCallbackUrl)
-
-      if (data.authUrl) {
-        window.location.href = data.authUrl
-      } else {
-        throw new Error('Auth URL not found')
-      }
+      await initGoogleAuth(frontendCallbackUrl)
     } catch (error) {
       console.error('Login error:', error)
       toast.error('Falha no login', {
         description: 'Por favor, tente novamente',
       })
-    } finally {
       setIsGoogleLoading(false)
     }
   }
@@ -96,8 +86,7 @@ export function LoginContent() {
 
     try {
       setIsMagicLinkLoading(true)
-
-      await authService.requestMagicLink(email)
+      await requestMagicLink(email)
 
       setMagicLinkSent(true)
       toast.success('Magic link enviado!', {
@@ -121,14 +110,14 @@ export function LoginContent() {
   // Show loading state while checking auth
   if (authLoading) {
     return (
-      <div className="w-screen h-screen flex items-center justify-center bg-[#FCFCFD]">
-        <Loader2 size={40} className="text-[#5C6570] animate-spin" />
+      <div className="w-screen h-screen flex items-center justify-center bg-background">
+        <Loader2 size={40} className="text-muted-foreground animate-spin" />
       </div>
     )
   }
 
   return (
-    <div className="w-screen h-screen flex items-center justify-center bg-[#FCFCFD] p-[70px] relative">
+    <div className="w-screen h-screen flex items-center justify-center bg-background p-[70px] relative">
       <div className="absolute left-[10%] top-[70px] flex items-center gap-4 z-10">
         <img
           src="/seloDooorBlack.png"
