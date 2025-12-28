@@ -1,21 +1,19 @@
 "use client";
 
 import * as React from "react";
-import { cn } from "@/lib/utils/date.utils";
+import { cn } from "@/lib/utils";
 import { ChatMessage } from "./chat-message";
 import { ChatInput } from "./chat-input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { PlusCircle, MessageSquare } from "lucide-react";
-import { useStreamChat } from "@/hooks/api/use-stream-chat";
 import { useChatMessages, useCreateChat } from "@/hooks/api/use-chat";
 import { useDocuments } from "@/hooks/api/use-documents";
-import { useMarkedDocuments, useMarkDocument, useUnmarkDocument } from "@/hooks/api/use-chat-documents";
+import { useMarkedDocuments, useMarkDocument, useUnmarkDocument, useStreamChat } from "@/hooks/api/use-chat";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { DocumentMarker } from "@/components/features/old/document-marker";
-import type { DocumentResponseDto } from "@/lib/api/services/document.service";
-import type { ChatMessageResponseDto } from "@/types/chat";
+import type { ChatMessageResponseDto } from "@/lib/api/types/chat.types";
 
 export interface ChatAreaProps {
   workspaceId: string;
@@ -103,7 +101,7 @@ export function ChatArea({
 
       // Iniciar streaming
       try {
-        await startStream(workspaceId, targetChatId, message, documentIds);
+        await startStream(workspaceId, targetChatId, message);
         setInputValue("");
         setAttachedDocIds([]);
       } catch (error) {

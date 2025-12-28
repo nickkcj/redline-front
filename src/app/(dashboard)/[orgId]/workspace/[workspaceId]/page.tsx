@@ -1,10 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { useCurrentWorkspace } from "@/store/app-store";
-import { Sidebar } from "@/components/features/old/sidebar";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { BreadcrumbHeader } from "@/components/layout/breadcrumb-header";
 import { ChatArea } from "@/components/features/chat/chat-area";
-import { PdfViewer } from "@/components/features/old/pdf-viewer";
+import { useCurrentOrganization, useCurrentWorkspace } from "@/lib/stores/app.store";
 
 interface WorkspacePageProps {
   params: Promise<{
@@ -14,16 +15,13 @@ interface WorkspacePageProps {
 }
 
 export default function WorkspacePage({ params }: WorkspacePageProps) {
+  const currentOrganization = useCurrentOrganization();
   const currentWorkspace = useCurrentWorkspace();
   const [resolvedParams, setResolvedParams] = React.useState<{
     orgId: string;
     workspaceId: string;
   } | null>(null);
   const [currentChatId, setCurrentChatId] = React.useState<string | null>(null);
-  const [selectedDocument, setSelectedDocument] = React.useState<{
-    id: string;
-    name: string;
-  } | null>(null);
 
   React.useEffect(() => {
     params.then(setResolvedParams);
@@ -37,13 +35,6 @@ export default function WorkspacePage({ params }: WorkspacePageProps) {
     setCurrentChatId(chatId);
   }, []);
 
-  const handleDocumentClick = React.useCallback(
-    (documentId: string, documentName: string) => {
-      setSelectedDocument({ id: documentId, name: documentName });
-    },
-    []
-  );
-
   if (!resolvedParams) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -55,42 +46,32 @@ export default function WorkspacePage({ params }: WorkspacePageProps) {
     );
   }
 
+  // Dynamic breadcrumbs
+  const breadcrumbs = [
+    { label: currentOrganization?.name || 'Organization', href: '/org' },
+    { label: currentWorkspace?.name || 'Workspace' },
+    { label: 'Chat' },
+  ];
+
+  // Header actions
+  const actions = (
+    <Button onClick={handleNewChat} size="sm">
+      <Plus className="h-4 w-4 mr-2" />
+      Nova Conversa
+    </Button>
+  );
+
   return (
-    <>
-      <div className="h-screen bg-background flex overflow-hidden">
-        {/* Left Sidebar */}
-        <div className="flex-shrink-0">
-          <Sidebar
-            workspaceId={resolvedParams.workspaceId}
-            workspaceName={currentWorkspace?.name || "Workspace"}
-            organizationId={resolvedParams.orgId}
-            currentChatId={currentChatId}
-            onChatSelect={setCurrentChatId}
-            onNewChat={handleNewChat}
-            onDocumentClick={handleDocumentClick}
-          />
-        </div>
+    <div className="h-screen flex flex-col">
+      <BreadcrumbHeader breadcrumbs={breadcrumbs} actions={actions} />
 
-        {/* Main Chat Area */}
-        <div className="flex-1 min-w-0 overflow-hidden bg-background">
-          <ChatArea
-            workspaceId={resolvedParams.workspaceId}
-            chatId={currentChatId}
-            onChatCreated={handleChatCreated}
-          />
-        </div>
-      </div>
-
-      {/* PDF Viewer Modal */}
-      {selectedDocument && (
-        <PdfViewer
-          open={!!selectedDocument}
-          onClose={() => setSelectedDocument(null)}
-          documentId={selectedDocument.id}
+      <div className="flex-1 min-h-0">
+        <ChatArea
           workspaceId={resolvedParams.workspaceId}
-          documentName={selectedDocument.name}
+          chatId={currentChatId}
+          onChatCreated={handleChatCreated}
         />
-      )}
-    </>
+      </div>
+    </div>
   );
 }

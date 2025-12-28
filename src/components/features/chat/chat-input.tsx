@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { cn } from "@/lib/utils/date.utils";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Send, Paperclip, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";

@@ -2,7 +2,7 @@
 
 import { FileQuestion } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils/date.utils"
+import { cn } from "@/lib/utils"
 import Link from "next/link"
 
 interface NotFoundStateProps {

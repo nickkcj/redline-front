@@ -1,5 +1,8 @@
 import { Suspense } from "react";
-import { WorkspaceProvider } from "../../../../../../components/providers/workspace-provider";
+import { WorkspaceProvider } from "@/components/providers/workspace-provider";
+import { SidebarControlProvider } from "@/contexts/sidebar-control-context";
+import { DocumentViewerProvider } from "@/contexts/document-viewer-context";
+import { BaseLayout } from "@/components/layout/base-layout";
 
 interface WorkspaceLayoutProps {
   children: React.ReactNode;
@@ -15,7 +18,13 @@ export default async function WorkspaceLayout({ children, params }: WorkspaceLay
   return (
     <Suspense fallback={null}>
       <WorkspaceProvider orgId={orgId} workspaceId={workspaceId}>
-        {children}
+        <SidebarControlProvider>
+          <DocumentViewerProvider>
+            <BaseLayout>
+              {children}
+            </BaseLayout>
+          </DocumentViewerProvider>
+        </SidebarControlProvider>
       </WorkspaceProvider>
     </Suspense>
   );
