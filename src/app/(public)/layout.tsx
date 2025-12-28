@@ -1,5 +1,5 @@
 import { Navbar } from "@/components/shared/navigation/navbar"
-import { BackgroundVideo } from "@/components/shared/layout/background-video"
+import { BackgroundVideo } from "@/components/layout/background-video"
 
 interface DashboardLayoutProps {
   children: React.ReactNode
