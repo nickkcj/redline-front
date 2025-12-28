@@ -14,7 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { History, MessageSquare, Calendar, Trash2 } from "lucide-react";
 import { useChats, useDeleteChat } from "@/hooks/api/use-chat";
-import { useCurrentWorkspace } from "@/store/app-store";
+import { useCurrentWorkspace } from "@/lib/stores/app.store";
 import { ChatResponseDto } from "@/types/chat";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";

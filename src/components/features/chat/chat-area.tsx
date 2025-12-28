@@ -12,7 +12,6 @@ import { useDocuments } from "@/hooks/api/use-documents";
 import { useMarkedDocuments, useMarkDocument, useUnmarkDocument, useStreamChat } from "@/hooks/api/use-chat";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { DocumentMarker } from "@/components/features/old/document-marker";
 import type { ChatMessageResponseDto } from "@/lib/api/types/chat.types";
 
 export interface ChatAreaProps {
@@ -291,18 +290,7 @@ export function ChatArea({
 
       {/* Input Area */}
       <div className="border-t border-border bg-white p-4 flex-shrink-0">
-        <div className="max-w-3xl mx-auto space-y-3">
-          {/* Document Marker */}
-          <DocumentMarker
-            workspaceId={workspaceId}
-            chatId={chatId}
-            documents={documents}
-            markedDocuments={markedDocs}
-            onMark={handleMarkDocument}
-            onUnmark={handleUnmarkDocument}
-            disabled={isStreaming}
-          />
-
+        <div className="max-w-3xl mx-auto">
           <ChatInput
             value={inputValue}
             onChange={setInputValue}

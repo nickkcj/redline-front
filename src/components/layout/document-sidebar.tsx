@@ -24,6 +24,7 @@ import { useDocumentViewer } from "@/contexts/document-viewer-context"
 import { useSidebarControl } from "@/contexts/sidebar-control-context"
 import { useCurrentWorkspace } from "@/lib/stores/app.store"
 import { usePermissions } from "@/hooks/api/use-permissions"
+import { hasAnyPermission as hasAnyPermissionUtil } from "@/lib/utils/permission.utils"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
@@ -43,12 +44,10 @@ export function DocumentSidebar({ className }: DocumentSidebarProps) {
     enabled: !!currentWorkspace?.id && documentsOpen,
   })
 
-  const { hasAnyPermission } = usePermissions(currentWorkspace?.id || '', {
-    enabled: !!currentWorkspace?.id,
-  })
+  const { data: userPermissions = [] } = usePermissions(currentWorkspace?.id || '')
 
-  const canWrite = hasAnyPermission(['documents.write.own', 'documents.write.all'])
-  const canDelete = hasAnyPermission(['documents.delete.all'])
+  const canWrite = hasAnyPermissionUtil(userPermissions, ['documents.write.own', 'documents.write.all'])
+  const canDelete = hasAnyPermissionUtil(userPermissions, ['documents.delete.all'])
 
   // Upload mutation
   const {

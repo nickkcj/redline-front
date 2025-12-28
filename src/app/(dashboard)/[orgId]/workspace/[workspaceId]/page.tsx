@@ -1,10 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { Plus } from "lucide-react";
+import { Plus, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BreadcrumbHeader } from "@/components/layout/breadcrumb-header";
 import { ChatArea } from "@/components/features/chat/chat-area";
+import { ChatHistorySheet } from "@/components/features/chat/chat-history-sheet";
 import { useCurrentOrganization, useCurrentWorkspace } from "@/lib/stores/app.store";
 
 interface WorkspacePageProps {
@@ -35,6 +36,10 @@ export default function WorkspacePage({ params }: WorkspacePageProps) {
     setCurrentChatId(chatId);
   }, []);
 
+  const handleSelectChat = React.useCallback((chatId: string) => {
+    setCurrentChatId(chatId);
+  }, []);
+
   if (!resolvedParams) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -55,10 +60,22 @@ export default function WorkspacePage({ params }: WorkspacePageProps) {
 
   // Header actions
   const actions = (
-    <Button onClick={handleNewChat} size="sm">
-      <Plus className="h-4 w-4 mr-2" />
-      Nova Conversa
-    </Button>
+    <div className="flex items-center gap-2">
+      <ChatHistorySheet
+        onSelectChat={handleSelectChat}
+        currentChatId={currentChatId || undefined}
+        trigger={
+          <Button variant="outline" size="sm">
+            <History className="h-4 w-4 mr-2" />
+            Histórico
+          </Button>
+        }
+      />
+      <Button onClick={handleNewChat} size="sm">
+        <Plus className="h-4 w-4 mr-2" />
+        Nova Conversa
+      </Button>
+    </div>
   );
 
   return (

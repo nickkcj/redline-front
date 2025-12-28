@@ -59,14 +59,10 @@ export function OrganizationSwitcher() {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                <Image
-                  src="/seloDooorBlack.png"
-                  alt="Logo Dooor"
-                  width={24}
-                  height={24}
-                  className="dark:invert"
-                />
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-accent border border-sidebar-border">
+                <span className="text-lg font-semibold">
+                  {currentWorkspace?.name?.charAt(0).toUpperCase() || 'W'}
+                </span>
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">
