@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import { useCommandPaletteContext } from "@/contexts/command-palette-context"
-import { useAuth } from "@/providers/auth-provider"
+import { useAuth } from "@/components/providers/auth-provider"
 import Image from "next/image"
 import {
   House,

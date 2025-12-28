@@ -13,7 +13,7 @@ import { useDocuments } from "@/hooks/api/use-documents";
 import { useMarkedDocuments, useMarkDocument, useUnmarkDocument } from "@/hooks/api/use-chat-documents";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { DocumentMarker } from "@/components/workspace/document-marker";
+import { DocumentMarker } from "@/components/features/workspace/document-marker";
 import type { DocumentResponseDto } from "@/lib/api/services/document.service";
 import type { ChatMessageResponseDto } from "@/types/chat";
 

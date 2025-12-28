@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 import { useCurrentOrganization, useSetCurrentOrganization, useSetCurrentWorkspace, useUser } from "@/store/app-store";
 import { organizationService } from "@/lib/api/services/organization.service";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Navbar } from "@/components/navigation/navbar";
-import { useAuth } from "@/providers/auth-provider";
+import { Navbar } from "@/components/shared/navigation/navbar";
+import { useAuth } from "@/components/providers/auth-provider";
 import {
   Dialog,
   DialogContent,

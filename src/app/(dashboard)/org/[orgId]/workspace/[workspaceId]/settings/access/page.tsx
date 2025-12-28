@@ -7,8 +7,8 @@
 
 'use client'
 
-import { ProtectedRoute } from '@/components/permissions/protected-route'
-import { AccessControlSection } from '@/components/permissions/access-control-section'
+import { ProtectedRoute } from '@/components/features/permissions/protected-route'
+import { AccessControlSection } from '@/components/features/permissions/access-control-section'
 import { useParams } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'

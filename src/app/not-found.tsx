@@ -1,4 +1,4 @@
-import { NotFoundState } from "@/components/ui/states"
+import { NotFoundState } from "@/components/shared/states"
 
 export default function NotFound() {
   return (

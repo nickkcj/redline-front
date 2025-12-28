@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useAuth } from '@/providers/auth-provider'
+import { useAuth } from '@/components/providers/auth-provider'
 import { authService } from '@/lib/api/services/auth.service'
 import { toast } from 'sonner'
 import { Loader2, Mail } from 'lucide-react'

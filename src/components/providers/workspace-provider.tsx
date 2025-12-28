@@ -9,8 +9,8 @@ import {
   useSetCurrentWorkspace,
 } from "@/lib/stores/app.store"
 import { useOrganizations } from "@/hooks/api/use-organization"
-import { LoadingState } from "@/components/ui/states"
-import { NotFoundState } from "@/components/ui/states"
+import { LoadingState } from "@/components/shared/states"
+import { NotFoundState } from "@/components/shared/states"
 import type { OrganizationWithWorkspaces } from "@/lib/api/types/organization.types"
 
 interface WorkspaceProviderProps {

@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Message, MessageContent, MessageAvatar } from "@/components/ai-elements/message";
+import { Message, MessageContent, MessageAvatar } from "@/components/ui/ai-elements/message";
 import {
   PromptInput,
   PromptInputBody,
@@ -11,7 +11,7 @@ import {
   PromptInputToolbar,
   PromptInputTools,
   PromptInputSubmit,
-} from "@/components/ai-elements/prompt-input";
+} from "@/components/ui/ai-elements/prompt-input";
 import { Menu, Send, FileText, X } from "lucide-react";
 import { chatService } from "@/lib/api/services/chat.service";
 import { useChat, useCreateChat } from "@/hooks/api/use-chat";

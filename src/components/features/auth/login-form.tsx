@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils/date.utils";
-import { useAuth } from "@/providers/auth-provider";
+import { useAuth } from "@/components/providers/auth-provider";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";

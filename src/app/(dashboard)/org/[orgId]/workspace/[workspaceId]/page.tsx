@@ -2,9 +2,9 @@
 
 import * as React from "react";
 import { useCurrentWorkspace } from "@/store/app-store";
-import { Sidebar } from "@/components/workspace/sidebar";
-import { ChatArea } from "@/components/chat/chat-area";
-import { PdfViewer } from "@/components/workspace/pdf-viewer";
+import { Sidebar } from "@/components/features/workspace/sidebar";
+import { ChatArea } from "@/components/features/chat/chat-area";
+import { PdfViewer } from "@/components/features/workspace/pdf-viewer";
 
 interface WorkspacePageProps {
   params: Promise<{

@@ -6,7 +6,7 @@
 
 import { useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { useAuth } from '@/providers/auth-provider'
+import { useAuth } from '@/components/providers/auth-provider'
 
 interface UseAuthGuardOptions {
   redirectTo?: string

@@ -34,7 +34,7 @@ import {
   PromptInputModelSelectTrigger,
   PromptInputModelSelectContent,
   PromptInputModelSelectItem
-} from "@/components/ai-elements/prompt-input";
+} from "@/components/ui/ai-elements/prompt-input";
 import { useCreateChat, useChat, useSendMessage } from "@/hooks/api/use-chat";
 import { useCurrentWorkspace } from "@/store/app-store";
 import { MessageRole, SendMessageDto } from "@/types/chat";
