@@ -1,13 +1,12 @@
 "use client"
 
 import * as React from "react"
-import { Users, Shield, FileText, Settings as SettingsIcon } from "lucide-react"
+import { Users, History, Settings, CreditCard } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BreadcrumbHeader } from "@/components/layout/breadcrumb-header"
 import { MembersTab } from "@/components/features/admin/members-tab"
 import { RBACTab } from "@/components/features/admin/rbac-tab"
 import { AuditLogsTab } from "@/components/features/admin/audit-logs-tab"
-import { SettingsTab } from "@/components/features/admin/settings-tab"
 import { useCurrentOrganization, useCurrentWorkspace } from "@/lib/stores/app.store"
 
 interface AdminPageProps {
@@ -52,48 +51,48 @@ export default function AdminPage({ params }: AdminPageProps) {
       <BreadcrumbHeader breadcrumbs={breadcrumbs} />
 
       <div className="flex-1 min-h-0 overflow-auto">
-        <div className="container mx-auto py-6 px-4">
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold tracking-tight">Administração</h1>
-            <p className="text-muted-foreground">
-              Gerencie membros, permissões, configurações e monitore atividades do workspace.
+        <div className="max-w-6xl mx-auto py-6 pl-8 pr-4">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+              <Settings className="h-8 w-8" />
+              Administração
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              Gerencie configurações, uso de recursos e membros do projeto
             </p>
           </div>
 
-          <Tabs defaultValue="members" className="space-y-6">
-            <TabsList className="grid w-full max-w-2xl grid-cols-4">
-              <TabsTrigger value="members" className="flex items-center gap-2">
+          <Tabs defaultValue="access" className="space-y-6">
+            <TabsList className="w-full justify-start bg-muted/50 p-1">
+              <TabsTrigger value="audit" className="flex-1 max-w-[200px] gap-2">
+                <History className="h-4 w-4" />
+                Auditoria
+              </TabsTrigger>
+              <TabsTrigger value="access" className="flex-1 max-w-[200px] gap-2">
                 <Users className="h-4 w-4" />
-                <span className="hidden sm:inline">Membros</span>
-              </TabsTrigger>
-              <TabsTrigger value="rbac" className="flex items-center gap-2">
-                <Shield className="h-4 w-4" />
-                <span className="hidden sm:inline">RBAC</span>
-              </TabsTrigger>
-              <TabsTrigger value="audit" className="flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                <span className="hidden sm:inline">Audit Logs</span>
-              </TabsTrigger>
-              <TabsTrigger value="settings" className="flex items-center gap-2">
-                <SettingsIcon className="h-4 w-4" />
-                <span className="hidden sm:inline">Configurações</span>
+                Controle de Acesso
               </TabsTrigger>
             </TabsList>
-
-            <TabsContent value="members" className="space-y-4">
-              <MembersTab workspaceId={resolvedParams.workspaceId} />
-            </TabsContent>
-
-            <TabsContent value="rbac" className="space-y-4">
-              <RBACTab workspaceId={resolvedParams.workspaceId} />
-            </TabsContent>
 
             <TabsContent value="audit" className="space-y-4">
               <AuditLogsTab workspaceId={resolvedParams.workspaceId} />
             </TabsContent>
 
-            <TabsContent value="settings" className="space-y-4">
-              <SettingsTab workspaceId={resolvedParams.workspaceId} />
+            <TabsContent value="access" className="space-y-6">
+              <Tabs defaultValue="members">
+                <TabsList className="w-auto">
+                  <TabsTrigger value="members">Membros</TabsTrigger>
+                  <TabsTrigger value="roles">Funções</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="members" className="mt-6">
+                  <MembersTab workspaceId={resolvedParams.workspaceId} />
+                </TabsContent>
+
+                <TabsContent value="roles" className="mt-6">
+                  <RBACTab workspaceId={resolvedParams.workspaceId} />
+                </TabsContent>
+              </Tabs>
             </TabsContent>
           </Tabs>
         </div>

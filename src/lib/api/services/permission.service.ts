@@ -12,7 +12,7 @@ export class PermissionService {
   }
 
   static async getAllPermissions(workspaceId: string): Promise<PermissionDto[]> {
-    return apiClient.get<PermissionDto[]>(`/workspaces/${workspaceId}/permissions`)
+    return apiClient.get<PermissionDto[]>(`/workspaces/${workspaceId}/permissions/available`)
   }
 
   static async listRoles(workspaceId: string): Promise<RoleDto[]> {
