@@ -25,11 +25,23 @@ class BaseApiClient {
   }
 
   private handleUnauthorized(): never {
-    console.warn('401 Unauthorized - session invalid, redirecting to login')
-    tokenStore.clear()
-    if (typeof window !== 'undefined') {
-      window.location.href = '/login'
+    console.warn('401 Unauthorized - session invalid')
+
+    // Check if we're on a callback or login route
+    const isCallbackRoute = typeof window !== 'undefined' && (
+      window.location.pathname.startsWith('/auth/') ||
+      window.location.pathname === '/login'
+    )
+
+    // Only clear tokens and redirect if we're NOT on a callback route
+    if (!isCallbackRoute) {
+      console.warn('Clearing tokens and redirecting to login')
+      tokenStore.clear()
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login'
+      }
     }
+
     throw {
       message: 'Session inválida ou expirada',
       statusCode: 401,

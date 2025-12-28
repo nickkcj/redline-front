@@ -9,7 +9,6 @@ import {
   useVerifyMagicLink,
   useLogout as useLogoutMutation,
   useUserInfo,
-  useGoogleCallback
 } from '@/hooks/auth/use-auth-api'
 
 interface AuthContextType {
@@ -18,7 +17,6 @@ interface AuthContextType {
   isLoading: boolean
   error: string | null
   initGoogleAuth: (callbackUrl: string) => Promise<void>
-  handleGoogleCallback: (code: string, callbackUrl: string) => Promise<void>
   requestMagicLink: (email: string) => Promise<void>
   verifyMagicLink: (token: string) => Promise<void>
   logout: () => Promise<void>
@@ -36,7 +34,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Mutations from hooks
   const { mutateAsync: getGoogleOAuthUrl } = useGoogleOAuthUrl()
-  const { mutateAsync: handleGoogleAuth } = useGoogleCallback()
   const { mutateAsync: sendMagicLink } = useRequestMagicLink()
   const { mutateAsync: verifyMagic } = useVerifyMagicLink()
   const { mutateAsync: performLogout } = useLogoutMutation()
@@ -53,24 +50,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [getGoogleOAuthUrl])
 
-  const handleGoogleCallback = useCallback(async (code: string, callbackUrl: string) => {
-    try {
-      setIsLoading(true)
-      setError(null)
-
-      const response = await handleGoogleAuth({ code, callbackUrl })
-
-      if (response.user) {
-        setUser(response.user)
-        router.push('/')
-      }
-    } catch (err: any) {
-      setError(err.message || 'Google authentication failed')
-      throw err
-    } finally {
-      setIsLoading(false)
-    }
-  }, [handleGoogleAuth, router])
 
   const requestMagicLink = useCallback(async (email: string) => {
     try {
@@ -130,6 +109,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Initialize user on mount
   useEffect(() => {
     async function initialize() {
+      // Skip auth initialization on callback routes
+      if (typeof window !== 'undefined') {
+        const pathname = window.location.pathname
+        const isCallbackRoute = pathname.startsWith('/auth/') ||
+                                pathname === '/login'
+
+        if (isCallbackRoute) {
+          console.log('[AuthProvider] Skipping auth init on callback route:', pathname)
+          setIsLoading(false)
+          return
+        }
+      }
+
       try {
         const userData = await getUserInfo()
         setUser(userData)
@@ -150,7 +142,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoading,
     error,
     initGoogleAuth,
-    handleGoogleCallback,
     requestMagicLink,
     verifyMagicLink,
     logout,

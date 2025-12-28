@@ -13,6 +13,8 @@ export function MagicLinkHandler() {
   const [loadingMessage, setLoadingMessage] = useState('Verificando magic link')
 
   useEffect(() => {
+    let isCancelled = false
+
     const handleMagicLinkVerification = async () => {
       const token = searchParams.get('token')
       const error = searchParams.get('error')
@@ -25,7 +27,7 @@ export function MagicLinkHandler() {
           description: error,
         })
         await new Promise((resolve) => setTimeout(resolve, 2000))
-        router.replace('/login')
+        if (!isCancelled) router.replace('/login')
         return
       }
 
@@ -37,7 +39,7 @@ export function MagicLinkHandler() {
           description: 'O link de magic link não contém um token válido',
         })
         await new Promise((resolve) => setTimeout(resolve, 2000))
-        router.replace('/login')
+        if (!isCancelled) router.replace('/login')
         return
       }
 
@@ -57,6 +59,8 @@ export function MagicLinkHandler() {
 
         // Router push will be handled by auth provider
       } catch (error) {
+        if (isCancelled) return
+
         console.error('Magic link verification failed:', error)
 
         // Check if it's a "magic link already used" error
@@ -76,12 +80,17 @@ export function MagicLinkHandler() {
 
         setLoadingMessage('Erro na verificação. Redirecionando...')
         await new Promise((resolve) => setTimeout(resolve, 2000))
-        router.replace('/login')
+        if (!isCancelled) router.replace('/login')
       }
     }
 
     handleMagicLinkVerification()
-  }, [router, searchParams, verifyMagicLink])
+
+    return () => {
+      isCancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <div className="w-screen h-screen flex flex-col items-center justify-center bg-background">
