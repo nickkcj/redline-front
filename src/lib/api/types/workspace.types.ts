@@ -57,3 +57,31 @@ export interface WorkspaceSummaryDto {
  * Response com lista de workspaces
  */
 export type WorkspaceListResponse = WorkspaceResponseDto[]
+
+// ========== WORKSPACE INVITES ==========
+
+/**
+ * POST /workspace/:workspaceId/invites
+ * Request para criar convite
+ */
+export interface CreateWorkspaceInviteRequestDto {
+  role?: WorkspaceRole
+}
+
+/**
+ * Response de criar convite
+ */
+export interface WorkspaceInviteLinkResponseDto {
+  code: string
+  inviteLink: string
+  expiresAt: string
+  role: WorkspaceRole
+}
+
+/**
+ * POST /workspace/:workspaceId/invites/use
+ * Request para usar convite
+ */
+export interface UseWorkspaceInviteRequestDto {
+  code: string
+}

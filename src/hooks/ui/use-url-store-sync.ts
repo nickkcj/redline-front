@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import {
   useSetCurrentOrganization,
   useSetCurrentWorkspace,
-} from '@/store/app-store'
+} from '@/lib/stores/app.store'
 
 export function useUrlStoreSync() {
   const searchParams = useSearchParams()
@@ -31,8 +31,9 @@ export function useUrlStoreSync() {
         id: workspaceId,
         name: '',
         description: '',
-        role: 'MEMBER',
-        organization: { id: orgId || '', name: '', description: '' }
+        organizationId: orgId || '',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       })
     }
 

@@ -3,6 +3,8 @@ import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { AuthProvider } from "@/components/providers/auth-provider";
+import { DocumentViewerProvider } from "@/contexts/document-viewer-context";
+import { UnifiedDocumentViewer } from "@/components/shared/viewers";
 import "../styles/globals.css";
 
 const geistSans = Geist({
@@ -44,9 +46,12 @@ export default function RootLayout({
       >
         <QueryProvider>
           <AuthProvider>
+            <DocumentViewerProvider>
               <Suspense fallback={null}>
               </Suspense>
               {children}
+              <UnifiedDocumentViewer />
+            </DocumentViewerProvider>
           </AuthProvider>
         </QueryProvider>
       </body>

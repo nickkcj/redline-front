@@ -72,18 +72,27 @@ export function useChat(workspaceId: string, chatId: string) {
  * Get chat messages with pagination
  * @param workspaceId - Workspace ID
  * @param chatId - Chat ID
- * @param params - Optional pagination params
+ * @param params - Optional pagination params or query options
  * @returns Query result with messages list
  *
  * @example
  * const { data: messages } = useChatMessages(workspaceId, chatId)
+ * const { data: messages } = useChatMessages(workspaceId, chatId, { enabled: !!chatId })
  */
-export function useChatMessages(workspaceId: string, chatId: string, params?: ListChatsDto) {
+export function useChatMessages(
+  workspaceId: string,
+  chatId: string,
+  params?: ListChatsDto | { enabled?: boolean; page?: number; limit?: number }
+) {
+  // Separate pagination params from query options
+  const queryOptions = typeof params === 'object' && 'enabled' in params ? params : undefined
+  const paginationParams = typeof params === 'object' && !('enabled' in params) ? params : undefined
+
   return useApiQuery<ChatMessagesResponseDto>(
-    ['chat-messages', workspaceId, chatId, params?.page?.toString() || '1', params?.limit?.toString() || '20'],
-    () => chatService.getChatMessages(workspaceId, chatId, params),
+    ['chat-messages', workspaceId, chatId, paginationParams?.page?.toString() || '1', paginationParams?.limit?.toString() || '20'],
+    () => chatService.getChatMessages(workspaceId, chatId, paginationParams),
     {
-      enabled: !!workspaceId && !!chatId,
+      enabled: queryOptions?.enabled !== undefined ? queryOptions.enabled : (!!workspaceId && !!chatId),
       staleTime: 1000 * 60 * 2, // 2 minutes
       gcTime: 1000 * 60 * 5, // 5 minutes
       refetchOnMount: false,
@@ -299,12 +308,12 @@ export function useStreamChat(options?: {
   const [streamingContent, setStreamingContent] = useState('')
 
   const startStream = useCallback(
-    async (workspaceId: string, chatId: string, content: string) => {
+    async (workspaceId: string, chatId: string, content: string, useWebSearch?: boolean) => {
       setIsStreaming(true)
       setStreamingContent('')
 
       try {
-        const stream = await chatService.streamChat(workspaceId, chatId, content)
+        const stream = await chatService.streamChat(workspaceId, chatId, content, useWebSearch)
         let accumulatedContent = ''
 
         await parseSSEStream(stream, {

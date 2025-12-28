@@ -4,7 +4,7 @@ import * as React from "react";
 import { Plus, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BreadcrumbHeader } from "@/components/layout/breadcrumb-header";
-import { ChatArea } from "@/components/features/chat/chat-area";
+import { ModernChatArea } from "@/components/features/chat";
 import { ChatHistorySheet } from "@/components/features/chat/chat-history-sheet";
 import { useCurrentOrganization, useCurrentWorkspace } from "@/lib/stores/app.store";
 
@@ -83,7 +83,7 @@ export default function WorkspacePage({ params }: WorkspacePageProps) {
       <BreadcrumbHeader breadcrumbs={breadcrumbs} actions={actions} />
 
       <div className="flex-1 min-h-0">
-        <ChatArea
+        <ModernChatArea
           workspaceId={resolvedParams.workspaceId}
           chatId={currentChatId}
           onChatCreated={handleChatCreated}

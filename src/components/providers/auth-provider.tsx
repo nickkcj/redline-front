@@ -67,11 +67,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsLoading(true)
       setError(null)
 
+      // Primeiro verifica o magic link (retorna UserInfoDto)
       const response = await verifyMagic(token)
 
-      if (response.user) {
-        setUser(response.user)
-        useAppStore.getState().setUser(response.user)
+      if (response.success && response.sessionToken) {
+        // Depois busca o UserDTO completo via /me
+        const userData = await getUserInfo()
+
+        setUser(userData)
+        useAppStore.getState().setUser(userData)
         router.push('/')
       }
     } catch (err: any) {
@@ -80,7 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false)
     }
-  }, [verifyMagic, router])
+  }, [verifyMagic, getUserInfo, router])
 
   const logout = useCallback(async () => {
     try {

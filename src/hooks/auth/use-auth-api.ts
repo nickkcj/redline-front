@@ -6,6 +6,7 @@ import { useApiMutation } from '../api/use-api'
 import { authService } from '@/lib/api/services/auth.service'
 import { tokenStore } from '@/lib/stores/token.store'
 import type { UserDTO } from '@/lib/api/types/user.types'
+import type { UserInfoDto } from '@/lib/api/types/auth.types'
 
 export function useGoogleOAuthUrl() {
   return useApiMutation<string, string>(
@@ -18,7 +19,7 @@ export function useGoogleOAuthUrl() {
 
 export function useGoogleCallback() {
   return useApiMutation<
-    { success: boolean; sessionToken: string; user: UserDTO },
+    { success: boolean; sessionToken: string; user: UserInfoDto },
     { code: string; callbackUrl: string }
   >(
     ({ code, callbackUrl }) => authService.googleCallback(code, callbackUrl),
@@ -38,10 +39,7 @@ export function useGoogleCallback() {
 
 export function useRequestMagicLink() {
   return useApiMutation<{ success: boolean; message: string }, string>(
-    (email) => {
-      const service = new authService()
-      return service.requestMagicLink(email)
-    },
+    (email) => authService.requestMagicLink(email),
     {
       successMessage: 'Magic link enviado! Verifique seu email.',
     }
@@ -49,7 +47,7 @@ export function useRequestMagicLink() {
 }
 
 export function useVerifyMagicLink() {
-  return useApiMutation<{ success: boolean; sessionToken: string; user: UserDTO }, string>(
+  return useApiMutation<{ success: boolean; sessionToken: string; user: UserInfoDto }, string>(
     (token) => authService.verifyMagicLink(token),
     {
       successMessage: 'Login realizado com sucesso!',

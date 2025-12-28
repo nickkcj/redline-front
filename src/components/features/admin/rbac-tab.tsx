@@ -87,6 +87,7 @@ export function RolesManagementTable({ workspaceId }: RolesManagementTableProps)
     const data: UpdateRoleDto = {
       name: roleName,
       description: roleDescription || undefined,
+      permissions: selectedPermissions,
     }
 
     updateRole(
@@ -127,6 +128,7 @@ export function RolesManagementTable({ workspaceId }: RolesManagementTableProps)
       setSelectedRoleId(roleId)
       setRoleName(role.name)
       setRoleDescription(role.description || '')
+      setSelectedPermissions(role.permissions.map((p) => p.id))
       setEditDialogOpen(true)
     }
   }
@@ -288,11 +290,11 @@ export function RolesManagementTable({ workspaceId }: RolesManagementTableProps)
 
       {/* Edit Role Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Editar Função</DialogTitle>
             <DialogDescription>
-              Edite o nome e descrição da função
+              Edite o nome, descrição e permissões da função
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -311,6 +313,40 @@ export function RolesManagementTable({ workspaceId }: RolesManagementTableProps)
                 value={roleDescription}
                 onChange={(e) => setRoleDescription(e.target.value)}
               />
+            </div>
+            <div className="space-y-2">
+              <Label>Permissões</Label>
+              {groupedPermissions.map(([resource, perms]) => (
+                <div key={resource} className="space-y-2">
+                  <p className="text-sm font-medium capitalize">{resource}</p>
+                  <div className="grid grid-cols-2 gap-2 pl-4">
+                    {perms.map((permStr) => {
+                      const perm = allPermissions?.find(
+                        (p) => `${p.resource}.${p.action}.${p.scope || 'all'}` === permStr
+                      )
+                      if (!perm) return null
+                      return (
+                        <div key={perm.id} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`edit-${perm.id}`}
+                            checked={selectedPermissions.includes(perm.id)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setSelectedPermissions([...selectedPermissions, perm.id])
+                              } else {
+                                setSelectedPermissions(selectedPermissions.filter((id) => id !== perm.id))
+                              }
+                            }}
+                          />
+                          <Label htmlFor={`edit-${perm.id}`} className="text-sm cursor-pointer">
+                            {getPermissionDescription(permStr)}
+                          </Label>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
           <DialogFooter>

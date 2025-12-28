@@ -1,5 +1,5 @@
 import { apiClient } from '@/lib/api/client/base.client'
-import { UserInfoDto, UserDTO } from '../types';
+import { UserDTO, UserInfoDto } from '../types';
 
 
 export class AuthService {
@@ -27,8 +27,9 @@ export class AuthService {
     )
   }
 
-  async requestMagicLink(email: string): Promise<{ success: boolean; message: string }> {
-    const callbackUrl = `${this.appUrl}/auth/magic-link`
+  static async requestMagicLink(email: string): Promise<{ success: boolean; message: string }> {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    const callbackUrl = `${appUrl}/auth/magic-link`
 
     return apiClient.post<{ success: boolean; message: string }>(
       '/auth/email/init',

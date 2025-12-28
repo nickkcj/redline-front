@@ -76,7 +76,8 @@ export class ChatService {
   static async streamChat(
     workspaceId: string,
     chatId: string,
-    content: string
+    content: string,
+    useWebSearch?: boolean
   ): Promise<ReadableStream<Uint8Array>> {
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001'
     const API_KEY = process.env.NEXT_PUBLIC_API_KEY || ''
@@ -89,7 +90,10 @@ export class ChatService {
         'x-parse-session-token': sessionToken || '',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ content }),
+      body: JSON.stringify({
+        content,
+        useWebSearch
+      }),
     })
 
     if (response.status === 401) {

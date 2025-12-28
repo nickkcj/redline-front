@@ -52,6 +52,7 @@ export interface CreateRoleDto {
 export interface UpdateRoleDto {
   name?: string
   description?: string
+  permissions?: string[] // Array de permission IDs
 }
 
 // ========== ADD PERMISSION TO ROLE ==========

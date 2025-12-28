@@ -89,6 +89,7 @@ export interface SendMessageDto {
  */
 export interface StreamMessageDto {
   content: string
+  useWebSearch?: boolean
 }
 
 /**
