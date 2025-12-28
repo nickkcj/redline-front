@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import { Loader2, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { BackgroundVideo } from '@/components/shared/layout/background-video'
 
 export function LoginPage() {
   const { isAuthenticated, user, isLoading: authLoading, requestMagicLink, initGoogleAuth } = useAuth()
@@ -118,6 +119,7 @@ export function LoginPage() {
 
   return (
     <div className="w-screen h-screen flex items-center justify-center bg-background p-[70px] relative">
+      <BackgroundVideo opacity={0.7} />
       <div className="absolute left-[10%] top-[70px] flex items-center gap-4 z-10">
         <img
           src="/seloDooorBlack.png"
@@ -131,17 +133,6 @@ export function LoginPage() {
           <div className="text-sm font-serif font-bold text-muted-foreground mt-1">by dooor</div>
         </div>
       </div>
-      <video
-        src={'/mountain-vector-white.mp4'}
-        autoPlay
-        muted
-        loop
-        className="w-screen h-screen absolute bottom-0 pointer-events-none left-0 object-cover"
-      >
-        <source src="/mountain-vector-white.mp4" type="video/mp4" />
-      </video>
-      {/* Overlay for opacity effect */}
-      <div className="w-screen h-screen absolute bottom-0 left-0 bg-background opacity-70 pointer-events-none"></div>
       <div className="flex flex-col items-center gap-4 relative z-10 max-w-md w-full">
         {!magicLinkSent ? (
           <>

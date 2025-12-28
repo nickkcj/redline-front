@@ -177,3 +177,73 @@ export function useLeaveWorkspace() {
   )
 }
 
+// ============================================================================
+// Utility Hooks
+// ============================================================================
+
+/**
+ * Get display name for the current user
+ * Tries currentUser.name, then authUser.name, then authUser.email prefix
+ * Returns capitalized name or null
+ */
+export function useDisplayName() {
+  const { useUser } = require('@/store/app-store')
+  const { useAuth } = require('@/components/providers/auth-provider')
+
+  const currentUser = useUser()
+  const { user: authUser } = useAuth()
+
+  let name = null
+
+  if (currentUser?.name) {
+    name = currentUser.name
+  } else if (authUser) {
+    if (authUser.name) {
+      name = authUser.name
+    } else if (authUser.email) {
+      name = authUser.email.split('@')[0]
+    }
+  }
+
+  if (name) {
+    return name.charAt(0).toUpperCase() + name.slice(1)
+  }
+
+  return null
+}
+
+/**
+ * Check if the current user can manage workspaces in an organization
+ * Only owners and master members can manage workspaces
+ */
+export function useOrganizationPermissions(organization: OrganizationWithWorkspaces | null) {
+  const { useAuth } = require('@/components/providers/auth-provider')
+  const { useUser } = require('@/store/app-store')
+  const { useMemo } = require('react')
+
+  const { user: authUser } = useAuth()
+  const currentUser = useUser()
+
+  return useMemo(() => {
+    const userId = authUser?.id || currentUser?.id
+
+    if (!organization || !userId) {
+      return {
+        canManageWorkspaces: false,
+        isOwner: false,
+        isMaster: false,
+      }
+    }
+
+    const isOwner = organization.ownerId === userId
+    const isMaster = organization.masterMemberId === userId
+    const canManageWorkspaces = isOwner || isMaster
+
+    return {
+      canManageWorkspaces,
+      isOwner,
+      isMaster,
+    }
+  }, [organization, authUser, currentUser])
+}
+
