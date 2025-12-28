@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
-import { useCurrentOrganization, useSetCurrentWorkspace } from "@/store/app-store"
+import { useCurrentOrganization, useSetCurrentWorkspace } from "@/lib/stores/app.store"
 import {
   useOrganizations,
   useCreateWorkspaceInOrganization,
@@ -30,15 +30,15 @@ export function WorkspaceList() {
   const currentOrganization = useCurrentOrganization()
   const setCurrentWorkspace = useSetCurrentWorkspace()
 
-  const { organizations, loading: orgsLoading } = useOrganizations()
+  const { data: organizations, isLoading: orgsLoading } = useOrganizations()
 
   // Get workspaces from current organization
   const currentOrgWithWorkspaces = React.useMemo(() => {
     if (currentOrganization) {
-      const found = organizations.find((org: OrganizationWithWorkspaces) => org.id === currentOrganization.id)
+      const found = organizations?.find((org: OrganizationWithWorkspaces) => org.id === currentOrganization.id)
       if (found) return found
     }
-    return organizations.find((org: OrganizationWithWorkspaces) => org.id === currentOrganization?.id) || null
+    return organizations?.find((org: OrganizationWithWorkspaces) => org.id === currentOrganization?.id) || null
   }, [organizations, currentOrganization])
 
   const workspaces: WorkspaceSummary[] = (currentOrgWithWorkspaces as OrganizationWithWorkspaces | null)?.workspaces ?? []
@@ -59,7 +59,7 @@ export function WorkspaceList() {
   const [showLeaveModal, setShowLeaveModal] = React.useState(false)
   const [selectedWorkspace, setSelectedWorkspace] = React.useState<WorkspaceSummary | null>(null)
 
-  const isLoading = orgsLoading || (organizations.length > 0 && !currentOrganization)
+  const isLoading = orgsLoading || ((organizations?.length || 0) > 0 && !currentOrganization)
 
   const handleEnterWorkspace = (workspace: WorkspaceSummary) => {
     if (!currentOrganization?.id) return
@@ -68,12 +68,9 @@ export function WorkspaceList() {
       id: workspace.id,
       name: workspace.name,
       description: workspace.description,
-      role: 'MEMBER' as const,
-      organization: {
-        id: currentOrganization.id,
-        name: currentOrganization.name,
-        description: currentOrganization.description,
-      },
+      organizationId: currentOrganization.id,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     }
 
     setCurrentWorkspace(userWorkspace)
@@ -228,7 +225,7 @@ export function WorkspaceList() {
         onOpenChange={setShowCreateModal}
         onSubmit={handleCreateWorkspace}
         isCreating={creating}
-        error={createError}
+        error={null}
       />
 
       <WorkspaceEditModal
@@ -237,7 +234,7 @@ export function WorkspaceList() {
         workspace={selectedWorkspace}
         onSubmit={handleUpdateWorkspace}
         isUpdating={updating}
-        error={updateError}
+        error={null}
       />
 
       <WorkspaceDeleteModal
@@ -246,7 +243,7 @@ export function WorkspaceList() {
         workspace={selectedWorkspace}
         onConfirm={handleDeleteWorkspace}
         isDeleting={deleting}
-        error={deleteError}
+        error={null}
       />
 
       <WorkspaceLeaveModal
@@ -255,7 +252,7 @@ export function WorkspaceList() {
         workspace={selectedWorkspace}
         onConfirm={handleLeaveWorkspace}
         isLeaving={leaving}
-        error={leaveError}
+        error={null}
       />
     </div>
   )

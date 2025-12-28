@@ -30,10 +30,10 @@ export function OrganizationsList() {
   const setCurrentWorkspace = useSetCurrentWorkspace()
   const displayName = useDisplayName()
 
-  const { organizations, loading: orgsLoading } = useOrganizations()
-  const { createOrganization, creating, error: createError } = useCreateOrganization()
-  const { updateOrganization, updating, error: updateError } = useUpdateOrganization()
-  const { deleteOrganization, deleting, error: deleteError } = useDeleteOrganization()
+  const { data: organizations, isLoading: orgsLoading } = useOrganizations()
+  const { mutateAsync: createOrganization, isPending: creating, error: createError } = useCreateOrganization()
+  const { mutateAsync: updateOrganization, isPending: updating, error: updateError } = useUpdateOrganization()
+  const { mutateAsync: deleteOrganization, isPending: deleting, error: deleteError } = useDeleteOrganization()
 
   const appName = process.env.NEXT_PUBLIC_APP_NAME || 'Scaffold'
 
@@ -75,7 +75,7 @@ export function OrganizationsList() {
     return () => {
       container.removeEventListener('scroll', handleScroll)
     }
-  }, [handleScroll, organizations.length])
+  }, [handleScroll, organizations?.length])
 
   const handleEnterOrganization = (org: OrganizationWithWorkspaces) => {
     setCurrentWorkspace(null)
@@ -90,7 +90,7 @@ export function OrganizationsList() {
       toast.success(`Organização "${newOrg.name}" foi criada com sucesso!`)
     } catch (err) {
       console.error('Error creating organization:', err)
-      toast.error(createError || 'Erro ao criar organização')
+      toast.error('Erro ao criar organização')
     }
   }
 
@@ -104,13 +104,13 @@ export function OrganizationsList() {
     if (!selectedOrganization) return
 
     try {
-      const updatedOrg = await updateOrganization(selectedOrganization.id, data)
+      const updatedOrg = await updateOrganization({ id: selectedOrganization.id, data })
       setShowEditModal(false)
       setSelectedOrganization(null)
       toast.success(`Organização "${updatedOrg.name}" foi atualizada com sucesso!`)
     } catch (err) {
       console.error('Error updating organization:', err)
-      toast.error(updateError || 'Erro ao atualizar organização')
+      toast.error('Erro ao atualizar organização')
     }
   }
 
@@ -130,7 +130,7 @@ export function OrganizationsList() {
       setSelectedOrganization(null)
     } catch (err) {
       console.error('Error deleting organization:', err)
-      toast.error(deleteError || 'Erro ao excluir organização')
+      toast.error('Erro ao excluir organização')
     }
   }
 
@@ -192,11 +192,11 @@ export function OrganizationsList() {
 
         <div className="space-y-6">
           <OrganizationsHeader
-            organizationCount={organizations.length}
+            organizationCount={organizations?.length || 0}
             onCreateClick={() => setShowCreateModal(true)}
           />
 
-          {organizations.length === 0 ? (
+          {(organizations?.length || 0) === 0 ? (
             <OrganizationEmptyState onCreateClick={() => setShowCreateModal(true)} />
           ) : (
             <div className="relative">
@@ -204,7 +204,7 @@ export function OrganizationsList() {
                 ref={scrollContainerRef}
                 className="flex flex-wrap gap-6 max-h-[calc(100vh-300px)] overflow-y-auto pb-8 pr-2 scroll-smooth scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/30"
               >
-                {organizations.map((org: OrganizationWithWorkspaces) => (
+                {organizations?.map((org: OrganizationWithWorkspaces) => (
                   <OrganizationCard
                     key={org.id}
                     organization={org}
@@ -217,7 +217,7 @@ export function OrganizationsList() {
               </div>
 
               {/* Scroll indicator */}
-              {organizations.length > 4 && (
+              {(organizations?.length || 0) > 4 && (
                 <div className={`absolute bottom-2 left-0 right-0 pointer-events-none flex items-end justify-center transition-opacity duration-300 ${showScrollIndicator ? 'opacity-100' : 'opacity-0'}`}>
                   <div className="text-xs text-muted-foreground flex items-center gap-1.5 animate-bounce bg-background/95 backdrop-blur-sm px-4 py-2 rounded-full shadow-md border border-border font-medium">
                     <span>↓</span>
@@ -236,7 +236,7 @@ export function OrganizationsList() {
         onOpenChange={setShowCreateModal}
         onSubmit={handleCreateOrganization}
         isCreating={creating}
-        error={createError}
+        error={null}
       />
 
       <OrganizationEditModal
@@ -245,7 +245,7 @@ export function OrganizationsList() {
         organization={selectedOrganization}
         onSubmit={handleUpdateOrganization}
         isUpdating={updating}
-        error={updateError}
+        error={null}
       />
 
       <OrganizationDeleteModal
@@ -254,7 +254,7 @@ export function OrganizationsList() {
         organization={selectedOrganization}
         onConfirm={handleDeleteOrganization}
         isDeleting={deleting}
-        error={deleteError}
+        error={null}
       />
     </div>
   )

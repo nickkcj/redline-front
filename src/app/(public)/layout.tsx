@@ -5,7 +5,7 @@ interface DashboardLayoutProps {
   children: React.ReactNode
 }
 
-export default function DashboardLayout({ children }: DashboardLayoutProps) {
+export default function PublicLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="min-h-screen bg-background relative">
       <BackgroundVideo opacity={0.8} />

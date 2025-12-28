@@ -187,7 +187,7 @@ export function useLeaveWorkspace() {
  * Returns capitalized name or null
  */
 export function useDisplayName() {
-  const { useUser } = require('@/store/app-store')
+  const { useUser } = require('@/lib/stores/app.store')
   const { useAuth } = require('@/components/providers/auth-provider')
 
   const currentUser = useUser()
@@ -218,7 +218,7 @@ export function useDisplayName() {
  */
 export function useOrganizationPermissions(organization: OrganizationWithWorkspaces | null) {
   const { useAuth } = require('@/components/providers/auth-provider')
-  const { useUser } = require('@/store/app-store')
+  const { useUser } = require('@/lib/stores/app.store')
   const { useMemo } = require('react')
 
   const { user: authUser } = useAuth()
