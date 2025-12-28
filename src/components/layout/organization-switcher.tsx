@@ -27,11 +27,11 @@ export function OrganizationSwitcher() {
   const { data: organizations = [], isLoading } = useOrganizations()
 
   const handleSwitch = (orgId: string, workspaceId: string) => {
-    router.push(`/org/${orgId}/workspace/${workspaceId}`)
+    router.push(`/${orgId}/workspace/${workspaceId}`)
   }
 
   const handleViewAll = () => {
-    router.push('/org')
+    router.push('/')
   }
 
   if (isLoading) {
@@ -59,10 +59,13 @@ export function OrganizationSwitcher() {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-accent border border-sidebar-border">
-                <span className="text-lg font-semibold">
-                  {currentWorkspace?.name?.charAt(0).toUpperCase() || 'W'}
-                </span>
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-white">
+                <Image
+                  src="/seloDooorBlack.png"
+                  alt="Logo Dooor"
+                  width={20}
+                  height={20}
+                />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">

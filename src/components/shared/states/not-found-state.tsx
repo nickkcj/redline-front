@@ -15,7 +15,7 @@ interface NotFoundStateProps {
    */
   message?: string
   /**
-   * Link para voltar (ex: "/org")
+   * Link para voltar (ex: "/")
    */
   backLink?: string
   /**

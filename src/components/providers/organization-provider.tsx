@@ -33,7 +33,7 @@ export function OrganizationProvider({ children, orgId }: OrganizationProviderPr
 
     if (!org) {
       if (!isLoading && organizations.length > 0) {
-        router.replace('/org')
+        router.replace('/')
       }
       return
     }
@@ -51,7 +51,7 @@ export function OrganizationProvider({ children, orgId }: OrganizationProviderPr
     return (
       <NotFoundState
         entity="Organização"
-        backLink="/org"
+        backLink="/"
         backText="Voltar para organizações"
       />
     )

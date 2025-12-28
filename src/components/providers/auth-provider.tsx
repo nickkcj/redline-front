@@ -3,6 +3,7 @@
 import { createContext, useContext, ReactNode, useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import type { UserDTO } from '@/lib/api/types/user.types'
+import { useAppStore } from '@/lib/stores/app.store'
 import {
   useGoogleOAuthUrl,
   useRequestMagicLink,
@@ -70,6 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (response.user) {
         setUser(response.user)
+        useAppStore.getState().setUser(response.user)
         router.push('/')
       }
     } catch (err: any) {
@@ -84,10 +86,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await performLogout()
       setUser(null)
+      useAppStore.getState().logout()
       router.push('/login')
     } catch (err) {
       console.warn('Logout API call failed:', err)
       setUser(null)
+      useAppStore.getState().logout()
       router.push('/login')
     }
   }, [performLogout, router])
@@ -96,9 +100,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const userData = await getUserInfo()
       setUser(userData)
+      useAppStore.getState().setUser(userData)
     } catch (err) {
       console.error('Failed to refresh user:', err)
       setUser(null)
+      useAppStore.getState().setUser(null)
     }
   }, [getUserInfo])
 
@@ -125,9 +131,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const userData = await getUserInfo()
         setUser(userData)
+        useAppStore.getState().setUser(userData)
       } catch (err) {
         console.error('Auth initialization failed:', err)
         setUser(null)
+        useAppStore.getState().setUser(null)
       } finally {
         setIsLoading(false)
       }

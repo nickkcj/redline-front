@@ -53,7 +53,7 @@ export default function WorkspacePage({ params }: WorkspacePageProps) {
 
   // Dynamic breadcrumbs
   const breadcrumbs = [
-    { label: currentOrganization?.name || 'Organization', href: '/org' },
+    { label: currentOrganization?.name || 'Organization', href: '/' },
     { label: currentWorkspace?.name || 'Workspace' },
     { label: 'Chat' },
   ];

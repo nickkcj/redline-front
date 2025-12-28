@@ -41,7 +41,7 @@ export default function AdminPage({ params }: AdminPageProps) {
 
   // Dynamic breadcrumbs
   const breadcrumbs = [
-    { label: currentOrganization?.name || 'Organization', href: '/org' },
+    { label: currentOrganization?.name || 'Organization', href: '/' },
     { label: currentWorkspace?.name || 'Workspace' },
     { label: 'Administração' },
   ]

@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronsUpDown, LogOut, User as UserIcon } from "lucide-react"
+import { ChevronsUpDown, LogOut, Building } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
@@ -17,20 +17,18 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { useAuth } from "@/components/providers/auth-provider"
-import { useUser } from "@/lib/stores/app.store"
+import { useUser, useCurrentOrganization, useCurrentWorkspace } from "@/lib/stores/app.store"
 
 export function NavUser() {
   const router = useRouter()
   const { logout } = useAuth()
   const user = useUser()
+  const currentOrganization = useCurrentOrganization()
+  const currentWorkspace = useCurrentWorkspace()
 
   const handleLogout = async () => {
     await logout()
     router.push('/login')
-  }
-
-  const handleProfile = () => {
-    router.push('/profile')
   }
 
   if (!user) {
@@ -94,9 +92,16 @@ export function NavUser() {
 
             <DropdownMenuSeparator />
 
-            <DropdownMenuItem onClick={handleProfile}>
-              <UserIcon className="mr-2 h-4 w-4" />
-              Perfil
+            <DropdownMenuItem disabled className="text-sm text-muted-foreground">
+              <Building className="mr-2 h-4 w-4" />
+              <div className="flex flex-col">
+                <span className="text-xs">
+                  Org: {currentOrganization?.name || 'Nenhuma'}
+                </span>
+                <span className="text-xs">
+                  Workspace: {currentWorkspace?.name || 'Nenhum'}
+                </span>
+              </div>
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />

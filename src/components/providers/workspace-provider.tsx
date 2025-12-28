@@ -36,7 +36,7 @@ export function WorkspaceProvider({ children, orgId, workspaceId }: WorkspacePro
 
     if (!org) {
       if (!isLoading && organizations.length > 0) {
-        router.replace('/org')
+        router.replace('/')
       }
       return
     }
@@ -49,7 +49,7 @@ export function WorkspaceProvider({ children, orgId, workspaceId }: WorkspacePro
 
     if (!workspace) {
       if (!isLoading) {
-        router.replace(`/org/${orgId}`)
+        router.replace(`/${orgId}`)
       }
       return
     }
@@ -86,7 +86,7 @@ export function WorkspaceProvider({ children, orgId, workspaceId }: WorkspacePro
     return (
       <NotFoundState
         entity="Projeto"
-        backLink="/org"
+        backLink="/"
         backText="Voltar para organizações"
       />
     )

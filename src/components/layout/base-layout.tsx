@@ -19,24 +19,32 @@ export function BaseLayout({ children, className }: BaseLayoutProps) {
 
   return (
     <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset className="flex">
-        {/* Document Sidebar (secondary sidebar) */}
-        {documentsOpen && <DocumentSidebar />}
+      <div className="flex h-screen w-full">
+        {/* Main Sidebar */}
+        <AppSidebar />
 
-        {/* Main Content Area - 50% when viewer is open */}
-        <div
-          className={`flex-1 min-w-0 ${className || ''}`}
-          style={{
-            width: isDocumentViewerOpen ? '50%' : '100%',
-          }}
-        >
-          {children}
-        </div>
+        {/* Document Sidebar - appears next to main sidebar when open */}
+        {documentsOpen && (
+          <div className="w-72 border-r border-sidebar-border bg-sidebar">
+            <DocumentSidebar />
+          </div>
+        )}
 
-        {/* Document Viewer Panel - 50% width on the right */}
-        {isDocumentViewerOpen && <DocumentViewerPanel />}
-      </SidebarInset>
+        {/* Main Content Area */}
+        <SidebarInset className="flex-1 flex min-w-0">
+          <div
+            className={`h-full ${className || ''}`}
+            style={{
+              width: isDocumentViewerOpen ? '50%' : '100%',
+            }}
+          >
+            {children}
+          </div>
+
+          {/* Document Viewer Panel - 50% width on the right */}
+          {isDocumentViewerOpen && <DocumentViewerPanel />}
+        </SidebarInset>
+      </div>
     </SidebarProvider>
   )
 }

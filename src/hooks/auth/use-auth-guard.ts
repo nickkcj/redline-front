@@ -34,7 +34,7 @@ export function useAuthGuard(options: UseAuthGuardOptions = {}) {
     // Redirect authenticated users away from public pages
     if (isAuthenticated && redirectAuthenticated) {
       const returnUrl = new URLSearchParams(window.location.search).get('returnUrl')
-      const destination = returnUrl || '/org'
+      const destination = returnUrl || '/'
       router.push(destination)
       return
     }

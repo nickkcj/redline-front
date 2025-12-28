@@ -1,11 +1,8 @@
 "use client"
 
-import React, { useState, useEffect, useCallback } from 'react'
-import { Document, Page, pdfjs } from 'react-pdf'
-import { Loader2 } from 'lucide-react'
+import React, { useState } from 'react'
+import { Loader2, FileText, ExternalLink } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import 'react-pdf/dist/Page/AnnotationLayer.css'
-import 'react-pdf/dist/Page/TextLayer.css'
 
 interface PDFViewerProps {
   url: string
@@ -17,119 +14,72 @@ interface PDFViewerProps {
 export function PDFViewer({
   url,
   className,
-  scale = 1.0,
   onLoadSuccess
 }: PDFViewerProps) {
-  const [numPages, setNumPages] = useState<number>(0)
   const [loading, setLoading] = useState<boolean>(true)
   const [error, setError] = useState<string | null>(null)
-  const [pagesToRender, setPagesToRender] = useState<number>(10)
 
-  // Configure PDF.js worker only on client side
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
-    }
-  }, [])
-
-  const loadMorePages = useCallback(() => {
-    setPagesToRender(prev => Math.min(prev + 10, numPages))
-  }, [numPages])
-
-  // Presigned URL configuration - no auth headers needed
-  const fileConfig = React.useMemo(() => {
-    return {
-      url: url,
-      withCredentials: false, // Allow Range requests
-    }
-  }, [url])
-
-  const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
-    setNumPages(numPages)
+  const handleLoad = () => {
     setLoading(false)
     setError(null)
-    onLoadSuccess?.(numPages)
+    onLoadSuccess?.(1) // PDF loaded successfully
   }
 
-  const onDocumentLoadError = (error: Error) => {
+  const handleError = () => {
     setLoading(false)
-    const errorMessage = error.message || 'Erro ao carregar o PDF'
+    setError('Erro ao carregar o PDF')
+  }
 
-    if (errorMessage.includes('CORS') || errorMessage.includes('Failed to fetch')) {
-      setError('Erro de CORS ao carregar PDF')
-    } else {
-      setError(`Erro ao carregar o PDF: ${errorMessage}`)
-    }
+  const openInNewTab = () => {
+    window.open(url, '_blank')
   }
 
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-96 text-center">
-        <div className="text-destructive mb-2">⚠️</div>
-        <p className="text-sm text-muted-foreground">{error}</p>
+        <div className="text-destructive mb-4 text-4xl">⚠️</div>
+        <p className="text-sm text-muted-foreground mb-4">{error}</p>
+        <button
+          onClick={openInNewTab}
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+        >
+          <ExternalLink className="h-4 w-4" />
+          Abrir em nova aba
+        </button>
       </div>
     )
   }
 
   return (
     <div className={cn("flex flex-col h-full", className)}>
-      <div className="flex-1 overflow-auto bg-gray-100 dark:bg-gray-900">
-        <div className="flex justify-center py-4">
-          {loading && (
-            <div className="flex flex-col items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin mb-2" />
-              <p className="text-sm text-muted-foreground">Carregando PDF...</p>
-            </div>
-          )}
+      <div className="flex-1 bg-gray-100 dark:bg-gray-900">
+        {loading && (
+          <div className="flex flex-col items-center justify-center h-full">
+            <Loader2 className="h-8 w-8 animate-spin mb-4" />
+            <p className="text-sm text-muted-foreground">Carregando PDF...</p>
+          </div>
+        )}
 
-          <Document
-            file={fileConfig}
-            onLoadSuccess={onDocumentLoadSuccess}
-            onLoadError={onDocumentLoadError}
-            loading=""
-            className="max-w-full"
-          >
-            {numPages > 0 && (
-              <div className="flex flex-col gap-4">
-                {Array.from(new Array(Math.min(pagesToRender, numPages)), (el, index) => (
-                  <Page
-                    key={`page_${index + 1}`}
-                    pageNumber={index + 1}
-                    scale={scale}
-                    className="shadow-lg border border-gray-300 dark:border-gray-600"
-                    loading=""
-                    renderAnnotationLayer={true}
-                    renderTextLayer={true}
-                  />
-                ))}
+        <iframe
+          src={url}
+          className={cn("w-full h-full border-0", loading ? "hidden" : "block")}
+          onLoad={handleLoad}
+          onError={handleError}
+          title="PDF Viewer"
+        />
 
-                {/* Load more button */}
-                {pagesToRender < numPages && (
-                  <div className="flex flex-col items-center gap-4 py-8">
-                    <p className="text-sm text-muted-foreground">
-                      Mostrando {pagesToRender} de {numPages} páginas
-                    </p>
-                    <button
-                      onClick={loadMorePages}
-                      className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
-                    >
-                      Carregar mais 10 páginas
-                    </button>
-                  </div>
-                )}
-
-                {/* All pages loaded message */}
-                {pagesToRender >= numPages && numPages > 10 && (
-                  <div className="flex justify-center py-6">
-                    <p className="text-sm text-muted-foreground">
-                      ✓ Todas as {numPages} páginas foram carregadas
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
-          </Document>
-        </div>
+        {!loading && !error && (
+          <div className="absolute top-4 right-4">
+            <button
+              onClick={openInNewTab}
+              className="flex items-center gap-2 px-3 py-2 bg-primary/90 text-primary-foreground rounded-lg hover:bg-primary transition-colors text-sm"
+              title="Abrir em nova aba"
+            >
+              <ExternalLink className="h-4 w-4" />
+              Expandir
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )

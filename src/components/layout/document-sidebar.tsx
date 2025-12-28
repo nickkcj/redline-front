@@ -4,7 +4,7 @@ import * as React from "react"
 import { File, Upload, X, MoreVertical, Eye, Trash2, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
-  Sidebar,
+  SidebarProvider,
   SidebarContent,
   SidebarHeader,
   SidebarMenu,
@@ -41,7 +41,7 @@ export function DocumentSidebar({ className }: DocumentSidebarProps) {
 
   // Fetch documents and permissions
   const { data: documents = [], isLoading } = useDocuments(currentWorkspace?.id || '', {
-    enabled: !!currentWorkspace?.id && documentsOpen,
+    take: 100, // Load more documents
   })
 
   const { data: userPermissions = [] } = usePermissions(currentWorkspace?.id || '')
@@ -113,34 +113,31 @@ export function DocumentSidebar({ className }: DocumentSidebarProps) {
   }
 
   return (
-    <Sidebar
-      className={cn("border-r", className)}
-      collapsible="none"
-      side="left"
-    >
-      <SidebarHeader>
+    <SidebarProvider>
+      <div
+        className={cn("w-72 h-full bg-sidebar border-r border-sidebar-border flex flex-col", className)}
+      >
+        <SidebarHeader>
         <div className="flex items-center justify-between p-3">
           <h3 className="font-semibold text-base">Documentos</h3>
           <div className="flex items-center gap-2">
-            {canWrite && (
-              <>
-                <Button
-                  size="sm"
-                  onClick={handleUploadClick}
-                  disabled={isUploading}
-                >
-                  <Upload className="h-4 w-4 mr-2" />
-                  Upload
-                </Button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  className="hidden"
-                  onChange={handleFileChange}
-                  disabled={isUploading}
-                />
-              </>
-            )}
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={handleUploadClick}
+              disabled={isUploading}
+              className="h-8 px-3"
+            >
+              <Upload className="h-3 w-3 mr-1" />
+              <span className="text-xs">{isUploading ? '...' : 'Upload'}</span>
+            </Button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              className="hidden"
+              onChange={handleFileChange}
+              disabled={isUploading}
+            />
             <Button
               variant="ghost"
               size="sm"
@@ -178,15 +175,19 @@ export function DocumentSidebar({ className }: DocumentSidebarProps) {
           <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
             <File className="h-12 w-12 text-muted-foreground mb-4" />
             <p className="text-sm font-medium mb-1">Nenhum documento</p>
-            <p className="text-xs text-muted-foreground mb-4">
+            <p className="text-xs text-muted-foreground mb-6">
               Faça upload do primeiro documento
             </p>
-            {canWrite && (
-              <Button size="sm" onClick={handleUploadClick}>
-                <Upload className="h-4 w-4 mr-2" />
-                Upload
-              </Button>
-            )}
+            <Button
+              onClick={handleUploadClick}
+              disabled={isUploading}
+              className="w-full"
+              size="sm"
+              variant="outline"
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              {isUploading ? 'Enviando...' : 'Fazer Upload'}
+            </Button>
           </div>
         )}
 
@@ -234,6 +235,7 @@ export function DocumentSidebar({ className }: DocumentSidebarProps) {
           </SidebarMenu>
         )}
       </SidebarContent>
-    </Sidebar>
+    </div>
+    </SidebarProvider>
   )
 }

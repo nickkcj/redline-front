@@ -5,7 +5,7 @@ export default function NotFound() {
     <NotFoundState
       entity="Página"
       message="Página não encontrada"
-      backLink="/org"
+      backLink="/"
       backText="Voltar para organizações"
     />
   )

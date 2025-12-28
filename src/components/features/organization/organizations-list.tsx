@@ -25,7 +25,7 @@ import {
 
 export function OrganizationsList() {
   const router = useRouter()
-  const { user: authUser } = useAuth()
+  const { user: authUser, isLoading: authLoading } = useAuth()
   const setCurrentOrganization = useSetCurrentOrganization()
   const setCurrentWorkspace = useSetCurrentWorkspace()
   const displayName = useDisplayName()
@@ -134,7 +134,10 @@ export function OrganizationsList() {
     }
   }
 
-  if (orgsLoading) {
+  // Show loading while auth is loading OR while orgs are loading OR when auth finished but no user yet
+  const isLoading = authLoading || orgsLoading || (!authLoading && !authUser)
+
+  if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="@container/main flex flex-col gap-6 py-6">

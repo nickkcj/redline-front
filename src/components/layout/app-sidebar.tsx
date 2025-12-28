@@ -28,7 +28,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { documentsOpen, toggleDocuments } = useSidebarControl()
 
   const handleLogoClick = () => {
-    router.push('/org')
+    router.push('/')
   }
 
   // Build navigation items based on current org/workspace
@@ -40,12 +40,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     return [
       {
         title: "Chat",
-        url: `/org/${currentOrganization.id}/workspace/${currentWorkspace.id}`,
+        url: `/${currentOrganization.id}/workspace/${currentWorkspace.id}`,
         icon: MessageSquare,
       },
       {
         title: "Administração",
-        url: `/org/${currentOrganization.id}/workspace/${currentWorkspace.id}/admin`,
+        url: `/${currentOrganization.id}/workspace/${currentWorkspace.id}/admin`,
         icon: Settings,
       },
     ]
@@ -54,7 +54,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const navSecondaryItems = React.useMemo(() => {
     return [
       {
-        title: "Documentos",
+        title: documentsOpen ? "Fechar Documentos" : "Documentos",
         icon: Folder,
         onClick: toggleDocuments,
         isActive: documentsOpen,
@@ -65,29 +65,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader className="border-b border-sidebar-border">
-        {/* Logo Dooor */}
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              size="lg"
-              onClick={handleLogoClick}
-              className="cursor-pointer hover:bg-sidebar-accent"
-            >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary">
-                <Image
-                  src="/seloDooorBlack.png"
-                  alt="Logo Dooor"
-                  width={24}
-                  height={24}
-                  className="dark:invert"
-                />
-              </div>
-              <span className="font-bold text-lg">Dooor</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-
-        {/* Organization Switcher */}
+        {/* Organization Switcher with Logo */}
         <OrganizationSwitcher />
       </SidebarHeader>
 
