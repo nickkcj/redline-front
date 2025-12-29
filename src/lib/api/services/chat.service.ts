@@ -84,7 +84,7 @@ export class ChatService {
     const API_KEY = process.env.NEXT_PUBLIC_API_KEY || ''
     const sessionToken = tokenStore.getSessionToken()
 
-    const response = await fetch(`${API_BASE_URL}/chats/${workspaceId}/${chatId}/stream`, {
+    const response = await fetch(`${API_BASE_URL}/v1/chats/${workspaceId}/${chatId}/stream`, {
       method: 'POST',
       headers: {
         'X-API-Key': API_KEY,

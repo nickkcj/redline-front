@@ -60,6 +60,7 @@ export function ModernChatArea({
   const [optimisticMessages, setOptimisticMessages] = React.useState<OptimisticMessage[]>([])
   const [draggedDocumentIds, setDraggedDocumentIds] = React.useState<string[]>([])
   const [isDragOver, setIsDragOver] = React.useState(false)
+  const [finalStreamingContent, setFinalStreamingContent] = React.useState<string>('')
   const scrollAreaRef = React.useRef<HTMLDivElement>(null)
   const queryClient = useQueryClient()
 
@@ -88,17 +89,26 @@ export function ModernChatArea({
     clearStreamingContent,
   } = useStreamChat({
     onStreamEnd: () => {
+      console.log('Stream ended, saving final content and refreshing data')
+      // Save the final streaming content to prevent blank screen
+      setFinalStreamingContent(streamingContent)
       // Clear optimistic messages and refresh real data
       setOptimisticMessages([])
       queryClient.invalidateQueries({ queryKey: ["chat-messages", workspaceId, chatId] })
       queryClient.invalidateQueries({ queryKey: ["chats", workspaceId] })
       queryClient.invalidateQueries({ queryKey: ["chat", workspaceId, chatId] })
-      clearStreamingContent()
+      // Don't clear streaming content immediately - wait for real messages to load
     },
     onError: (error) => {
+      console.error('Stream error:', error)
       toast.error(error.message || "Erro ao processar mensagem")
       setOptimisticMessages([])
+      clearStreamingContent()
+      setFinalStreamingContent('')
     },
+    onContent: (content) => {
+      console.log('Streaming content update:', content.length, 'chars:', content.substring(0, 50) + '...')
+    }
   })
 
   // Combine server messages with optimistic messages
@@ -113,6 +123,15 @@ export function ModernChatArea({
     [markedDocs]
   )
 
+  // Clear final streaming content when real messages are loaded
+  React.useEffect(() => {
+    if (messagesData?.messages && finalStreamingContent) {
+      console.log('Real messages loaded, clearing final streaming content')
+      clearStreamingContent()
+      setFinalStreamingContent('')
+    }
+  }, [messagesData?.messages, finalStreamingContent, clearStreamingContent])
+
   // Auto-scroll to bottom
   React.useEffect(() => {
     if (scrollAreaRef.current) {
@@ -123,7 +142,7 @@ export function ModernChatArea({
         scrollElement.scrollTop = scrollElement.scrollHeight
       }
     }
-  }, [allMessages, streamingContent])
+  }, [allMessages, streamingContent, finalStreamingContent])
 
   const handleToggleDocument = React.useCallback(
     async (documentId: string, shouldMark: boolean) => {
@@ -388,29 +407,39 @@ export function ModernChatArea({
                 ))}
 
                 {/* Streaming message */}
-                {isStreaming && streamingContent && (
-                  <Message
-                    from="assistant"
-                    avatar={<MessageAvatar src="/ai-avatar.png" name="AI" />}
-                  >
-                    <MessageContent variant="flat" from="assistant">
-                      <Response>{streamingContent}</Response>
-                      <div className="flex items-center gap-1 mt-2">
-                        <span
-                          className="w-2 h-2 bg-primary rounded-full animate-bounce"
-                          style={{ animationDelay: "0ms" }}
-                        />
-                        <span
-                          className="w-2 h-2 bg-primary rounded-full animate-bounce"
-                          style={{ animationDelay: "150ms" }}
-                        />
-                        <span
-                          className="w-2 h-2 bg-primary rounded-full animate-bounce"
-                          style={{ animationDelay: "300ms" }}
-                        />
-                      </div>
-                    </MessageContent>
-                  </Message>
+                {(isStreaming || finalStreamingContent) && (streamingContent || finalStreamingContent) && (
+                  <>
+                    {console.log('Rendering streaming/final message:', {
+                      isStreaming,
+                      hasFinalContent: !!finalStreamingContent,
+                      streamingLength: streamingContent.length,
+                      finalLength: finalStreamingContent.length
+                    })}
+                    <Message
+                      from="assistant"
+                      avatar={<MessageAvatar src="/ai-avatar.png" name="AI" />}
+                    >
+                      <MessageContent variant="flat" from="assistant">
+                        <Response>{streamingContent || finalStreamingContent}</Response>
+                        {isStreaming && (
+                          <div className="flex items-center gap-1 mt-2">
+                            <span
+                              className="w-2 h-2 bg-primary rounded-full animate-bounce"
+                              style={{ animationDelay: "0ms" }}
+                            />
+                            <span
+                              className="w-2 h-2 bg-primary rounded-full animate-bounce"
+                              style={{ animationDelay: "150ms" }}
+                            />
+                            <span
+                              className="w-2 h-2 bg-primary rounded-full animate-bounce"
+                              style={{ animationDelay: "300ms" }}
+                            />
+                          </div>
+                        )}
+                      </MessageContent>
+                    </Message>
+                  </>
                 )}
               </>
             )}
