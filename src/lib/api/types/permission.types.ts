@@ -7,6 +7,7 @@
 export interface RoleDto {
   id: string
   name: string
+  displayName?: string
   description?: string
   workspaceId: string
   permissions: PermissionDto[]
