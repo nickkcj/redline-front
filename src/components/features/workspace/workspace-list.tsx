@@ -169,7 +169,7 @@ export function WorkspaceList() {
   if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="@container/main flex flex-col gap-6 py-6">
+        <div className="@container/main flex flex-col gap-6">
           <div>
             <Skeleton className="h-9 w-64" />
           </div>
@@ -190,7 +190,7 @@ export function WorkspaceList() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="@container/main flex flex-col gap-6 py-6">
+      <div className="@container/main flex flex-col gap-6">
         <WorkspacesHeader
           organizationName={currentOrganization?.name || 'Organização'}
           canCreateWorkspace={canManageWorkspaces}

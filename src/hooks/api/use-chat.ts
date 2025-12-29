@@ -308,12 +308,12 @@ export function useStreamChat(options?: {
   const [streamingContent, setStreamingContent] = useState('')
 
   const startStream = useCallback(
-    async (workspaceId: string, chatId: string, content: string, useWebSearch?: boolean) => {
+    async (workspaceId: string, chatId: string, content: string, useWebSearch?: boolean, documentIds?: string[]) => {
       setIsStreaming(true)
       setStreamingContent('')
 
       try {
-        const stream = await chatService.streamChat(workspaceId, chatId, content, useWebSearch)
+        const stream = await chatService.streamChat(workspaceId, chatId, content, useWebSearch, documentIds)
         let accumulatedContent = ''
 
         await parseSSEStream(stream, {

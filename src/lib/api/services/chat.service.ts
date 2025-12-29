@@ -77,7 +77,8 @@ export class ChatService {
     workspaceId: string,
     chatId: string,
     content: string,
-    useWebSearch?: boolean
+    useWebSearch?: boolean,
+    documentIds?: string[]
   ): Promise<ReadableStream<Uint8Array>> {
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001'
     const API_KEY = process.env.NEXT_PUBLIC_API_KEY || ''
@@ -92,7 +93,8 @@ export class ChatService {
       },
       body: JSON.stringify({
         content,
-        useWebSearch
+        useWebSearch,
+        documentIds
       }),
     })
 

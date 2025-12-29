@@ -1,15 +1,29 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
+import dynamic from "next/dynamic"
 import { Loader2, AlertCircle, X, Download, ExternalLink } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { PDFViewer } from "./pdf-viewer"
 import { MarkdownViewer } from "./markdown-viewer"
 import { ImageViewer } from "./image-viewer"
 import { TextViewer } from "./text-viewer"
 import { DocxViewer } from "./docx-viewer"
 import { useDocumentViewer } from "@/contexts/document-viewer-context"
+
+// Dynamic import for PDFViewer to avoid SSR issues with pdfjs
+const PDFViewer = dynamic(
+  () => import("./pdf-viewer").then((mod) => ({ default: mod.PDFViewer })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex flex-col items-center justify-center h-96">
+        <Loader2 className="h-12 w-12 animate-spin mb-4 text-primary" />
+        <p className="text-sm text-muted-foreground">Carregando visualizador PDF...</p>
+      </div>
+    ),
+  }
+)
 
 export function UnifiedDocumentViewer() {
   const {
@@ -106,7 +120,7 @@ export function UnifiedDocumentViewer() {
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && closeDocument()}>
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) closeDocument() }}>
       <DialogContent className="max-w-5xl h-[90vh] flex flex-col p-0">
         <DialogHeader className="px-6 py-4 border-b">
           <div className="flex items-center justify-between">
@@ -124,7 +138,15 @@ export function UnifiedDocumentViewer() {
                   <ExternalLink className="h-4 w-4" />
                 </Button>
               )}
-              <Button variant="ghost" size="sm" onClick={closeDocument}>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  closeDocument()
+                }}
+                title="Fechar"
+              >
                 <X className="h-4 w-4" />
               </Button>
             </div>

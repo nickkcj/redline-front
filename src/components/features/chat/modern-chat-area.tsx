@@ -58,6 +58,8 @@ export function ModernChatArea({
 }: ModernChatAreaProps) {
   const [useWebSearch, setUseWebSearch] = React.useState(false)
   const [optimisticMessages, setOptimisticMessages] = React.useState<OptimisticMessage[]>([])
+  const [draggedDocumentIds, setDraggedDocumentIds] = React.useState<string[]>([])
+  const [isDragOver, setIsDragOver] = React.useState(false)
   const scrollAreaRef = React.useRef<HTMLDivElement>(null)
   const queryClient = useQueryClient()
 
@@ -143,6 +145,47 @@ export function ModernChatArea({
     [chatId, markDocument, unmarkDocument]
   )
 
+  // Combine marked documents with dragged documents
+  const attachedDocumentIds = React.useMemo(() => {
+    return Array.from(new Set([...markedDocumentIds, ...draggedDocumentIds]))
+  }, [markedDocumentIds, draggedDocumentIds])
+
+  // Handle drag & drop
+  const handleDragOver = React.useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragOver(true)
+  }, [])
+
+  const handleDragLeave = React.useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragOver(false)
+  }, [])
+
+  const handleDrop = React.useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragOver(false)
+
+    try {
+      const data = e.dataTransfer.getData('application/json')
+      if (data) {
+        const { documentIds } = JSON.parse(data)
+        if (Array.isArray(documentIds)) {
+          setDraggedDocumentIds(prev => Array.from(new Set([...prev, ...documentIds])))
+          toast.success(`${documentIds.length} documento(s) adicionado(s)`)
+        }
+      }
+    } catch (error) {
+      console.error('Error processing drop:', error)
+    }
+  }, [])
+
+  const handleRemoveDocument = React.useCallback((docId: string) => {
+    setDraggedDocumentIds(prev => prev.filter(id => id !== docId))
+  }, [])
+
   const handleSubmit = React.useCallback(
     async (promptMessage: { text?: string; files?: any[] }) => {
       if (!promptMessage.text?.trim()) return
@@ -174,9 +217,17 @@ export function ModernChatArea({
         }
       }
 
-      // Start streaming
+      // Start streaming with attached documents
       try {
-        await startStream(workspaceId, targetChatId, userMessage, useWebSearch)
+        await startStream(
+          workspaceId,
+          targetChatId,
+          userMessage,
+          useWebSearch,
+          attachedDocumentIds.length > 0 ? attachedDocumentIds : undefined
+        )
+        // Clear dragged documents after sending
+        setDraggedDocumentIds([])
       } catch (error) {
         toast.error("Erro ao enviar mensagem")
         setOptimisticMessages([])
@@ -189,6 +240,7 @@ export function ModernChatArea({
       startStream,
       useWebSearch,
       onChatCreated,
+      attachedDocumentIds,
     ]
   )
 
@@ -271,7 +323,28 @@ export function ModernChatArea({
 
   // Chat view
   return (
-    <div className={cn("flex flex-col h-full bg-background", className)}>
+    <div
+      className={cn(
+        "flex flex-col h-full bg-background relative",
+        isDragOver && "ring-2 ring-primary ring-inset",
+        className
+      )}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {/* Drag overlay */}
+      {isDragOver && (
+        <div className="absolute inset-0 bg-primary/10 z-50 flex items-center justify-center pointer-events-none">
+          <div className="bg-background border-2 border-dashed border-primary rounded-lg p-8">
+            <div className="flex flex-col items-center gap-2">
+              <FileText className="w-12 h-12 text-primary" />
+              <p className="text-lg font-medium">Solte para adicionar documentos</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Messages Area */}
       <div className="flex-1 min-h-0">
         <ScrollArea ref={scrollAreaRef} className="h-full">
@@ -331,13 +404,14 @@ export function ModernChatArea({
         </ScrollArea>
       </div>
 
-      {/* Marked Documents Badge */}
-      {markedDocs.length > 0 && (
+      {/* Attached Documents Badge - Show both marked and dragged */}
+      {attachedDocumentIds.length > 0 && (
         <div className="border-t border-border px-4 py-2 bg-accent/50">
           <div className="max-w-4xl mx-auto flex items-center gap-2 flex-wrap">
             <span className="text-xs font-medium text-muted-foreground">
-              Documentos no contexto:
+              Documentos anexados ({attachedDocumentIds.length}):
             </span>
+            {/* Marked documents */}
             {markedDocs.map((doc: any) => (
               <Badge
                 key={doc.id}
@@ -349,11 +423,34 @@ export function ModernChatArea({
                 <button
                   onClick={() => handleToggleDocument(doc.id, false)}
                   className="hover:bg-background rounded-full p-0.5 ml-1"
+                  title="Remover do contexto"
                 >
                   <X className="h-3 w-3" />
                 </button>
               </Badge>
             ))}
+            {/* Dragged documents */}
+            {draggedDocumentIds.map((docId) => {
+              const doc = documents.find(d => d.id === docId)
+              if (!doc) return null
+              return (
+                <Badge
+                  key={docId}
+                  variant="default"
+                  className="text-xs gap-1 pr-1 bg-primary/20"
+                >
+                  <FileText className="w-3 h-3" />
+                  <span className="max-w-[120px] truncate">{doc.name}</span>
+                  <button
+                    onClick={() => handleRemoveDocument(docId)}
+                    className="hover:bg-background rounded-full p-0.5 ml-1"
+                    title="Remover da mensagem"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              )
+            })}
           </div>
         </div>
       )}
