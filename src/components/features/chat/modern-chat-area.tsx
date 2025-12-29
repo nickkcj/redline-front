@@ -60,9 +60,17 @@ export function ModernChatArea({
   const [optimisticMessages, setOptimisticMessages] = React.useState<OptimisticMessage[]>([])
   const [draggedDocumentIds, setDraggedDocumentIds] = React.useState<string[]>([])
   const [isDragOver, setIsDragOver] = React.useState(false)
-  const [finalStreamingContent, setFinalStreamingContent] = React.useState<string>('')
   const scrollAreaRef = React.useRef<HTMLDivElement>(null)
   const queryClient = useQueryClient()
+  const lastSentMessageRef = React.useRef<string | null>(null)
+  const currentChatIdRef = React.useRef<string | null>(chatId)
+  const waitingForInvalidationRef = React.useRef(false)
+  const messageCountBeforeInvalidationRef = React.useRef(0)
+
+  // Keep chatId ref updated
+  React.useEffect(() => {
+    currentChatIdRef.current = chatId
+  }, [chatId])
 
   // Queries
   const { data: messagesData, isLoading: loadingMessages } = useChatMessages(
@@ -89,26 +97,30 @@ export function ModernChatArea({
     clearStreamingContent,
   } = useStreamChat({
     onStreamEnd: () => {
-      console.log('Stream ended, saving final content and refreshing data')
-      // Save the final streaming content to prevent blank screen
-      setFinalStreamingContent(streamingContent)
-      // Clear optimistic messages and refresh real data
-      setOptimisticMessages([])
-      queryClient.invalidateQueries({ queryKey: ["chat-messages", workspaceId, chatId] })
-      queryClient.invalidateQueries({ queryKey: ["chats", workspaceId] })
-      queryClient.invalidateQueries({ queryKey: ["chat", workspaceId, chatId] })
-      // Don't clear streaming content immediately - wait for real messages to load
+      console.log('Stream ended, marking waiting for invalidation')
+      // Mark that we're waiting for invalidation
+      waitingForInvalidationRef.current = true
+      messageCountBeforeInvalidationRef.current = messagesData?.messages?.length || 0
+
+      // Wait a bit to ensure backend has saved the messages
+      setTimeout(() => {
+        const activeChatId = currentChatIdRef.current
+        console.log('Invalidating queries after stream for chatId:', activeChatId)
+        if (activeChatId) {
+          queryClient.invalidateQueries({ queryKey: ["chat-messages", workspaceId, activeChatId] })
+          queryClient.invalidateQueries({ queryKey: ["chat", workspaceId, activeChatId] })
+        }
+        queryClient.invalidateQueries({ queryKey: ["chats", workspaceId] })
+      }, 300)
     },
     onError: (error) => {
       console.error('Stream error:', error)
       toast.error(error.message || "Erro ao processar mensagem")
       setOptimisticMessages([])
       clearStreamingContent()
-      setFinalStreamingContent('')
+      lastSentMessageRef.current = null
+      waitingForInvalidationRef.current = false
     },
-    onContent: (content) => {
-      console.log('Streaming content update:', content.length, 'chars:', content.substring(0, 50) + '...')
-    }
   })
 
   // Combine server messages with optimistic messages
@@ -123,14 +135,50 @@ export function ModernChatArea({
     [markedDocs]
   )
 
-  // Clear final streaming content when real messages are loaded
+  // Clear streaming content and optimistic messages when real messages include our sent message
   React.useEffect(() => {
-    if (messagesData?.messages && finalStreamingContent) {
-      console.log('Real messages loaded, clearing final streaming content')
-      clearStreamingContent()
-      setFinalStreamingContent('')
+    const currentMessageCount = messagesData?.messages?.length || 0
+    const previousCount = messageCountBeforeInvalidationRef.current
+
+    console.log('[useEffect] Checking if should clear optimistic:', {
+      isStreaming,
+      hasMessages: !!messagesData?.messages,
+      messageCount: currentMessageCount,
+      lastSent: lastSentMessageRef.current,
+      waitingForInvalidation: waitingForInvalidationRef.current,
+      messageCountChanged: currentMessageCount > previousCount,
+    })
+
+    // Don't clear if streaming or waiting for invalidation (unless messages actually updated)
+    if (isStreaming) return
+    if (waitingForInvalidationRef.current && currentMessageCount <= previousCount) {
+      console.log('[useEffect] Waiting for invalidation to complete, skipping clear')
+      return
     }
-  }, [messagesData?.messages, finalStreamingContent, clearStreamingContent])
+
+    // Messages have been updated after invalidation
+    if (waitingForInvalidationRef.current && currentMessageCount > previousCount) {
+      console.log('[useEffect] Messages updated after invalidation, can now clear')
+      waitingForInvalidationRef.current = false
+    }
+
+    if (messagesData?.messages && lastSentMessageRef.current) {
+      // Check if our last sent message is in the real messages
+      const hasOurMessage = messagesData.messages.some(
+        msg => msg.content.trim() === lastSentMessageRef.current?.trim()
+      )
+
+      console.log('[useEffect] Has our message in real messages?', hasOurMessage)
+
+      if (hasOurMessage) {
+        console.log('[useEffect] Real messages include our sent message, clearing optimistic state')
+        clearStreamingContent()
+        setOptimisticMessages([])
+        lastSentMessageRef.current = null
+        waitingForInvalidationRef.current = false
+      }
+    }
+  }, [messagesData?.messages, isStreaming, clearStreamingContent])
 
   // Auto-scroll to bottom
   React.useEffect(() => {
@@ -142,7 +190,7 @@ export function ModernChatArea({
         scrollElement.scrollTop = scrollElement.scrollHeight
       }
     }
-  }, [allMessages, streamingContent, finalStreamingContent])
+  }, [allMessages, streamingContent])
 
   const handleToggleDocument = React.useCallback(
     async (documentId: string, shouldMark: boolean) => {
@@ -210,34 +258,45 @@ export function ModernChatArea({
       if (!promptMessage.text?.trim()) return
 
       const userMessage = promptMessage.text.trim()
-      let targetChatId = chatId
 
-      // Add optimistic user message
+      // Save message to ref for tracking
+      lastSentMessageRef.current = userMessage
+
+      // Add user message optimistically IMMEDIATELY for instant feedback
       const optimisticUserMessage: OptimisticMessage = {
         id: `temp-user-${Date.now()}`,
         role: "user" as MessageRole,
         content: userMessage,
         isOptimistic: true,
       }
+      console.log('[handleSubmit] Adding optimistic message IMMEDIATELY:', userMessage)
       setOptimisticMessages([optimisticUserMessage])
 
-      // Create chat if needed
-      if (!targetChatId) {
-        try {
+      let targetChatId = chatId
+
+      try {
+        // Create chat if needed (with temporary title that will be auto-generated by AI)
+        if (!targetChatId) {
           const newChat = await createChat({
-            title: userMessage.slice(0, 50),
+            title: "Nova conversa...",
           })
           targetChatId = newChat.id
-          onChatCreated?.(targetChatId)
-        } catch (error) {
-          toast.error("Erro ao criar chat")
-          setOptimisticMessages([])
-          return
-        }
-      }
 
-      // Start streaming with attached documents
-      try {
+          // Update the ref IMMEDIATELY with new chatId
+          console.log('[handleSubmit] Created new chat, updating ref to:', targetChatId)
+          currentChatIdRef.current = targetChatId
+
+          // Call onChatCreated BEFORE starting stream to prevent URL change mid-stream
+          if (onChatCreated) {
+            await new Promise<void>((resolve) => {
+              onChatCreated(targetChatId!)
+              // Give a small delay for URL to update and component to settle
+              setTimeout(resolve, 150)
+            })
+          }
+        }
+
+        // Start streaming with attached documents
         await startStream(
           workspaceId,
           targetChatId,
@@ -245,11 +304,14 @@ export function ModernChatArea({
           useWebSearch,
           attachedDocumentIds.length > 0 ? attachedDocumentIds : undefined
         )
+
         // Clear dragged documents after sending
         setDraggedDocumentIds([])
       } catch (error) {
         toast.error("Erro ao enviar mensagem")
+        // Remove optimistic message on error
         setOptimisticMessages([])
+        lastSentMessageRef.current = null
       }
     },
     [
@@ -393,35 +455,22 @@ export function ModernChatArea({
                       {String(msg.role).toLowerCase() === "assistant" ? (
                         <Response>{msg.content}</Response>
                       ) : (
-                        <div className="whitespace-pre-wrap">
-                          {msg.content}
-                          {(msg as OptimisticMessage).isOptimistic && (
-                            <span className="ml-2 inline-flex items-center text-xs text-muted-foreground">
-                              <span className="animate-pulse">Enviando...</span>
-                            </span>
-                          )}
-                        </div>
+                        <div className="whitespace-pre-wrap">{msg.content}</div>
                       )}
                     </MessageContent>
                   </Message>
                 ))}
 
-                {/* Streaming message */}
-                {(isStreaming || finalStreamingContent) && (streamingContent || finalStreamingContent) && (
-                  <>
-                    {console.log('Rendering streaming/final message:', {
-                      isStreaming,
-                      hasFinalContent: !!finalStreamingContent,
-                      streamingLength: streamingContent.length,
-                      finalLength: finalStreamingContent.length
-                    })}
-                    <Message
-                      from="assistant"
-                      avatar={<MessageAvatar src="/ai-avatar.png" name="AI" />}
-                    >
-                      <MessageContent variant="flat" from="assistant">
-                        <Response>{streamingContent || finalStreamingContent}</Response>
-                        {isStreaming && (
+                {/* Streaming message or typing indicator */}
+                {isStreaming && (
+                  <Message
+                    from="assistant"
+                    avatar={<MessageAvatar src="/ai-avatar.png" name="AI" />}
+                  >
+                    <MessageContent variant="flat" from="assistant">
+                      {streamingContent ? (
+                        <>
+                          <Response>{streamingContent}</Response>
                           <div className="flex items-center gap-1 mt-2">
                             <span
                               className="w-2 h-2 bg-primary rounded-full animate-bounce"
@@ -436,10 +485,28 @@ export function ModernChatArea({
                               style={{ animationDelay: "300ms" }}
                             />
                           </div>
-                        )}
-                      </MessageContent>
-                    </Message>
-                  </>
+                        </>
+                      ) : (
+                        <div className="flex items-center gap-2 py-2">
+                          <div className="flex items-center gap-1">
+                            <span
+                              className="w-2 h-2 bg-primary/60 rounded-full animate-bounce"
+                              style={{ animationDelay: "0ms" }}
+                            />
+                            <span
+                              className="w-2 h-2 bg-primary/60 rounded-full animate-bounce"
+                              style={{ animationDelay: "150ms" }}
+                            />
+                            <span
+                              className="w-2 h-2 bg-primary/60 rounded-full animate-bounce"
+                              style={{ animationDelay: "300ms" }}
+                            />
+                          </div>
+                          <span className="text-sm text-muted-foreground">Pensando...</span>
+                        </div>
+                      )}
+                    </MessageContent>
+                  </Message>
                 )}
               </>
             )}
