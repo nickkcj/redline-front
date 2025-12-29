@@ -1,12 +1,13 @@
 "use client"
 
 import * as React from "react"
-import { Users, History, Settings, CreditCard } from "lucide-react"
+import { Users, History, Settings, CreditCard, Mail } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BreadcrumbHeader } from "@/components/layout/breadcrumb-header"
 import { MembersTab } from "@/components/features/admin/members-tab"
 import { RBACTab } from "@/components/features/admin/rbac-tab"
 import { AuditLogsTab } from "@/components/features/admin/audit-logs-tab"
+import { InvitesTab } from "@/components/features/admin/invites-tab"
 import { useCurrentOrganization, useCurrentWorkspace } from "@/lib/stores/app.store"
 
 interface AdminPageProps {
@@ -82,11 +83,16 @@ export default function AdminPage({ params }: AdminPageProps) {
               <Tabs defaultValue="members">
                 <TabsList className="w-auto">
                   <TabsTrigger value="members">Membros</TabsTrigger>
+                  <TabsTrigger value="invites">Convites</TabsTrigger>
                   <TabsTrigger value="roles">Funções</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="members" className="mt-6">
                   <MembersTab workspaceId={resolvedParams.workspaceId} />
+                </TabsContent>
+
+                <TabsContent value="invites" className="mt-6">
+                  <InvitesTab workspaceId={resolvedParams.workspaceId} />
                 </TabsContent>
 
                 <TabsContent value="roles" className="mt-6">

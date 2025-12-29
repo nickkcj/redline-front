@@ -61,27 +61,73 @@ export type WorkspaceListResponse = WorkspaceResponseDto[]
 // ========== WORKSPACE INVITES ==========
 
 /**
- * POST /workspace/:workspaceId/invites
- * Request para criar convite
+ * Role completo como retornado em convites pelo backend
  */
-export interface CreateWorkspaceInviteRequestDto {
-  role?: WorkspaceRole
+export interface WorkspaceInviteRoleDto {
+  id: string
+  name: string
+  displayName: string
+  description?: string
 }
 
 /**
- * Response de criar convite
+ * Organization básica como retornada em invites
  */
-export interface WorkspaceInviteLinkResponseDto {
+export interface OrganizationSummaryDto {
+  id: string
+  name: string
+  description?: string
+}
+
+/**
+ * Workspace completo como retornado em invites
+ */
+export interface WorkspaceWithOrganizationDto {
+  id: string
+  name: string
+  description?: string
+  organization: OrganizationSummaryDto
+}
+
+/**
+ * POST /workspaces/:workspaceId/invites
+ * Request para criar convite por email
+ */
+export interface CreateWorkspaceInviteDto {
+  email: string
+  roleId: string
+}
+
+/**
+ * GET /workspaces/:workspaceId/invites
+ * POST /workspaces/:workspaceId/invites
+ * Response completa de convite
+ */
+export interface WorkspaceInviteResponseDto {
+  id: string
+  email: string
   code: string
-  inviteLink: string
-  expiresAt: string
-  role: WorkspaceRole
+  role: WorkspaceInviteRoleDto
+  workspace: WorkspaceWithOrganizationDto
+  expiresAt: Date
+  createdAt: Date
+  isUsed: boolean
 }
 
 /**
- * POST /workspace/:workspaceId/invites/use
+ * DELETE /workspaces/:workspaceId/invites/:inviteId
+ * Sem body, retorna 204 No Content
+ */
+
+/**
+ * POST /workspaces/:workspaceId/members/invites/use
  * Request para usar convite
  */
-export interface UseWorkspaceInviteRequestDto {
+export interface UseWorkspaceInviteDto {
   code: string
 }
+
+/**
+ * Lista de convites pendentes do usuário
+ */
+export type PendingInvitesListResponse = WorkspaceInviteResponseDto[]

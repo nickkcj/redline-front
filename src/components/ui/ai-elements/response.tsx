@@ -2,21 +2,34 @@
 
 import { cn } from "@/lib/utils";
 import { type ComponentProps, memo } from "react";
-import { Streamdown } from "streamdown";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
-type ResponseProps = ComponentProps<typeof Streamdown>;
+type ResponseProps = {
+  children: string | React.ReactNode;
+  className?: string;
+};
 
 export const Response = memo(
-  ({ className, ...props }: ResponseProps) => (
-    <Streamdown
-      className={cn(
-        "size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0",
-        className
-      )}
-      {...props}
-    />
-  ),
-  (prevProps, nextProps) => prevProps.children === nextProps.children
+  ({ className, children }: ResponseProps) => {
+    const content = typeof children === 'string' ? children : String(children || '');
+
+    return (
+      <div className={cn("text-sm text-foreground", className)}>
+        <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          p: ({ children }) => <p className="mb-2">{children}</p>,
+          strong: ({ children }) => <strong className="font-bold">{children}</strong>,
+          ul: ({ children }) => <ul className="list-disc list-inside ml-4 mb-2">{children}</ul>,
+          li: ({ children }) => <li className="mb-1">{children}</li>,
+        }}
+      >
+        {content}
+      </ReactMarkdown>
+    </div>
+    );
+  }
 );
 
 Response.displayName = "Response";

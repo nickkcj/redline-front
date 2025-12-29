@@ -58,8 +58,19 @@ export function ModernChatArea({
 }: ModernChatAreaProps) {
   const [useWebSearch, setUseWebSearch] = React.useState(false)
   const [optimisticMessages, setOptimisticMessages] = React.useState<OptimisticMessage[]>([])
+  const [draggedDocumentIds, setDraggedDocumentIds] = React.useState<string[]>([])
+  const [isDragOver, setIsDragOver] = React.useState(false)
   const scrollAreaRef = React.useRef<HTMLDivElement>(null)
   const queryClient = useQueryClient()
+  const lastSentMessageRef = React.useRef<string | null>(null)
+  const currentChatIdRef = React.useRef<string | null>(chatId)
+  const waitingForInvalidationRef = React.useRef(false)
+  const messageCountBeforeInvalidationRef = React.useRef(0)
+
+  // Keep chatId ref updated
+  React.useEffect(() => {
+    currentChatIdRef.current = chatId
+  }, [chatId])
 
   // Queries
   const { data: messagesData, isLoading: loadingMessages } = useChatMessages(
@@ -86,16 +97,29 @@ export function ModernChatArea({
     clearStreamingContent,
   } = useStreamChat({
     onStreamEnd: () => {
-      // Clear optimistic messages and refresh real data
-      setOptimisticMessages([])
-      queryClient.invalidateQueries({ queryKey: ["chat-messages", workspaceId, chatId] })
-      queryClient.invalidateQueries({ queryKey: ["chats", workspaceId] })
-      queryClient.invalidateQueries({ queryKey: ["chat", workspaceId, chatId] })
-      clearStreamingContent()
+      console.log('Stream ended, marking waiting for invalidation')
+      // Mark that we're waiting for invalidation
+      waitingForInvalidationRef.current = true
+      messageCountBeforeInvalidationRef.current = messagesData?.messages?.length || 0
+
+      // Wait a bit to ensure backend has saved the messages
+      setTimeout(() => {
+        const activeChatId = currentChatIdRef.current
+        console.log('Invalidating queries after stream for chatId:', activeChatId)
+        if (activeChatId) {
+          queryClient.invalidateQueries({ queryKey: ["chat-messages", workspaceId, activeChatId] })
+          queryClient.invalidateQueries({ queryKey: ["chat", workspaceId, activeChatId] })
+        }
+        queryClient.invalidateQueries({ queryKey: ["chats", workspaceId] })
+      }, 300)
     },
     onError: (error) => {
+      console.error('Stream error:', error)
       toast.error(error.message || "Erro ao processar mensagem")
       setOptimisticMessages([])
+      clearStreamingContent()
+      lastSentMessageRef.current = null
+      waitingForInvalidationRef.current = false
     },
   })
 
@@ -110,6 +134,51 @@ export function ModernChatArea({
     () => markedDocs.map((doc: any) => doc.id),
     [markedDocs]
   )
+
+  // Clear streaming content and optimistic messages when real messages include our sent message
+  React.useEffect(() => {
+    const currentMessageCount = messagesData?.messages?.length || 0
+    const previousCount = messageCountBeforeInvalidationRef.current
+
+    console.log('[useEffect] Checking if should clear optimistic:', {
+      isStreaming,
+      hasMessages: !!messagesData?.messages,
+      messageCount: currentMessageCount,
+      lastSent: lastSentMessageRef.current,
+      waitingForInvalidation: waitingForInvalidationRef.current,
+      messageCountChanged: currentMessageCount > previousCount,
+    })
+
+    // Don't clear if streaming or waiting for invalidation (unless messages actually updated)
+    if (isStreaming) return
+    if (waitingForInvalidationRef.current && currentMessageCount <= previousCount) {
+      console.log('[useEffect] Waiting for invalidation to complete, skipping clear')
+      return
+    }
+
+    // Messages have been updated after invalidation
+    if (waitingForInvalidationRef.current && currentMessageCount > previousCount) {
+      console.log('[useEffect] Messages updated after invalidation, can now clear')
+      waitingForInvalidationRef.current = false
+    }
+
+    if (messagesData?.messages && lastSentMessageRef.current) {
+      // Check if our last sent message is in the real messages
+      const hasOurMessage = messagesData.messages.some(
+        msg => msg.content.trim() === lastSentMessageRef.current?.trim()
+      )
+
+      console.log('[useEffect] Has our message in real messages?', hasOurMessage)
+
+      if (hasOurMessage) {
+        console.log('[useEffect] Real messages include our sent message, clearing optimistic state')
+        clearStreamingContent()
+        setOptimisticMessages([])
+        lastSentMessageRef.current = null
+        waitingForInvalidationRef.current = false
+      }
+    }
+  }, [messagesData?.messages, isStreaming, clearStreamingContent])
 
   // Auto-scroll to bottom
   React.useEffect(() => {
@@ -143,43 +212,106 @@ export function ModernChatArea({
     [chatId, markDocument, unmarkDocument]
   )
 
+  // Combine marked documents with dragged documents
+  const attachedDocumentIds = React.useMemo(() => {
+    return Array.from(new Set([...markedDocumentIds, ...draggedDocumentIds]))
+  }, [markedDocumentIds, draggedDocumentIds])
+
+  // Handle drag & drop
+  const handleDragOver = React.useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragOver(true)
+  }, [])
+
+  const handleDragLeave = React.useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragOver(false)
+  }, [])
+
+  const handleDrop = React.useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragOver(false)
+
+    try {
+      const data = e.dataTransfer.getData('application/json')
+      if (data) {
+        const { documentIds } = JSON.parse(data)
+        if (Array.isArray(documentIds)) {
+          setDraggedDocumentIds(prev => Array.from(new Set([...prev, ...documentIds])))
+          toast.success(`${documentIds.length} documento(s) adicionado(s)`)
+        }
+      }
+    } catch (error) {
+      console.error('Error processing drop:', error)
+    }
+  }, [])
+
+  const handleRemoveDocument = React.useCallback((docId: string) => {
+    setDraggedDocumentIds(prev => prev.filter(id => id !== docId))
+  }, [])
+
   const handleSubmit = React.useCallback(
     async (promptMessage: { text?: string; files?: any[] }) => {
       if (!promptMessage.text?.trim()) return
 
       const userMessage = promptMessage.text.trim()
-      let targetChatId = chatId
 
-      // Add optimistic user message
+      // Save message to ref for tracking
+      lastSentMessageRef.current = userMessage
+
+      // Add user message optimistically IMMEDIATELY for instant feedback
       const optimisticUserMessage: OptimisticMessage = {
         id: `temp-user-${Date.now()}`,
         role: "user" as MessageRole,
         content: userMessage,
         isOptimistic: true,
       }
+      console.log('[handleSubmit] Adding optimistic message IMMEDIATELY:', userMessage)
       setOptimisticMessages([optimisticUserMessage])
 
-      // Create chat if needed
-      if (!targetChatId) {
-        try {
+      let targetChatId = chatId
+
+      try {
+        // Create chat if needed (with temporary title that will be auto-generated by AI)
+        if (!targetChatId) {
           const newChat = await createChat({
-            title: userMessage.slice(0, 50),
+            title: "Nova conversa...",
           })
           targetChatId = newChat.id
-          onChatCreated?.(targetChatId)
-        } catch (error) {
-          toast.error("Erro ao criar chat")
-          setOptimisticMessages([])
-          return
-        }
-      }
 
-      // Start streaming
-      try {
-        await startStream(workspaceId, targetChatId, userMessage, useWebSearch)
+          // Update the ref IMMEDIATELY with new chatId
+          console.log('[handleSubmit] Created new chat, updating ref to:', targetChatId)
+          currentChatIdRef.current = targetChatId
+
+          // Call onChatCreated BEFORE starting stream to prevent URL change mid-stream
+          if (onChatCreated) {
+            await new Promise<void>((resolve) => {
+              onChatCreated(targetChatId!)
+              // Give a small delay for URL to update and component to settle
+              setTimeout(resolve, 150)
+            })
+          }
+        }
+
+        // Start streaming with attached documents
+        await startStream(
+          workspaceId,
+          targetChatId,
+          userMessage,
+          useWebSearch,
+          attachedDocumentIds.length > 0 ? attachedDocumentIds : undefined
+        )
+
+        // Clear dragged documents after sending
+        setDraggedDocumentIds([])
       } catch (error) {
         toast.error("Erro ao enviar mensagem")
+        // Remove optimistic message on error
         setOptimisticMessages([])
+        lastSentMessageRef.current = null
       }
     },
     [
@@ -189,6 +321,7 @@ export function ModernChatArea({
       startStream,
       useWebSearch,
       onChatCreated,
+      attachedDocumentIds,
     ]
   )
 
@@ -271,7 +404,28 @@ export function ModernChatArea({
 
   // Chat view
   return (
-    <div className={cn("flex flex-col h-full bg-background", className)}>
+    <div
+      className={cn(
+        "flex flex-col h-full bg-background relative",
+        isDragOver && "ring-2 ring-primary ring-inset",
+        className
+      )}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {/* Drag overlay */}
+      {isDragOver && (
+        <div className="absolute inset-0 bg-primary/10 z-50 flex items-center justify-center pointer-events-none">
+          <div className="bg-background border-2 border-dashed border-primary rounded-lg p-8">
+            <div className="flex flex-col items-center gap-2">
+              <FileText className="w-12 h-12 text-primary" />
+              <p className="text-lg font-medium">Solte para adicionar documentos</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Messages Area */}
       <div className="flex-1 min-h-0">
         <ScrollArea ref={scrollAreaRef} className="h-full">
@@ -283,17 +437,22 @@ export function ModernChatArea({
             ) : (
               <>
                 {allMessages.map((msg) => (
-                  <Message key={msg.id} from={msg.role}>
-                    <MessageAvatar
-                      src={
-                        msg.role === "user"
-                          ? "/user-avatar.png"
-                          : "/ai-avatar.png"
-                      }
-                      name={msg.role === "user" ? "You" : "AI"}
-                    />
-                    <MessageContent variant="flat">
-                      {msg.role === "assistant" ? (
+                  <Message
+                    key={msg.id}
+                    from={msg.role}
+                    avatar={
+                      <MessageAvatar
+                        src={
+                          String(msg.role).toLowerCase() === "user"
+                            ? "/user-avatar.png"
+                            : "/ai-avatar.png"
+                        }
+                        name={String(msg.role).toLowerCase() === "user" ? "You" : "AI"}
+                      />
+                    }
+                  >
+                    <MessageContent variant="flat" from={msg.role}>
+                      {String(msg.role).toLowerCase() === "assistant" ? (
                         <Response>{msg.content}</Response>
                       ) : (
                         <div className="whitespace-pre-wrap">{msg.content}</div>
@@ -302,26 +461,50 @@ export function ModernChatArea({
                   </Message>
                 ))}
 
-                {/* Streaming message */}
-                {isStreaming && streamingContent && (
-                  <Message from="assistant">
-                    <MessageAvatar src="/ai-avatar.png" name="AI" />
-                    <MessageContent variant="flat">
-                      <Response>{streamingContent}</Response>
-                      <div className="flex items-center gap-1 mt-2">
-                        <span
-                          className="w-2 h-2 bg-primary rounded-full animate-bounce"
-                          style={{ animationDelay: "0ms" }}
-                        />
-                        <span
-                          className="w-2 h-2 bg-primary rounded-full animate-bounce"
-                          style={{ animationDelay: "150ms" }}
-                        />
-                        <span
-                          className="w-2 h-2 bg-primary rounded-full animate-bounce"
-                          style={{ animationDelay: "300ms" }}
-                        />
-                      </div>
+                {/* Streaming message or typing indicator */}
+                {isStreaming && (
+                  <Message
+                    from="assistant"
+                    avatar={<MessageAvatar src="/ai-avatar.png" name="AI" />}
+                  >
+                    <MessageContent variant="flat" from="assistant">
+                      {streamingContent ? (
+                        <>
+                          <Response>{streamingContent}</Response>
+                          <div className="flex items-center gap-1 mt-2">
+                            <span
+                              className="w-2 h-2 bg-primary rounded-full animate-bounce"
+                              style={{ animationDelay: "0ms" }}
+                            />
+                            <span
+                              className="w-2 h-2 bg-primary rounded-full animate-bounce"
+                              style={{ animationDelay: "150ms" }}
+                            />
+                            <span
+                              className="w-2 h-2 bg-primary rounded-full animate-bounce"
+                              style={{ animationDelay: "300ms" }}
+                            />
+                          </div>
+                        </>
+                      ) : (
+                        <div className="flex items-center gap-2 py-2">
+                          <div className="flex items-center gap-1">
+                            <span
+                              className="w-2 h-2 bg-primary/60 rounded-full animate-bounce"
+                              style={{ animationDelay: "0ms" }}
+                            />
+                            <span
+                              className="w-2 h-2 bg-primary/60 rounded-full animate-bounce"
+                              style={{ animationDelay: "150ms" }}
+                            />
+                            <span
+                              className="w-2 h-2 bg-primary/60 rounded-full animate-bounce"
+                              style={{ animationDelay: "300ms" }}
+                            />
+                          </div>
+                          <span className="text-sm text-muted-foreground">Pensando...</span>
+                        </div>
+                      )}
                     </MessageContent>
                   </Message>
                 )}
@@ -331,13 +514,14 @@ export function ModernChatArea({
         </ScrollArea>
       </div>
 
-      {/* Marked Documents Badge */}
-      {markedDocs.length > 0 && (
+      {/* Attached Documents Badge - Show both marked and dragged */}
+      {attachedDocumentIds.length > 0 && (
         <div className="border-t border-border px-4 py-2 bg-accent/50">
           <div className="max-w-4xl mx-auto flex items-center gap-2 flex-wrap">
             <span className="text-xs font-medium text-muted-foreground">
-              Documentos no contexto:
+              Documentos anexados ({attachedDocumentIds.length}):
             </span>
+            {/* Marked documents */}
             {markedDocs.map((doc: any) => (
               <Badge
                 key={doc.id}
@@ -349,11 +533,34 @@ export function ModernChatArea({
                 <button
                   onClick={() => handleToggleDocument(doc.id, false)}
                   className="hover:bg-background rounded-full p-0.5 ml-1"
+                  title="Remover do contexto"
                 >
                   <X className="h-3 w-3" />
                 </button>
               </Badge>
             ))}
+            {/* Dragged documents */}
+            {draggedDocumentIds.map((docId) => {
+              const doc = documents.find(d => d.id === docId)
+              if (!doc) return null
+              return (
+                <Badge
+                  key={docId}
+                  variant="default"
+                  className="text-xs gap-1 pr-1 bg-primary/20"
+                >
+                  <FileText className="w-3 h-3" />
+                  <span className="max-w-[120px] truncate">{doc.name}</span>
+                  <button
+                    onClick={() => handleRemoveDocument(docId)}
+                    className="hover:bg-background rounded-full p-0.5 ml-1"
+                    title="Remover da mensagem"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              )
+            })}
           </div>
         </div>
       )}

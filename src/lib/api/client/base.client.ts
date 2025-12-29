@@ -12,10 +12,13 @@ class BaseApiClient {
   private readonly apiVersion: string = 'v1'
 
   constructor(
-    baseUrl: string = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001',
+    baseUrl: string = process.env.NEXT_PUBLIC_API_URL || process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001',
     privateKey: string = process.env.NEXT_PUBLIC_API_KEY || ''
   ) {
-    this.baseUrl = `${baseUrl}/${this.apiVersion}`
+    // If baseUrl already includes the version, use it as is
+    // Otherwise, append the version
+    const hasVersion = baseUrl.includes(`/${this.apiVersion}`)
+    this.baseUrl = hasVersion ? baseUrl : `${baseUrl}/${this.apiVersion}`
     this.privateKey = privateKey
   }
 

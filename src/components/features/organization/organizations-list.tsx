@@ -22,6 +22,7 @@ import {
   OrganizationEditModal,
   OrganizationDeleteModal,
 } from "@/components/features/organization/"
+import { PendingInvitesBanner } from "@/components/features/organization/pending-invites-banner"
 
 export function OrganizationsList() {
   const router = useRouter()
@@ -194,6 +195,8 @@ export function OrganizationsList() {
         </div>
 
         <div className="space-y-6">
+          <PendingInvitesBanner />
+
           <OrganizationsHeader
             organizationCount={organizations?.length || 0}
             onCreateClick={() => setShowCreateModal(true)}

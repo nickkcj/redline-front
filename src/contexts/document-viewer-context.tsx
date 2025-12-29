@@ -127,6 +127,15 @@ export function DocumentViewerProvider({ children }: { children: React.ReactNode
     }
   }, [error])
 
+  // Transform HTTP → HTTPS using harbor proxy to avoid Mixed Content errors
+  const transformedViewUrl = React.useMemo(() => {
+    const rawUrl = documentData?.viewUrl
+    if (!rawUrl) return undefined
+
+    // Transform http://35.225.43.68[:port] → https://api.harbor.dooor.ai
+    return rawUrl.replace(/http:\/\/35\.225\.43\.68(:\d+)?/, 'https://api.harbor.dooor.ai')
+  }, [documentData?.viewUrl])
+
   const value: DocumentViewerContextType = {
     // State
     isOpen: state.isOpen,
@@ -134,7 +143,7 @@ export function DocumentViewerProvider({ children }: { children: React.ReactNode
     documentName: state.documentName,
 
     // Data
-    viewUrl: documentData?.viewUrl,
+    viewUrl: transformedViewUrl,
     fileName: documentData?.filename || state.documentName,
     isLoading,
     error,

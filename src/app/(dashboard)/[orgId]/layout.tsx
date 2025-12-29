@@ -13,9 +13,7 @@ export default async function OrgLayout({ children, params }: OrgLayoutProps) {
   return (
     <Suspense fallback={null}>
       <OrganizationProvider orgId={orgId}>
-        <DashboardWrapper>
-          {children}
-        </DashboardWrapper>
+        {children}
       </OrganizationProvider>
     </Suspense>
   );
