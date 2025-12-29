@@ -31,11 +31,12 @@ export function BaseLayout({ children, className }: BaseLayoutProps) {
         )}
 
         {/* Main Content Area */}
-        <SidebarInset className="flex-1 flex min-w-0">
+        <SidebarInset className="flex-1 flex flex-row min-w-0">
           <div
             className={`h-full ${className || ''}`}
             style={{
               width: isDocumentViewerOpen ? '50%' : '100%',
+              transition: 'width 0.2s ease-in-out',
             }}
           >
             {children}

@@ -356,20 +356,32 @@ export function ModernChatArea({
             ) : (
               <>
                 {allMessages.map((msg) => (
-                  <Message key={msg.id} from={msg.role}>
-                    <MessageAvatar
-                      src={
-                        msg.role === "user"
-                          ? "/user-avatar.png"
-                          : "/ai-avatar.png"
-                      }
-                      name={msg.role === "user" ? "You" : "AI"}
-                    />
-                    <MessageContent variant="flat">
-                      {msg.role === "assistant" ? (
+                  <Message
+                    key={msg.id}
+                    from={msg.role}
+                    avatar={
+                      <MessageAvatar
+                        src={
+                          String(msg.role).toLowerCase() === "user"
+                            ? "/user-avatar.png"
+                            : "/ai-avatar.png"
+                        }
+                        name={String(msg.role).toLowerCase() === "user" ? "You" : "AI"}
+                      />
+                    }
+                  >
+                    <MessageContent variant="flat" from={msg.role}>
+                      {String(msg.role).toLowerCase() === "assistant" ? (
                         <Response>{msg.content}</Response>
                       ) : (
-                        <div className="whitespace-pre-wrap">{msg.content}</div>
+                        <div className="whitespace-pre-wrap">
+                          {msg.content}
+                          {(msg as OptimisticMessage).isOptimistic && (
+                            <span className="ml-2 inline-flex items-center text-xs text-muted-foreground">
+                              <span className="animate-pulse">Enviando...</span>
+                            </span>
+                          )}
+                        </div>
                       )}
                     </MessageContent>
                   </Message>
@@ -377,9 +389,11 @@ export function ModernChatArea({
 
                 {/* Streaming message */}
                 {isStreaming && streamingContent && (
-                  <Message from="assistant">
-                    <MessageAvatar src="/ai-avatar.png" name="AI" />
-                    <MessageContent variant="flat">
+                  <Message
+                    from="assistant"
+                    avatar={<MessageAvatar src="/ai-avatar.png" name="AI" />}
+                  >
+                    <MessageContent variant="flat" from="assistant">
                       <Response>{streamingContent}</Response>
                       <div className="flex items-center gap-1 mt-2">
                         <span
