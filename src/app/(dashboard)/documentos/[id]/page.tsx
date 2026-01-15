@@ -127,14 +127,14 @@ export default function DocumentEditPage() {
       {/* Editor */}
       <div className="max-w-5xl mx-auto px-8 py-8">
         <TiptapEditor
+          documentId={currentDocument.id}
           content={currentDocument.content}
           onChange={updateDocumentContent}
           editable={true}
-          showToolbar={true}
+          showToolbar={false}
           showBubbleMenu={true}
           placeholder="Start writing... Press / for commands or @ to mention"
           minHeight="calc(100vh - 200px)"
-          className="border-none shadow-none"
         />
       </div>
     </div>

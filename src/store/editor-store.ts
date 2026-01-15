@@ -126,6 +126,15 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
     const { currentDocument, autoSave } = get()
     if (!currentDocument) return
 
+    // Compare content to avoid unnecessary updates
+    const currentContentStr = JSON.stringify(currentDocument.content)
+    const newContentStr = JSON.stringify(content)
+    
+    // Only update if content actually changed
+    if (currentContentStr === newContentStr) {
+      return // No change, skip update
+    }
+
     const updatedDoc: Document = {
       ...currentDocument,
       content,
@@ -136,11 +145,18 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
 
     // Auto-save if enabled
     if (autoSave) {
+      // Clear any existing timeout
+      const existingTimeout = (get() as any).__saveTimeout
+      if (existingTimeout) {
+        clearTimeout(existingTimeout)
+      }
+      
       const saveTimeout = setTimeout(() => {
         get().saveDocument(content)
+        ;(get() as any).__saveTimeout = null
       }, 2000) // Debounce 2 seconds
-
-      return () => clearTimeout(saveTimeout)
+      
+      ;(get() as any).__saveTimeout = saveTimeout
     }
   },
 

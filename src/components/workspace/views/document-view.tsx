@@ -1,18 +1,15 @@
 'use client'
 
-import { FileText, MoreHorizontal, Clock, Share } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 import { TiptapEditor } from '@/components/editor/tiptap-editor'
 import { useEditorStore } from '@/store/editor-store'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { JSONContent } from '@tiptap/react'
 
-export function DocumentView({ tabId }: { tabId: string }) {
+export function DocumentView({ tabId, tabData }: { tabId: string; tabData?: any }) {
   const { currentDocument, setCurrentDocument, updateDocumentContent, createDocument } = useEditorStore()
-  const [isEditing, setIsEditing] = useState(false)
 
   useEffect(() => {
-    // Load or create a document for this tab
+    // Load or create a document for this tab - only when tabId changes
     if (!currentDocument || currentDocument.id !== tabId) {
       // Try to load from localStorage
       if (typeof window !== 'undefined') {
@@ -21,8 +18,12 @@ export function DocumentView({ tabId }: { tabId: string }) {
           const doc = JSON.parse(stored)
           setCurrentDocument(doc)
         } else {
-          // Create a new document with sample content
-          const sampleContent: JSONContent = {
+          // Create a new document - empty if tabData?.isEmpty is true
+          const shouldCreateEmpty = tabData?.isEmpty === true
+          const documentContent: JSONContent = shouldCreateEmpty ? {
+            type: 'doc',
+            content: []
+          } : {
             type: 'doc',
             content: [
               {
@@ -88,14 +89,16 @@ export function DocumentView({ tabId }: { tabId: string }) {
             ],
           }
 
-          createDocument('Technical Specifications').then((doc) => {
-            const updatedDoc = { ...doc, content: sampleContent }
+          const documentTitle = shouldCreateEmpty ? 'Untitled' : 'Technical Specifications'
+          createDocument(documentTitle).then((doc) => {
+            const updatedDoc = { ...doc, content: documentContent }
             setCurrentDocument(updatedDoc)
           })
         }
       }
     }
-  }, [tabId, currentDocument, setCurrentDocument, createDocument])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tabId, tabData]) // Intentionally excluding currentDocument, setCurrentDocument, createDocument to prevent infinite loops
 
   if (!currentDocument) {
     return (
@@ -108,46 +111,18 @@ export function DocumentView({ tabId }: { tabId: string }) {
   return (
     <div className="max-w-5xl mx-auto p-8 min-h-full">
       <div className="space-y-6">
-        {/* Doc Header */}
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 text-muted-foreground text-sm">
-            <FileText className="h-4 w-4" />
-            <span>Documents / Engineering</span>
-          </div>
-          <h1 className="text-4xl font-bold tracking-tight">{currentDocument.title}</h1>
-
-          <div className="flex items-center justify-between border-b pb-4">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Clock className="h-3 w-3" />
-              <span>Last edited {new Date(currentDocument.updatedAt).toLocaleString()}</span>
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant={isEditing ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setIsEditing(!isEditing)}
-              >
-                {isEditing ? 'View Mode' : 'Edit Mode'}
-              </Button>
-              <Button variant="ghost" size="sm">
-                Share
-              </Button>
-              <Button variant="ghost" size="icon">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
 
         {/* Tiptap Editor */}
         <TiptapEditor
+          documentId={currentDocument.id}
           content={currentDocument.content}
           onChange={updateDocumentContent}
-          editable={isEditing}
-          showToolbar={isEditing}
-          showBubbleMenu={isEditing}
+          editable={true}
+          showToolbar={false}
+          showBubbleMenu={true}
           placeholder="Start writing your document... Press / for commands"
           minHeight="500px"
+          className="-mx-2"
         />
       </div>
     </div>

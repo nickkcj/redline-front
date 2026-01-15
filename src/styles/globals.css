@@ -457,3 +457,16 @@ textarea.chat-input-textarea::-webkit-scrollbar,
     @apply bg-background text-foreground;
   }
 }
+
+/* Remove focus outline from Tiptap editor - Notion style */
+.tiptap-editor .ProseMirror {
+  outline: none !important;
+  border: none !important;
+}
+
+.tiptap-editor .ProseMirror:focus,
+.tiptap-editor .ProseMirror:focus-visible {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}

@@ -106,7 +106,7 @@ function SidebarItem({
           variant="ghost"
           onClick={handleClick}
           className={cn(
-            "w-full justify-start gap-2 pl-4 pr-1 h-8 font-normal text-left my-0 relative",
+            "flex-1 justify-start gap-2 pl-4 pr-1 h-8 font-normal text-left my-0 relative",
             "focus-visible:ring-0 focus-visible:ring-offset-0 focus:ring-0 focus:ring-offset-0",
             "focus:outline-none focus-visible:outline-none outline-none",
             "before:hidden after:hidden ring-0 ring-offset-0",
@@ -115,35 +115,35 @@ function SidebarItem({
         >
           {Icon && <Icon className="h-4 w-4 text-muted-foreground shrink-0" />}
           <span className="truncate flex-1 text-left min-w-0">{title}</span>
-          <SidebarItemMenu
-            open={menuOpen}
-            onOpenChange={setMenuOpen}
-            title={title}
-            type={type}
-            itemId={itemId}
-            onOpen={onClick}
-            onOpenInNewTab={onShiftClick}
-            onOpenInNewWindow={onShiftClick}
-            onOpenInSidePeek={onAltClick}
-            trigger={
-              <Button
-                variant="ghost"
-                size="icon"
-                className={cn(
-                  "h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 -mr-1",
-                  active && "opacity-100"
-                )}
-                onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  setMenuOpen(true)
-                }}
-              >
-                <MoreHorizontal className="h-3.5 w-3.5" />
-              </Button>
-            }
-          />
         </Button>
+        <SidebarItemMenu
+          open={menuOpen}
+          onOpenChange={setMenuOpen}
+          title={title}
+          type={type}
+          itemId={itemId}
+          onOpen={onClick}
+          onOpenInNewTab={onShiftClick}
+          onOpenInNewWindow={onShiftClick}
+          onOpenInSidePeek={onAltClick}
+          trigger={
+            <Button
+              variant="ghost"
+              size="icon"
+              className={cn(
+                "h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 -mr-1",
+                active && "opacity-100"
+              )}
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                setMenuOpen(true)
+              }}
+            >
+              <MoreHorizontal className="h-3.5 w-3.5" />
+            </Button>
+          }
+        />
       </div>
     </>
   )

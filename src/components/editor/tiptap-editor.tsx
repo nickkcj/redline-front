@@ -22,7 +22,7 @@ import Typography from '@tiptap/extension-typography'
 import CharacterCount from '@tiptap/extension-character-count'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import { common, createLowlight } from 'lowlight'
-import { useEffect, useCallback } from 'react'
+import { useEffect, useCallback, useRef, useMemo } from 'react'
 import { EditorToolbar } from './editor-toolbar'
 import { EditorBubbleMenu } from './editor-bubble-menu'
 import { SlashCommand } from './extensions/slash-command'
@@ -46,6 +46,7 @@ export interface TiptapEditorProps {
   minHeight?: string
   maxHeight?: string
   className?: string
+  documentId?: string // Add documentId to detect document changes
 }
 
 export const TiptapEditor = ({
@@ -59,8 +60,21 @@ export const TiptapEditor = ({
   minHeight = '400px',
   maxHeight,
   className = '',
+  documentId,
 }: TiptapEditorProps) => {
+  const isUpdatingFromPropsRef = useRef(false)
+  const isUserEditingRef = useRef(false)
+  const onChangeTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const currentDocumentIdRef = useRef<string | undefined>(documentId)
+  const contentRef = useRef<string | JSONContent | undefined>(content)
+  
+  // Update content ref whenever it changes
+  useEffect(() => {
+    contentRef.current = content
+  }, [content])
+
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         codeBlock: false, // We'll use CodeBlockLowlight instead
@@ -255,24 +269,80 @@ export const TiptapEditor = ({
         },
       }),
     ],
-    content,
+    content: undefined, // Don't set initial content here, manage via useEffect
     editable,
     onUpdate: ({ editor }) => {
+      // Don't call onChange if we're updating from props
+      if (isUpdatingFromPropsRef.current) return
+      
+      isUserEditingRef.current = true
       const json = editor.getJSON()
-      onChange?.(json)
+      
+      // Debounce onChange to avoid rapid updates
+      if (onChangeTimeoutRef.current) {
+        clearTimeout(onChangeTimeoutRef.current)
+      }
+      
+      onChangeTimeoutRef.current = setTimeout(() => {
+        onChange?.(json)
+        // Reset flag after onChange is called
+        setTimeout(() => {
+          isUserEditingRef.current = false
+        }, 50)
+      }, 150) // Small debounce to batch rapid changes
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm sm:prose lg:prose-lg dark:prose-invert max-w-none focus:outline-none',
+        class: 'prose prose-sm sm:prose lg:prose-lg dark:prose-invert max-w-none focus:outline-none focus-visible:outline-none outline-none',
       },
     },
   })
 
+  // Initialize content on mount
   useEffect(() => {
-    if (editor && content && editor.isEmpty) {
-      editor.commands.setContent(content)
+    if (!editor) return
+    
+    // Only set initial content if editor is empty
+    if (editor.isEmpty && content) {
+      isUpdatingFromPropsRef.current = true
+      editor.commands.setContent(content, false)
+      setTimeout(() => {
+        isUpdatingFromPropsRef.current = false
+      }, 0)
     }
-  }, [editor, content])
+  }, [editor]) // Only run once when editor is created
+
+  // Detect document changes and update editor content
+  useEffect(() => {
+    if (!editor) return
+    if (isUserEditingRef.current) return // Don't update if user is actively editing
+    
+    // If documentId changed, this is a different document - update content
+    if (documentId && documentId !== currentDocumentIdRef.current) {
+      currentDocumentIdRef.current = documentId
+      isUpdatingFromPropsRef.current = true
+      
+      const currentContent = contentRef.current
+      if (currentContent) {
+        editor.commands.setContent(currentContent, false)
+      } else {
+        editor.commands.clearContent(false)
+      }
+      
+      setTimeout(() => {
+        isUpdatingFromPropsRef.current = false
+      }, 0)
+    }
+  }, [editor, documentId]) // content is accessed via ref to prevent loop
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (onChangeTimeoutRef.current) {
+        clearTimeout(onChangeTimeoutRef.current)
+      }
+    }
+  }, [])
 
   const handleExport = useCallback(() => {
     if (editor) {
@@ -299,28 +369,18 @@ export const TiptapEditor = ({
   }
 
   return (
-    <div className={`tiptap-editor border rounded-lg bg-background ${className}`}>
+    <div className={`tiptap-editor ${className}`}>
       {showToolbar && <EditorToolbar editor={editor} onExport={handleExport} />}
       {showBubbleMenu && <EditorBubbleMenu editor={editor} />}
       <div
-        className="relative"
+        className="relative focus:outline-none focus-visible:outline-none"
         style={{
           minHeight,
           maxHeight,
           overflowY: maxHeight ? 'auto' : undefined,
         }}
       >
-        <EditorContent editor={editor} className="p-6" />
-      </div>
-      
-      {/* Character count */}
-      <div className="border-t px-4 py-2 text-xs text-muted-foreground flex justify-between items-center">
-        <span>
-          {editor.storage.characterCount.characters()} characters · {editor.storage.characterCount.words()} words
-        </span>
-        <span className="text-xs">
-          Press <kbd className="px-1.5 py-0.5 text-xs border rounded">Cmd+S</kbd> to save
-        </span>
+        <EditorContent editor={editor} className="px-2 py-4 focus:outline-none focus-visible:outline-none [&_.ProseMirror]:focus:outline-none [&_.ProseMirror]:focus-visible:outline-none" />
       </div>
     </div>
   )
