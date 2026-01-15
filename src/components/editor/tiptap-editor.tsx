@@ -78,6 +78,21 @@ export const TiptapEditor = ({
     extensions: [
       StarterKit.configure({
         codeBlock: false, // We'll use CodeBlockLowlight instead
+        // Enable all markdown shortcuts like Obsidian
+        heading: {
+          levels: [1, 2, 3, 4, 5, 6],
+        },
+        blockquote: true,
+        bold: true,
+        bulletList: true,
+        code: true,
+        hardBreak: true,
+        horizontalRule: true,
+        italic: true,
+        listItem: true,
+        orderedList: true,
+        paragraph: true,
+        strike: true,
       }),
       Underline,
       TextAlign.configure({
