@@ -12,7 +12,8 @@ export function useGoogleOAuthUrl() {
   return useApiMutation<string, string>(
     (callbackUrl) => authService.getGoogleOAuthUrl(callbackUrl).then(res => res.authUrl),
     {
-      successMessage: 'Redirecionando para Google...',
+      showSuccessToast: false,
+      showErrorToast: true,
     }
   )
 }
@@ -79,7 +80,8 @@ export function useUserInfo() {
   return useApiMutation<UserDTO, void>(
     () => authService.getUserInfo(),
     {
-      successMessage: 'Informações do usuário carregadas!',
+      showSuccessToast: false,
+      showErrorToast: false, // Não mostrar erro porque é usado em background
     }
   )
 }

@@ -31,8 +31,8 @@ export function NavSecondary({ items }: NavSecondaryProps) {
               onClick={item.onClick}
               isActive={item.isActive}
             >
-              {item.icon && <item.icon />}
-              <span>{item.title}</span>
+              {item.icon && <item.icon className="shrink-0" />}
+              <span className="text-left">{item.title}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         ))}

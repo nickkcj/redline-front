@@ -1,6 +1,8 @@
 'use client'
 
-import { Mail } from 'lucide-react'
+import { Mail, ArrowLeft } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
 interface MagicLinkSuccessProps {
   email: string
@@ -9,18 +11,23 @@ interface MagicLinkSuccessProps {
 
 export function MagicLinkSuccess({ email, onBackToLogin }: MagicLinkSuccessProps) {
   return (
-    <div className="w-full bg-green-50 border border-green-200 rounded-xl p-6 text-center">
-      <Mail size={40} className="mx-auto mb-3 text-green-600" />
-      <h3 className="text-lg font-semibold text-green-800 mb-2">Email enviado com sucesso!</h3>
-      <p className="text-sm text-green-700 mb-4">
-        Verifique seu email ({email}) e clique no link para fazer login.
-      </p>
-      <button
+    <div className="flex flex-col gap-4">
+      <Alert variant="success">
+        <Mail className="size-4" />
+        <AlertTitle>Email enviado!</AlertTitle>
+        <AlertDescription>
+          Verifique sua caixa de entrada em <span className="font-medium">{email}</span> e clique no link para entrar.
+        </AlertDescription>
+      </Alert>
+      
+      <Button
+        variant="ghost"
         onClick={onBackToLogin}
-        className="text-sm cursor-pointer text-green-600 hover:text-green-700 underline"
+        className="w-full"
       >
+        <ArrowLeft className="size-4" />
         Voltar para o login
-      </button>
+      </Button>
     </div>
   )
 }

@@ -37,8 +37,8 @@ export function NavMain({ items }: NavMainProps) {
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton asChild isActive={isActive}>
                 <Link href={item.url}>
-                  {item.icon && <item.icon />}
-                  <span>{item.title}</span>
+                  {item.icon && <item.icon className="shrink-0" />}
+                  <span className="text-left">{item.title}</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

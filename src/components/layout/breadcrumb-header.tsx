@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { PanelLeft } from "lucide-react"
+import { PanelLeft, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Breadcrumb,
@@ -49,6 +49,28 @@ export function BreadcrumbHeader({ breadcrumbs, actions }: BreadcrumbHeaderProps
           >
             <PanelLeft className="h-4 w-4" />
           </Button>
+
+          {/* Navigation Buttons */}
+          <div className="flex items-center gap-0.5">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              disabled
+              title="Go back"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              disabled
+              title="Go forward"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
 
           <Breadcrumb>
             <BreadcrumbList>

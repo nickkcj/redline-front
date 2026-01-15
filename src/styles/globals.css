@@ -6,7 +6,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-sans: var(--font-sans);
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -37,146 +37,173 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
   --radius-xl: calc(var(--radius) + 4px);
   --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-  --radius: 0.625rem;
+  --radius: 0.375rem;
   --tracking-tighter: calc(var(--tracking-normal) - 0.05em);
   --tracking-tight: calc(var(--tracking-normal) - 0.025em);
   --tracking-wide: calc(var(--tracking-normal) + 0.025em);
   --tracking-wider: calc(var(--tracking-normal) + 0.05em);
   --tracking-widest: calc(var(--tracking-normal) + 0.1em);
-  --tracking-normal: var(--tracking-normal);
-  --shadow-2xl: var(--shadow-2xl);
-  --shadow-xl: var(--shadow-xl);
-  --shadow-lg: var(--shadow-lg);
-  --shadow-md: var(--shadow-md);
-  --shadow: var(--shadow);
-  --shadow-sm: var(--shadow-sm);
-  --shadow-xs: var(--shadow-xs);
-  --shadow-2xs: var(--shadow-2xs);
-  --spacing: var(--spacing);
-  --letter-spacing: var(--letter-spacing);
-  --shadow-offset-y: var(--shadow-offset-y);
-  --shadow-offset-x: var(--shadow-offset-x);
-  --shadow-spread: var(--shadow-spread);
-  --shadow-blur: var(--shadow-blur);
-  --shadow-opacity: var(--shadow-opacity);
-  --color-shadow-color: var(--shadow-color);
+  --tracking-normal: 0em;
+  --shadow-2xl: none;
+  --shadow-xl: none;
+  --shadow-lg: 0 0 0 1px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 0 0 1px rgba(0, 0, 0, 0.05);
+  --shadow: none;
+  --shadow-sm: none;
+  --shadow-xs: none;
+  --shadow-2xs: none;
+  --spacing: 0.25rem;
+  --letter-spacing: 0em;
   --color-destructive-foreground: var(--destructive-foreground);
+
+  /* Notion Tag Colors */
+  --color-tag-red: var(--tag-red);
+  --color-tag-red-foreground: var(--tag-red-foreground);
+  --color-tag-orange: var(--tag-orange);
+  --color-tag-orange-foreground: var(--tag-orange-foreground);
+  --color-tag-yellow: var(--tag-yellow);
+  --color-tag-yellow-foreground: var(--tag-yellow-foreground);
+  --color-tag-green: var(--tag-green);
+  --color-tag-green-foreground: var(--tag-green-foreground);
+  --color-tag-blue: var(--tag-blue);
+  --color-tag-blue-foreground: var(--tag-blue-foreground);
+  --color-tag-purple: var(--tag-purple);
+  --color-tag-purple-foreground: var(--tag-purple-foreground);
+  --color-tag-pink: var(--tag-pink);
+  --color-tag-pink-foreground: var(--tag-pink-foreground);
+  --color-tag-gray: var(--tag-gray);
+  --color-tag-gray-foreground: var(--tag-gray-foreground);
+  --color-tag-brown: var(--tag-brown);
+  --color-tag-brown-foreground: var(--tag-brown-foreground);
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.1450 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.1450 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.1450 0 0);
-  --primary: oklch(0.2050 0 0);
-  --primary-foreground: oklch(0.9850 0 0);
-  --secondary: oklch(0.9700 0 0);
-  --secondary-foreground: oklch(0.2050 0 0);
-  --muted: oklch(0.9700 0 0);
-  --muted-foreground: oklch(0.5560 0 0);
-  --accent: oklch(0.9700 0 0);
-  --accent-foreground: oklch(0.2050 0 0);
-  --destructive: oklch(0.5770 0.2450 27.3250);
-  --border: oklch(0.9220 0 0);
-  --input: oklch(0.9220 0 0);
-  --ring: oklch(0.7080 0 0);
-  --chart-1: oklch(0.8100 0.1000 252);
-  --chart-2: oklch(0.6200 0.1900 260);
-  --chart-3: oklch(0.5500 0.2200 263);
-  --chart-4: oklch(0.4900 0.2200 264);
-  --chart-5: oklch(0.4200 0.1800 266);
-  --sidebar: oklch(0.9850 0 0);
-  --sidebar-foreground: oklch(0.1450 0 0);
-  --sidebar-primary: oklch(0.2050 0 0);
-  --sidebar-primary-foreground: oklch(0.9850 0 0);
-  --sidebar-accent: oklch(0.9700 0 0);
-  --sidebar-accent-foreground: oklch(0.2050 0 0);
-  --sidebar-border: oklch(0.9220 0 0);
-  --sidebar-ring: oklch(0.7080 0 0);
-  --destructive-foreground: oklch(1 0 0);
-  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  --shadow-color: oklch(0 0 0);
-  --shadow-opacity: 0.1;
-  --shadow-blur: 3px;
-  --shadow-spread: 0px;
-  --shadow-offset-x: 0;
-  --shadow-offset-y: 1px;
-  --letter-spacing: 0em;
-  --spacing: 0.25rem;
-  --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-  --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-  --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 1px 2px -1px hsl(0 0% 0% / 0.10);
-  --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 1px 2px -1px hsl(0 0% 0% / 0.10);
-  --shadow-md: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 2px 4px -1px hsl(0 0% 0% / 0.10);
-  --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 4px 6px -1px hsl(0 0% 0% / 0.10);
-  --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 8px 10px -1px hsl(0 0% 0% / 0.10);
-  --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
-  --tracking-normal: 0em;
+  /* Notion-inspired Light Theme */
+  --radius: 0.375rem;
+  --background: #ffffff;
+  --foreground: #37352f;
+  --card: #ffffff;
+  --card-foreground: #37352f;
+  --popover: #ffffff;
+  --popover-foreground: #37352f;
+  --primary: #37352f;
+  --primary-foreground: #ffffff;
+  --secondary: #f7f6f3;
+  --secondary-foreground: #37352f;
+  --muted: #f7f6f3;
+  --muted-foreground: #9b9a97;
+  --accent: #f7f6f3;
+  --accent-foreground: #37352f;
+  --destructive: #e03e3e;
+  --destructive-foreground: #ffffff;
+  --border: rgba(55, 53, 47, 0.09);
+  --input: rgba(55, 53, 47, 0.09);
+  --ring: #e5e5e5;
+
+  /* Charts - Notion accent colors */
+  --chart-1: #737373;
+  --chart-2: #0f7b6c;
+  --chart-3: #d9730d;
+  --chart-4: #6940a5;
+  --chart-5: #e03e3e;
+
+  /* Sidebar */
+  --sidebar: #fbfbfa;
+  --sidebar-foreground: #37352f;
+  --sidebar-primary: #37352f;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(55, 53, 47, 0.08);
+  --sidebar-accent-foreground: #37352f;
+  --sidebar-border: rgba(55, 53, 47, 0.09);
+  --sidebar-ring: #e5e5e5;
+
+  /* Notion Tag Colors - Light */
+  --tag-red: #fbe4e4;
+  --tag-red-foreground: #e03e3e;
+  --tag-orange: #faebdd;
+  --tag-orange-foreground: #d9730d;
+  --tag-yellow: #fbf3db;
+  --tag-yellow-foreground: #dfab01;
+  --tag-green: #ddedea;
+  --tag-green-foreground: #0f7b6c;
+  --tag-blue: #ddebf1;
+  --tag-blue-foreground: #0b6e99;
+  --tag-purple: #eae4f2;
+  --tag-purple-foreground: #6940a5;
+  --tag-pink: #f4dfeb;
+  --tag-pink-foreground: #ad1a72;
+  --tag-gray: #ebeced;
+  --tag-gray-foreground: #64676a;
+  --tag-brown: #e9e5e3;
+  --tag-brown-foreground: #64473a;
+
+  /* Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
 .dark {
-  --background: oklch(0.1450 0 0);
-  --foreground: oklch(0.9850 0 0);
-  --card: oklch(0.2050 0 0);
-  --card-foreground: oklch(0.9850 0 0);
-  --popover: oklch(0.2690 0 0);
-  --popover-foreground: oklch(0.9850 0 0);
-  --primary: oklch(0.9220 0 0);
-  --primary-foreground: oklch(0.2050 0 0);
-  --secondary: oklch(0.2690 0 0);
-  --secondary-foreground: oklch(0.9850 0 0);
-  --muted: oklch(0.2690 0 0);
-  --muted-foreground: oklch(0.7080 0 0);
-  --accent: oklch(0.3710 0 0);
-  --accent-foreground: oklch(0.9850 0 0);
-  --destructive: oklch(0.7040 0.1910 22.2160);
-  --border: oklch(0.2750 0 0);
-  --input: oklch(0.3250 0 0);
-  --ring: oklch(0.5560 0 0);
-  --chart-1: oklch(0.8100 0.1000 252);
-  --chart-2: oklch(0.6200 0.1900 260);
-  --chart-3: oklch(0.5500 0.2200 263);
-  --chart-4: oklch(0.4900 0.2200 264);
-  --chart-5: oklch(0.4200 0.1800 266);
-  --sidebar: oklch(0.2050 0 0);
-  --sidebar-foreground: oklch(0.9850 0 0);
-  --sidebar-primary: oklch(0.4880 0.2430 264.3760);
-  --sidebar-primary-foreground: oklch(0.9850 0 0);
-  --sidebar-accent: oklch(0.2690 0 0);
-  --sidebar-accent-foreground: oklch(0.9850 0 0);
-  --sidebar-border: oklch(0.2750 0 0);
-  --sidebar-ring: oklch(0.4390 0 0);
-  --destructive-foreground: oklch(0.9850 0 0);
-  --radius: 0.625rem;
-  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  --shadow-color: oklch(0 0 0);
-  --shadow-opacity: 0.1;
-  --shadow-blur: 3px;
-  --shadow-spread: 0px;
-  --shadow-offset-x: 0;
-  --shadow-offset-y: 1px;
-  --letter-spacing: 0em;
-  --spacing: 0.25rem;
-  --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-  --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
-  --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 1px 2px -1px hsl(0 0% 0% / 0.10);
-  --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 1px 2px -1px hsl(0 0% 0% / 0.10);
-  --shadow-md: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 2px 4px -1px hsl(0 0% 0% / 0.10);
-  --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 4px 6px -1px hsl(0 0% 0% / 0.10);
-  --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 8px 10px -1px hsl(0 0% 0% / 0.10);
-  --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+  /* Notion-inspired Dark Theme */
+  --background: #191919;
+  --foreground: rgba(255, 255, 255, 0.81);
+  --card: #202020;
+  --card-foreground: rgba(255, 255, 255, 0.81);
+  --popover: #252525;
+  --popover-foreground: rgba(255, 255, 255, 0.81);
+  --primary: rgba(255, 255, 255, 0.81);
+  --primary-foreground: #191919;
+  --secondary: #252525;
+  --secondary-foreground: rgba(255, 255, 255, 0.81);
+  --muted: #252525;
+  --muted-foreground: rgba(255, 255, 255, 0.44);
+  --accent: rgba(255, 255, 255, 0.055);
+  --accent-foreground: rgba(255, 255, 255, 0.81);
+  --destructive: #e03e3e;
+  --destructive-foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0.094);
+  --input: rgba(255, 255, 255, 0.094);
+  --ring: #404040;
+
+  /* Charts */
+  --chart-1: #a1a1aa;
+  --chart-2: #4dab9a;
+  --chart-3: #d9730d;
+  --chart-4: #9065c4;
+  --chart-5: #ff7369;
+
+  /* Sidebar */
+  --sidebar: #202020;
+  --sidebar-foreground: rgba(255, 255, 255, 0.81);
+  --sidebar-primary: #ffffff;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(255, 255, 255, 0.055);
+  --sidebar-accent-foreground: rgba(255, 255, 255, 0.81);
+  --sidebar-border: rgba(255, 255, 255, 0.094);
+  --sidebar-ring: #404040;
+
+  /* Notion Tag Colors - Dark */
+  --tag-red: rgba(255, 115, 105, 0.2);
+  --tag-red-foreground: #ff7369;
+  --tag-orange: rgba(255, 163, 68, 0.2);
+  --tag-orange-foreground: #ffa344;
+  --tag-yellow: rgba(255, 220, 73, 0.2);
+  --tag-yellow-foreground: #ffdc49;
+  --tag-green: rgba(77, 171, 154, 0.2);
+  --tag-green-foreground: #4dab9a;
+  --tag-blue: rgba(82, 156, 202, 0.2);
+  --tag-blue-foreground: #529cca;
+  --tag-purple: rgba(144, 101, 196, 0.2);
+  --tag-purple-foreground: #9065c4;
+  --tag-pink: rgba(226, 85, 161, 0.2);
+  --tag-pink-foreground: #e255a1;
+  --tag-gray: rgba(145, 145, 142, 0.2);
+  --tag-gray-foreground: #91918e;
+  --tag-brown: rgba(147, 114, 100, 0.2);
+  --tag-brown-foreground: #937264;
 }
 
 @layer base {
@@ -184,11 +211,13 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-white text-foreground;
-    letter-spacing: var(--tracking-normal);
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans);
+    letter-spacing: -0.003em;
+    line-height: 1.5;
   }
   html {
-    @apply bg-white;
+    @apply bg-background;
   }
 }
 
@@ -203,11 +232,76 @@
 }
 
 .animate-in {
-  animation: fadeIn 0.3s ease-in-out;
+  animation: fadeIn 0.2s ease-out;
 }
 
 .fade-in {
-  animation: fadeIn 0.3s ease-in-out;
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* macOS-style modal animations with scale and blur */
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translate(-50%, -50%);
+    filter: blur(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translate(-50%, -50%);
+    filter: blur(0);
+  }
+}
+
+@keyframes scale-out {
+  from {
+    opacity: 1;
+    transform: scale(1) translate(-50%, -50%);
+    filter: blur(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.96) translate(-50%, -50%);
+    filter: blur(6px);
+  }
+}
+
+@keyframes overlay-blur-in {
+  from {
+    backdrop-filter: blur(0);
+    -webkit-backdrop-filter: blur(0);
+  }
+  to {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+}
+
+@keyframes overlay-blur-out {
+  from {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+  to {
+    backdrop-filter: blur(0);
+    -webkit-backdrop-filter: blur(0);
+  }
+}
+
+.animate-scale-in {
+  animation: scale-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-scale-out {
+  animation: scale-out 0.15s cubic-bezier(0.4, 0, 1, 1);
+}
+
+.animate-overlay-blur-in {
+  animation: overlay-blur-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-overlay-blur-out {
+  animation: overlay-blur-out 0.15s cubic-bezier(0.4, 0, 1, 1);
 }
 
 /* Hide textarea resize handle and scrollbars */
@@ -270,4 +364,96 @@ textarea.chat-input-textarea::-webkit-scrollbar,
   width: 0 !important;
   height: 0 !important;
   display: none !important;
+}
+
+/* Notion-style selection */
+::selection {
+  background: rgba(160, 160, 160, 0.3);
+}
+
+/* Notion-style focus visible - subtle blue ring */
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+/* Notion-style scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(55, 53, 47, 0.16);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(55, 53, 47, 0.3);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+/* Hide scrollbar completely */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+  scrollbar-gutter: auto;  /* Don't reserve space for scrollbar */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;  /* Chrome, Safari and Opera */
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+}
+
+.no-scrollbar::-webkit-scrollbar-track {
+  display: none !important;
+  background: transparent !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.no-scrollbar::-webkit-scrollbar-thumb {
+  display: none !important;
+  background: transparent !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.no-scrollbar::-webkit-scrollbar-corner {
+  display: none !important;
+  background: transparent !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }

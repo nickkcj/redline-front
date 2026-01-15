@@ -37,8 +37,9 @@ export function useOrganizations() {
     () => organizationService.getOrganizations(),
     {
       staleTime: 1000 * 60 * 2, // 2 minutes
-      refetchOnMount: false,
+      refetchOnMount: true,
       refetchOnWindowFocus: false,
+      showErrorToast: true,
     }
   )
 }

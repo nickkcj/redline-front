@@ -22,35 +22,32 @@ export function Navbar() {
   };
 
   return (
-    <nav className="border-b border-gray-200 bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/80 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center gap-3">
-            <div className="relative h-8 w-8 flex-shrink-0">
+    <nav className="border-b border-border bg-background">
+      <div className="max-w-5xl mx-auto px-6">
+        <div className="flex items-center justify-between h-12">
+          <div className="flex items-center gap-2">
+            <div className="relative h-6 w-6 flex-shrink-0">
               <Image
                 src="/seloDooorBlack.png"
-                alt="Dooor Logo"
+                alt="Logo"
                 fill
                 className="object-contain"
                 priority
               />
             </div>
-            <h1 className="text-xl font-serif font-bold text-foreground leading-tight">{appName}</h1>
+            <span className="text-sm font-medium text-foreground">{appName}</span>
           </div>
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleLogout}
-              className="gap-2 text-gray-700 hover:text-foreground hover:bg-gray-100"
-            >
-              <LogOut className="h-4 w-4" />
-              Sair
-            </Button>
-          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleLogout}
+            className="gap-1.5 text-muted-foreground hover:text-foreground h-7 px-2 text-sm"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            Sair
+          </Button>
         </div>
       </div>
     </nav>
   );
 }
-

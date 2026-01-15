@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { AuthProvider } from "@/components/providers/auth-provider";
-import { DocumentViewerProvider } from "@/contexts/document-viewer-context";
-import { UnifiedDocumentViewer } from "@/components/shared/viewers";
+import { ThemeProvider } from "@/components/providers/theme-provider";
 import "../styles/globals.css";
 
 const geistSans = Geist({
@@ -44,16 +42,18 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background`}
       >
-        <QueryProvider>
-          <AuthProvider>
-            <DocumentViewerProvider>
-              <Suspense fallback={null}>
-              </Suspense>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <QueryProvider>
+            <AuthProvider>
               {children}
-              <UnifiedDocumentViewer />
-            </DocumentViewerProvider>
-          </AuthProvider>
-        </QueryProvider>
+            </AuthProvider>
+          </QueryProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Plus, ArrowLeft, Building } from "lucide-react"
+import { Plus, ChevronLeft, Building2 } from "lucide-react"
 
 interface WorkspacesHeaderProps {
   organizationName: string
@@ -17,46 +17,47 @@ export function WorkspacesHeader({
   onCreateClick,
 }: WorkspacesHeaderProps) {
   return (
-    <>
-      {/* Back Button */}
-      <div className="flex items-center gap-4">
+    <div className="space-y-6">
+      {/* Breadcrumb Navigation */}
+      <div className="flex items-center gap-1 text-sm">
         <Button
           variant="ghost"
           size="sm"
           onClick={onBackClick}
-          className="gap-2 text-base cursor-pointer text-foreground hover:text-foreground"
+          className="gap-1 h-7 px-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-md"
         >
-          <ArrowLeft className="size-5" />
-          <span>Voltar para Organizações</span>
+          <ChevronLeft className="size-4" />
+          <span>Organizações</span>
         </Button>
-        <div className="flex items-center gap-2">
-          <Building className="size-5 text-foreground" />
-          <span className="text-base font-medium text-foreground">
-            {organizationName}
-          </span>
+        <span className="text-muted-foreground">/</span>
+        <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-accent/50">
+          <Building2 className="size-3.5 text-muted-foreground" />
+          <span className="font-medium text-foreground">{organizationName}</span>
         </div>
       </div>
 
-      {/* Header Section */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mt-6">
-        <div className="flex-1">
-          <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
+      {/* Page Header */}
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold text-foreground tracking-tight">
             Projetos
           </h1>
-          <p className="text-foreground mt-1 text-sm sm:text-base">
+          <p className="text-muted-foreground mt-1 text-sm">
             Gerencie seus projetos de trabalho
           </p>
         </div>
         {canCreateWorkspace && (
           <Button
             onClick={onCreateClick}
-            className="w-full sm:w-auto transition-all cursor-pointer duration-200 hover:shadow-md bg-primary hover:bg-primary/90 text-white"
+            variant="default"
+            size="sm"
+            className="gap-1.5 h-8 px-3 bg-ring hover:bg-ring/90 text-white rounded-md"
           >
-            <Plus className="size-4 mr-2" />
-            <span className="sm:inline">Novo Projeto</span>
+            <Plus className="size-4" />
+            Novo Projeto
           </Button>
         )}
       </div>
-    </>
+    </div>
   )
 }

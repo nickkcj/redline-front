@@ -17,9 +17,21 @@ export function useApiQuery<T>(
     onError?: (error: unknown) => void
   }
 ) {
+  console.log('[USE-API-QUERY] Setting up query:', { key, enabled: options?.enabled })
+  
   const queryResult = useQuery({
     queryKey: key,
-    queryFn: fetcher,
+    queryFn: async () => {
+      console.log('[USE-API-QUERY] Fetching:', key)
+      try {
+        const result = await fetcher()
+        console.log('[USE-API-QUERY] Success:', { key, hasData: !!result })
+        return result
+      } catch (error) {
+        console.error('[USE-API-QUERY] Error:', { key, error })
+        throw error
+      }
+    },
     enabled: options?.enabled,
     staleTime: options?.staleTime,
     gcTime: options?.gcTime,
@@ -41,7 +53,8 @@ export function useApiQuery<T>(
         toast.error(errorInfo.message)
       }
 
-      console.error('Query error:', {
+      console.error('[USE-API-QUERY] Query error:', {
+        key,
         message: errorInfo.message,
         code: errorInfo.code,
         statusCode: errorInfo.statusCode,
@@ -131,13 +144,6 @@ export function useApiMutation<TData, TVariables>(
         toast.error(errorInfo.message)
       }
 
-      console.error('Mutation error:', {
-        message: errorInfo.message,
-        code: errorInfo.code,
-        statusCode: errorInfo.statusCode,
-        details: errorInfo.details,
-      })
-      
       options?.onError?.(error)
     },
   })

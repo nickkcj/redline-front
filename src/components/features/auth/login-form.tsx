@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Loader2, Mail } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
@@ -38,30 +38,27 @@ export function LoginForm({ onMagicLinkRequest, isMagicLinkLoading }: LoginFormP
   }
 
   return (
-    <form onSubmit={handleSubmit} className="w-full flex flex-col gap-3">
-      <div className="flex flex-col gap-2">
-        <Input
-          type="email"
-          name="email"
-          id="email"
-          autoComplete="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Digite seu email"
-          disabled={isMagicLinkLoading}
-          className="h-auto py-3 rounded-xl"
-          required
-        />
-      </div>
+    <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+      <Input
+        type="email"
+        name="email"
+        id="email"
+        autoComplete="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        placeholder="nome@exemplo.com"
+        disabled={isMagicLinkLoading}
+        required
+      />
       <Button
         type="submit"
         disabled={isMagicLinkLoading || !email || !isValidEmail(email)}
-        className="w-full transition-all cursor-pointer duration-200 hover:shadow-md bg-primary hover:bg-gray-800 text-white rounded-xl px-5 py-3 h-auto"
+        className="w-full"
       >
-        {isMagicLinkLoading ? <Loader2 size={20} className="animate-spin" /> : <Mail size={20} />}
-        <span className="text-sm font-medium">
-          {isMagicLinkLoading ? 'Enviando...' : 'Enviar email'}
-        </span>
+        {isMagicLinkLoading && (
+          <Loader2 className="size-4 animate-spin" />
+        )}
+        {isMagicLinkLoading ? 'Enviando...' : 'Entrar com Email'}
       </Button>
     </form>
   )

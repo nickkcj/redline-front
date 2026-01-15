@@ -2,12 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Image from 'next/image'
 import { useAuth } from '@/components/providers/auth-provider'
 import { toast } from 'sonner'
-import { BackgroundVideo } from '@/components/layout/background-video'
 import { LoginForm } from './login-form'
 import { GoogleLoginButton } from './google-login-button'
-import { LoginHeader } from './login-header'
 import { MagicLinkSuccess } from './magic-link-success'
 import { LoginLoading } from './login-loading'
 
@@ -21,8 +20,6 @@ export function LoginPage() {
 
   const router = useRouter()
   const searchParams = useSearchParams()
-
-  const appName = process.env.NEXT_PUBLIC_APP_NAME || 'Scaffold'
 
   // Handle mounting to avoid hydration issues
   useEffect(() => {
@@ -63,14 +60,18 @@ export function LoginPage() {
       const frontendCallbackUrl = `${window.location.origin}/auth/success`
       await initGoogleAuth(frontendCallbackUrl)
     } catch (error) {
-      console.error('Login error:', error)
+      // Extract error message
+      let errorMessage = 'Por favor, tente novamente'
+      if (error && typeof error === 'object' && 'message' in error) {
+        errorMessage = (error as any).message
+      }
+      
       toast.error('Falha no login', {
-        description: 'Por favor, tente novamente',
+        description: errorMessage,
       })
       setIsGoogleLoading(false)
     }
   }
-
 
   const handleMagicLinkRequest = async (email: string) => {
     try {
@@ -78,7 +79,7 @@ export function LoginPage() {
       await requestMagicLink(email)
 
       setMagicLinkSent(true)
-      setEmail(email) // Save email for success message
+      setEmail(email)
       toast.success('Magic link enviado!', {
         description: 'Verifique seu email para continuar',
       })
@@ -87,7 +88,7 @@ export function LoginPage() {
       toast.error('Falha ao enviar magic link', {
         description: error instanceof Error ? error.message : 'Por favor, tente novamente',
       })
-      throw error // Re-throw to let LoginForm handle it
+      throw error
     } finally {
       setIsMagicLinkLoading(false)
     }
@@ -104,37 +105,110 @@ export function LoginPage() {
   }
 
   return (
-    <div className="w-screen h-screen flex items-center justify-center bg-background p-[70px] relative">
-      <BackgroundVideo opacity={0.7} />
-      <LoginHeader appName={appName} />
-      <div className="flex flex-col items-center gap-4 relative z-10 max-w-md w-full">
-        {!magicLinkSent ? (
-          <>
-            <LoginForm
-              onMagicLinkRequest={handleMagicLinkRequest}
-              isMagicLinkLoading={isMagicLinkLoading}
+    <div className="min-h-screen w-full lg:grid lg:grid-cols-2">
+      {/* Left Side - Image with Logo */}
+      <div className="hidden lg:block relative bg-muted overflow-hidden">
+        <Image
+          src="/bglogin.png"
+          alt="Background"
+          fill
+          className="object-cover animate-zoom-in"
+          priority
+          quality={100}
+        />
+        {/* Dark overlay */}
+        <div className="absolute inset-0 bg-black/40 z-10" />
+        
+        {/* Logo centered */}
+        <div className="absolute inset-0 flex items-center justify-center p-12 z-20">
+          <div className="relative w-full max-w-sm h-20">
+            <Image
+              src="/scaffold_White_inter.png"
+              alt="Scaffold"
+              fill
+              className="object-contain"
+              priority
             />
+          </div>
+        </div>
+      </div>
 
-            <div className="flex items-center gap-3 w-full">
-              <div className="flex-1 h-px bg-muted"></div>
-              <span className="text-sm text-gray-500">ou</span>
-              <div className="flex-1 h-px bg-muted"></div>
-            </div>
+      <style jsx global>{`
+        @keyframes zoom-in {
+          0% {
+            transform: scale(1);
+          }
+          100% {
+            transform: scale(1.1);
+          }
+        }
 
-            <GoogleLoginButton
-              onGoogleLogin={handleGoogleLogin}
-              isGoogleLoading={isGoogleLoading}
-            />
-          </>
-        ) : (
-          <MagicLinkSuccess
-            email={email}
-            onBackToLogin={() => {
-              setMagicLinkSent(false)
-              setEmail('')
-            }}
-          />
-        )}
+        .animate-zoom-in {
+          animation: zoom-in 8s ease-out forwards;
+        }
+      `}</style>
+
+      {/* Right Side - Form */}
+      <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-sm space-y-8">
+          {/* Title */}
+          <div className="flex flex-col items-center text-center space-y-2">
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+              Criar uma conta
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Digite seu email abaixo para criar sua conta
+            </p>
+          </div>
+
+          {/* Forms */}
+          <div className="space-y-4">
+            {!magicLinkSent ? (
+              <>
+                <LoginForm
+                  onMagicLinkRequest={handleMagicLinkRequest}
+                  isMagicLinkLoading={isMagicLinkLoading}
+                />
+
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-border" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">
+                      Ou continue com
+                    </span>
+                  </div>
+                </div>
+
+                <GoogleLoginButton
+                  onGoogleLogin={handleGoogleLogin}
+                  isGoogleLoading={isGoogleLoading}
+                />
+
+                <p className="text-center text-xs text-muted-foreground">
+                  Ao clicar em continuar, você concorda com nossos{' '}
+                  <a href="#" className="underline underline-offset-4 hover:text-foreground">
+                    Termos de Serviço
+                  </a>{' '}
+                  e{' '}
+                  <a href="#" className="underline underline-offset-4 hover:text-foreground">
+                    Política de Privacidade
+                  </a>
+                  .
+                </p>
+              </>
+            ) : (
+              <MagicLinkSuccess
+                email={email}
+                onBackToLogin={() => {
+                  setMagicLinkSent(false)
+                  setEmail('')
+                }}
+              />
+            )}
+          </div>
+        </div>
       </div>
     </div>
   )

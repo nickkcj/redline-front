@@ -61,17 +61,33 @@ class BaseApiClient {
       if (isJson) {
         try {
           errorData = await response.json()
+        } catch (parseError) {
+          console.error('Failed to parse error response:', parseError)
+        }
+      } else {
+        try {
+          const textError = await response.text()
+          errorData = { message: textError }
         } catch {
-          // Ignore parsing errors
+          // Ignore
         }
       }
 
-      throw {
-        message: errorData.message || response.statusText || 'An error occurred',
-        code: errorData.code,
+      const error: ApiError = {
+        message: errorData?.message || response.statusText || `HTTP ${response.status} Error`,
+        code: errorData?.code || `HTTP_${response.status}`,
         statusCode: response.status,
-        details: errorData.details,
-      } as ApiError
+        details: errorData?.details,
+      }
+
+      console.error('API Error:', {
+        url: response.url,
+        status: response.status,
+        statusText: response.statusText,
+        error,
+      })
+
+      throw error
     }
 
     return isJson ? response.json() : (response.text() as unknown as T)
@@ -98,13 +114,26 @@ class BaseApiClient {
 
       return this.handleResponse<T>(response)
     } catch (error) {
+      // Handle network errors
       if (error instanceof TypeError && error.message.includes('fetch')) {
-        throw {
-          message: 'Network error. Please check your connection.',
+        const networkError: ApiError = {
+          message: 'Erro de rede. Verifique sua conexão.',
           code: 'NETWORK_ERROR',
-        } as ApiError
+        }
+        throw networkError
       }
-      throw error
+      
+      // If it's already an ApiError, just rethrow
+      if (error && typeof error === 'object' && 'message' in error && 'code' in error) {
+        throw error
+      }
+      
+      // Unknown error - wrap it
+      const unknownError: ApiError = {
+        message: error instanceof Error ? error.message : 'Erro desconhecido',
+        code: 'UNKNOWN_ERROR',
+      }
+      throw unknownError
     }
   }
 

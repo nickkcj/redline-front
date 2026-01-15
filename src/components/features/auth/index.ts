@@ -1,7 +1,6 @@
 export { LoginPage } from './login-page'
 export { LoginForm } from './login-form'
 export { GoogleLoginButton } from './google-login-button'
-export { LoginHeader } from './login-header'
 export { MagicLinkSuccess } from './magic-link-success'
 export { LoginLoading } from './login-loading'
 export { MagicLinkHandler } from './magic-link-handler'

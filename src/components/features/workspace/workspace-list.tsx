@@ -168,20 +168,19 @@ export function WorkspaceList() {
 
   if (isLoading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="@container/main flex flex-col gap-6">
-          <div>
-            <Skeleton className="h-9 w-64" />
+      <div className="max-w-5xl mx-auto px-6">
+        <div className="flex flex-col gap-6">
+          <div className="space-y-2">
+            <Skeleton className="h-5 w-48" />
           </div>
-          <div className="space-y-3">
-            <div>
-              <Skeleton className="h-8 w-24" />
-            </div>
-            <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} className="h-32 w-full" />
-              ))}
-            </div>
+          <div className="space-y-4">
+            <Skeleton className="h-8 w-32" />
+            <Skeleton className="h-5 w-56" />
+          </div>
+          <div className="flex flex-wrap gap-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-28 w-[280px] rounded-lg" />
+            ))}
           </div>
         </div>
       </div>
@@ -189,8 +188,8 @@ export function WorkspaceList() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="@container/main flex flex-col gap-6">
+    <div className="max-w-5xl mx-auto px-6">
+      <div className="flex flex-col gap-8">
         <WorkspacesHeader
           organizationName={currentOrganization?.name || 'Organização'}
           canCreateWorkspace={canManageWorkspaces}
@@ -198,11 +197,18 @@ export function WorkspaceList() {
           onCreateClick={() => setShowCreateModal(true)}
         />
 
-        <div className="space-y-6">
+        <div>
           {workspaces.length === 0 ? (
-            <p className="text-foreground font-medium">Nenhum projeto disponível.</p>
+            <div className="text-center py-12 border border-dashed border-border rounded-lg">
+              <p className="text-muted-foreground">Nenhum projeto disponível.</p>
+              {canManageWorkspaces && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  Clique em "Novo Projeto" para criar seu primeiro projeto.
+                </p>
+              )}
+            </div>
           ) : (
-            <div className="flex flex-wrap gap-6">
+            <div className="flex flex-wrap gap-4">
               {workspaces.map((workspace) => (
                 <WorkspaceCard
                   key={workspace.id}

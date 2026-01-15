@@ -44,9 +44,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setError(null)
       const authUrl = await getGoogleOAuthUrl(callbackUrl)
+      
+      if (!authUrl || typeof authUrl !== 'string') {
+        throw new Error('URL de autenticação inválida')
+      }
+      
       window.location.href = authUrl
     } catch (err: any) {
-      setError(err.message || 'Failed to initialize Google Auth')
+      const errorMessage = err?.message || 'Falha ao inicializar autenticação do Google'
+      setError(errorMessage)
       throw err
     }
   }, [getGoogleOAuthUrl])
@@ -126,7 +132,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                                 pathname === '/login'
 
         if (isCallbackRoute) {
-          console.log('[AuthProvider] Skipping auth init on callback route:', pathname)
           setIsLoading(false)
           return
         }
@@ -137,7 +142,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(userData)
         useAppStore.getState().setUser(userData)
       } catch (err) {
-        console.error('Auth initialization failed:', err)
         setUser(null)
         useAppStore.getState().setUser(null)
       } finally {
