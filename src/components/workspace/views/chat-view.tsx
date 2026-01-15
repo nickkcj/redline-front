@@ -65,7 +65,7 @@ Try this: Ask me to create a project tracker database, or search your workspace 
   ]
 }
 
-export function ChatView({ tabId }: { tabId: string }) {
+export function ChatView({ tabId, tabData }: { tabId: string; tabData?: any }) {
   // Determine if it's a new chat or an existing one from history
   // If tabId is in our conversations map, load it. Otherwise, assume new or welcome.
   
@@ -73,8 +73,10 @@ export function ChatView({ tabId }: { tabId: string }) {
   // - If tabId starts with 'chat-' and is in dictionary, load it.
   // - If it's "New Chat" (from sidebar button usually generates a unique ID, but for now we might receive 'New Chat' string or a timestamped ID). 
   // - Let's treat 'New Chat' or unknown IDs as the "Welcome" state (Notion AI intro).
+  // - If tabData?.isEmpty is true, show empty state (no messages)
   
-  const initialMessages = conversations[tabId] || conversations['welcome']
+  const shouldShowEmpty = tabData?.isEmpty === true
+  const initialMessages = shouldShowEmpty ? [] : (conversations[tabId] || conversations['welcome'])
   const [messages, setMessages] = React.useState<Message[]>(initialMessages)
   const [inputValue, setInputValue] = React.useState('')
   const [isThinking, setIsThinking] = React.useState(false)
@@ -82,8 +84,12 @@ export function ChatView({ tabId }: { tabId: string }) {
 
   // Reset messages when tabId changes
   React.useEffect(() => {
-    setMessages(conversations[tabId] || conversations['welcome'])
-  }, [tabId])
+    if (tabData?.isEmpty === true) {
+      setMessages([])
+    } else {
+      setMessages(conversations[tabId] || conversations['welcome'])
+    }
+  }, [tabId, tabData])
 
   const handleSend = () => {
     if (!inputValue.trim() || isThinking) return

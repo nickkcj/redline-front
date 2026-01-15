@@ -175,9 +175,9 @@ function WorkspaceLayoutContent() {
       case 'home':
         return <HomeView />
       case 'chat':
-        return <ChatView tabId={tab.id} />
+        return <ChatView tabId={tab.id} tabData={tab.data} />
       case 'document':
-        return <DocumentView tabId={tab.id} />
+        return <DocumentView tabId={tab.id} tabData={tab.data} />
       default:
         return <div>Unknown tab type</div>
     }

@@ -15,7 +15,8 @@ import {
 } from "@/components/ui/dialog"
 
 export function TabBar() {
-  const { tabs, activeTabId, activeSplitTabId, activeThirdTabId, setActiveTab, closeTab, isSplit, isThreeColumnSplit } = useWorkspaceStore()
+  const { tabs, activeTabId, activeSplitTabId, activeThirdTabId, setActiveTab, closeTab, isSplit, isThreeColumnSplit, addTab } = useWorkspaceStore()
+  const [dialogOpen, setDialogOpen] = React.useState(false)
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -170,7 +171,7 @@ export function TabBar() {
       })}
 
       {/* New Tab Button inline */}
-      <Dialog>
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogTrigger asChild>
             <div className="flex h-8 items-center justify-center px-2 cursor-pointer text-muted-foreground hover:bg-muted/50 rounded-t-md hover:text-foreground transition-colors ml-1">
                 <Plus className="h-4 w-4" />
@@ -184,8 +185,26 @@ export function TabBar() {
             </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
-            <Button variant="outline" className="justify-start">New Chat</Button>
-            <Button variant="outline" className="justify-start">New Document</Button>
+            <Button 
+              variant="outline" 
+              className="justify-start"
+              onClick={() => {
+                addTab('chat', 'New Chat', { isEmpty: true })
+                setDialogOpen(false)
+              }}
+            >
+              New Chat
+            </Button>
+            <Button 
+              variant="outline" 
+              className="justify-start"
+              onClick={() => {
+                addTab('document', 'New Document', { isEmpty: true })
+                setDialogOpen(false)
+              }}
+            >
+              New Document
+            </Button>
             </div>
         </DialogContent>
       </Dialog>
