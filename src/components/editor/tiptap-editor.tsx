@@ -22,6 +22,9 @@ import Typography from '@tiptap/extension-typography'
 import CharacterCount from '@tiptap/extension-character-count'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import { common, createLowlight } from 'lowlight'
+
+// Debug: Log when editor is created
+const LOG_EDITOR_DEBUG = false
 import { useEffect, useCallback, useRef, useMemo } from 'react'
 import { EditorToolbar } from './editor-toolbar'
 import { EditorBubbleMenu } from './editor-bubble-menu'
@@ -78,21 +81,19 @@ export const TiptapEditor = ({
     extensions: [
       StarterKit.configure({
         codeBlock: false, // We'll use CodeBlockLowlight instead
-        // Enable all markdown shortcuts like Obsidian
         heading: {
           levels: [1, 2, 3, 4, 5, 6],
         },
-        blockquote: true,
-        bold: true,
-        bulletList: true,
-        code: true,
-        hardBreak: true,
-        horizontalRule: true,
-        italic: true,
-        listItem: true,
-        orderedList: true,
-        paragraph: true,
-        strike: true,
+        // Explicitly enable markdown input rules
+        bold: {},
+        italic: {},
+        strike: {},
+        code: {},
+        horizontalRule: {},
+        blockquote: {},
+        bulletList: {},
+        orderedList: {},
+        listItem: {},
       }),
       Underline,
       TextAlign.configure({
