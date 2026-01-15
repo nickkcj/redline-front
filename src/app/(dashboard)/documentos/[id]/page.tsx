@@ -2,71 +2,70 @@
 
 import { TiptapEditor } from '@/components/editor/tiptap-editor'
 import { useEditorStore } from '@/store/editor-store'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { ArrowLeft, Share2, Download, MoreVertical } from 'lucide-react'
-import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { exportAsMarkdownFile, exportAsJSONFile } from '@/components/editor/utils/markdown-converter'
+import { useEffect, useState, useRef } from 'react'
 
 export default function DocumentEditPage() {
   const params = useParams()
   const documentId = params?.id as string
-  const { currentDocument, setCurrentDocument, updateDocumentContent, createDocument, getDocumentById } = useEditorStore()
+  const { currentDocument, setCurrentDocument, updateDocumentContent, updateDocumentTitle, createDocument, getDocumentById } = useEditorStore()
   const [title, setTitle] = useState('')
+  const titleInputRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
     if (documentId === 'new') {
       // Create new document
-      createDocument('Untitled Document').then((doc) => {
+      createDocument('Untitled').then((doc) => {
         setCurrentDocument(doc)
-        setTitle(doc.title)
+        setTitle('Untitled')
+        // Auto-focus on title for new documents
+        setTimeout(() => {
+          titleInputRef.current?.focus()
+          titleInputRef.current?.select()
+        }, 100)
       })
     } else {
       // Load existing document
       const doc = getDocumentById(documentId)
       if (doc) {
         setCurrentDocument(doc)
-        setTitle(doc.title)
+        setTitle(doc.title || 'Untitled')
       } else if (typeof window !== 'undefined') {
         // Try localStorage
         const stored = localStorage.getItem(`document-${documentId}`)
         if (stored) {
           const doc = JSON.parse(stored)
           setCurrentDocument(doc)
-          setTitle(doc.title)
+          setTitle(doc.title || 'Untitled')
         }
       }
     }
   }, [documentId, createDocument, setCurrentDocument, getDocumentById])
 
-  const handleTitleChange = (newTitle: string) => {
+  const handleTitleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newTitle = e.target.value
     setTitle(newTitle)
-    if (currentDocument) {
-      const updatedDoc = { ...currentDocument, title: newTitle }
-      setCurrentDocument(updatedDoc)
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(`document-${currentDocument.id}`, JSON.stringify(updatedDoc))
-      }
+    if (updateDocumentTitle) {
+      updateDocumentTitle(newTitle)
     }
   }
 
-  const handleExport = (format: 'markdown' | 'json') => {
-    if (!currentDocument) return
-    
-    if (format === 'markdown') {
-      exportAsMarkdownFile(currentDocument.content, currentDocument.title)
-    } else {
-      exportAsJSONFile(currentDocument.content, currentDocument.title)
+  const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      // Focus on editor when pressing Enter
+      const editorElement = document.querySelector('.ProseMirror') as HTMLElement
+      editorElement?.focus()
     }
   }
+
+  // Auto-resize textarea
+  useEffect(() => {
+    if (titleInputRef.current) {
+      titleInputRef.current.style.height = 'auto'
+      titleInputRef.current.style.height = titleInputRef.current.scrollHeight + 'px'
+    }
+  }, [title])
 
   if (!currentDocument) {
     return (
@@ -78,64 +77,33 @@ export default function DocumentEditPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-8 py-4">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4 flex-1">
-              <Link href="/documentos">
-                <Button variant="ghost" size="icon">
-                  <ArrowLeft className="h-4 w-4" />
-                </Button>
-              </Link>
-              <Input
-                value={title}
-                onChange={(e) => handleTitleChange(e.target.value)}
-                className="text-2xl font-bold border-none shadow-none focus-visible:ring-0 px-2"
-                placeholder="Untitled Document"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="gap-2">
-                <Share2 className="h-4 w-4" />
-                Share
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-2">
-                    <Download className="h-4 w-4" />
-                    Export
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => handleExport('markdown')}>
-                    Export as Markdown
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleExport('json')}>
-                    Export as JSON
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              <Button variant="ghost" size="icon">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <div className="max-w-5xl mx-auto p-8">
+        <div className="space-y-1">
+          {/* Title Input - Notion Style */}
+          <textarea
+            ref={titleInputRef}
+            value={title}
+            onChange={handleTitleChange}
+            onKeyDown={handleTitleKeyDown}
+            placeholder="Untitled"
+            className="w-full text-5xl font-bold resize-none outline-none border-none bg-transparent focus:outline-none focus:ring-0 placeholder:text-muted-foreground/30 overflow-hidden px-2"
+            rows={1}
+            style={{ minHeight: '1.2em' }}
+          />
 
-      {/* Editor */}
-      <div className="max-w-5xl mx-auto px-8 py-8">
-        <TiptapEditor
-          documentId={currentDocument.id}
-          content={currentDocument.content}
-          onChange={updateDocumentContent}
-          editable={true}
-          showToolbar={false}
-          showBubbleMenu={true}
-          placeholder="Start writing... Press / for commands or @ to mention"
-          minHeight="calc(100vh - 200px)"
-        />
+          {/* Tiptap Editor */}
+          <TiptapEditor
+            documentId={currentDocument.id}
+            content={currentDocument.content}
+            onChange={updateDocumentContent}
+            editable={true}
+            showToolbar={false}
+            showBubbleMenu={true}
+            placeholder="Press Enter to continue with the main text..."
+            minHeight="calc(100vh - 200px)"
+            className="-mx-2"
+          />
+        </div>
       </div>
     </div>
   )

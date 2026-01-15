@@ -33,6 +33,7 @@ interface EditorStore {
   saveDocument: (content: JSONContent) => Promise<void>
   createDocument: (title: string) => Promise<Document>
   updateDocumentContent: (content: JSONContent) => void
+  updateDocumentTitle: (title: string) => void
   
   // Local storage of documents (for demo purposes)
   documents: Document[]
@@ -158,6 +159,30 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
       
       ;(get() as any).__saveTimeout = saveTimeout
     }
+  },
+
+  updateDocumentTitle: (title: string) => {
+    const { currentDocument } = get()
+    if (!currentDocument) return
+
+    const updatedDoc: Document = {
+      ...currentDocument,
+      title,
+      updatedAt: new Date(),
+    }
+
+    set({ currentDocument: updatedDoc })
+
+    // Save to localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(`document-${updatedDoc.id}`, JSON.stringify(updatedDoc))
+    }
+
+    // Update in documents list
+    const documents = get().documents.map((doc) =>
+      doc.id === updatedDoc.id ? updatedDoc : doc
+    )
+    set({ documents })
   },
 
   addDocument: (doc) =>

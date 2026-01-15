@@ -2,11 +2,13 @@
 
 import { TiptapEditor } from '@/components/editor/tiptap-editor'
 import { useEditorStore } from '@/store/editor-store'
-import { useEffect } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { JSONContent } from '@tiptap/react'
 
 export function DocumentView({ tabId, tabData }: { tabId: string; tabData?: any }) {
-  const { currentDocument, setCurrentDocument, updateDocumentContent, createDocument } = useEditorStore()
+  const { currentDocument, setCurrentDocument, updateDocumentContent, createDocument, updateDocumentTitle } = useEditorStore()
+  const [title, setTitle] = useState('')
+  const titleInputRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
     // Load or create a document for this tab - only when tabId changes
@@ -17,88 +19,50 @@ export function DocumentView({ tabId, tabData }: { tabId: string; tabData?: any 
         if (stored) {
           const doc = JSON.parse(stored)
           setCurrentDocument(doc)
+          setTitle(doc.title || '')
         } else {
-          // Create a new document - empty if tabData?.isEmpty is true
-          const shouldCreateEmpty = tabData?.isEmpty === true
-          const documentContent: JSONContent = shouldCreateEmpty ? {
-            type: 'doc',
-            content: []
-          } : {
-            type: 'doc',
-            content: [
-              {
-                type: 'heading',
-                attrs: { level: 1 },
-                content: [{ type: 'text', text: 'Technical Specifications' }],
-              },
-              {
-                type: 'paragraph',
-                content: [
-                  {
-                    type: 'text',
-                    text: 'This document outlines the technical architecture for the new workspace module. It includes details about state management, component hierarchy, and data flow.',
-                  },
-                ],
-              },
-              {
-                type: 'heading',
-                attrs: { level: 2 },
-                content: [{ type: 'text', text: 'Overview' }],
-              },
-              {
-                type: 'paragraph',
-                content: [
-                  {
-                    type: 'text',
-                    text: 'The system is built using React and Zustand for state management. We aim to replicate a browser-like tab experience within a single page application.',
-                  },
-                ],
-              },
-              {
-                type: 'bulletList',
-                content: [
-                  {
-                    type: 'listItem',
-                    content: [
-                      {
-                        type: 'paragraph',
-                        content: [{ type: 'text', text: 'State Persistence' }],
-                      },
-                    ],
-                  },
-                  {
-                    type: 'listItem',
-                    content: [
-                      {
-                        type: 'paragraph',
-                        content: [{ type: 'text', text: 'Tab Isolation' }],
-                      },
-                    ],
-                  },
-                  {
-                    type: 'listItem',
-                    content: [
-                      {
-                        type: 'paragraph',
-                        content: [{ type: 'text', text: 'Collapsible Sidebars' }],
-                      },
-                    ],
-                  },
-                ],
-              },
-            ],
-          }
-
-          const documentTitle = shouldCreateEmpty ? 'Untitled' : 'Technical Specifications'
-          createDocument(documentTitle).then((doc) => {
-            const updatedDoc = { ...doc, content: documentContent }
-            setCurrentDocument(updatedDoc)
+          // Create a new document - always empty for new documents
+          createDocument('Untitled').then((doc) => {
+            setCurrentDocument(doc)
+            setTitle('Untitled')
+            // Auto-focus on title for new documents
+            setTimeout(() => {
+              titleInputRef.current?.focus()
+              titleInputRef.current?.select()
+            }, 100)
           })
         }
       }
+    } else if (currentDocument) {
+      setTitle(currentDocument.title || '')
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tabId, tabData]) // Intentionally excluding currentDocument, setCurrentDocument, createDocument to prevent infinite loops
+
+  const handleTitleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newTitle = e.target.value
+    setTitle(newTitle)
+    if (updateDocumentTitle) {
+      updateDocumentTitle(newTitle)
+    }
+  }
+
+  const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      // Focus on editor when pressing Enter
+      const editorElement = document.querySelector('.ProseMirror') as HTMLElement
+      editorElement?.focus()
+    }
+  }
+
+  // Auto-resize textarea
+  useEffect(() => {
+    if (titleInputRef.current) {
+      titleInputRef.current.style.height = 'auto'
+      titleInputRef.current.style.height = titleInputRef.current.scrollHeight + 'px'
+    }
+  }, [title])
 
   if (!currentDocument) {
     return (
@@ -110,7 +74,18 @@ export function DocumentView({ tabId, tabData }: { tabId: string; tabData?: any 
 
   return (
     <div className="max-w-5xl mx-auto p-8 min-h-full">
-      <div className="space-y-6">
+      <div className="space-y-1">
+        {/* Title Input - Notion Style */}
+        <textarea
+          ref={titleInputRef}
+          value={title}
+          onChange={handleTitleChange}
+          onKeyDown={handleTitleKeyDown}
+          placeholder="Untitled"
+          className="w-full text-5xl font-bold resize-none outline-none border-none bg-transparent focus:outline-none focus:ring-0 placeholder:text-muted-foreground/30 overflow-hidden px-2"
+          rows={1}
+          style={{ minHeight: '1.2em' }}
+        />
 
         {/* Tiptap Editor */}
         <TiptapEditor
@@ -120,7 +95,7 @@ export function DocumentView({ tabId, tabData }: { tabId: string; tabData?: any 
           editable={true}
           showToolbar={false}
           showBubbleMenu={true}
-          placeholder="Start writing your document... Press / for commands"
+          placeholder="Press Enter to continue with the main text..."
           minHeight="500px"
           className="-mx-2"
         />
