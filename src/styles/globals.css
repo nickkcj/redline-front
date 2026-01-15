@@ -470,3 +470,17 @@ textarea.chat-input-textarea::-webkit-scrollbar,
   border: none !important;
   box-shadow: none !important;
 }
+
+/* Remove stroke/outline from search command input */
+[data-slot="command-input-wrapper"] {
+  border-color: transparent !important;
+}
+
+[data-slot="command-input"],
+[data-slot="command-input"]:focus,
+[data-slot="command-input"]:focus-visible {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  ring: 0 !important;
+}

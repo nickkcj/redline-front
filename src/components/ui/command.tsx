@@ -74,14 +74,14 @@ const CommandInput = React.forwardRef<
   return (
     <div
       data-slot="command-input-wrapper"
-      className="flex h-12 items-center gap-2 border-b border-border px-4"
+      className="flex h-12 items-center gap-2 border-b border-transparent px-4"
     >
       <Search className="size-4 shrink-0 text-muted-foreground" />
       <CommandPrimitive.Input
         ref={ref}
         data-slot="command-input"
         className={cn(
-          "placeholder:text-muted-foreground flex h-full w-full rounded-sm bg-transparent py-2 text-sm outline-hidden disabled:cursor-not-allowed disabled:opacity-50",
+          "placeholder:text-muted-foreground flex h-full w-full rounded-sm bg-transparent py-2 text-sm outline-none focus:outline-none focus-visible:outline-none ring-0 focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50",
           className
         )}
         {...props}
