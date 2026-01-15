@@ -86,7 +86,7 @@ export default function DocumentEditPage() {
             onChange={handleTitleChange}
             onKeyDown={handleTitleKeyDown}
             placeholder="Untitled"
-            className="w-full text-5xl font-bold resize-none outline-none border-none bg-transparent focus:outline-none focus:ring-0 placeholder:text-muted-foreground/30 overflow-hidden px-2"
+            className="w-full text-5xl font-bold resize-none outline-none border-none bg-transparent focus:outline-none focus:ring-0 placeholder:text-muted-foreground/30 overflow-hidden"
             rows={1}
             style={{ minHeight: '1.2em' }}
           />
