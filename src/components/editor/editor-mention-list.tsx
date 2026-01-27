@@ -1,7 +1,7 @@
 'use client'
 
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
-import { User, FileText, Calendar } from 'lucide-react'
+import { User, FileText, Calendar } from '@phosphor-icons/react'
 
 export interface MentionItem {
   id: string

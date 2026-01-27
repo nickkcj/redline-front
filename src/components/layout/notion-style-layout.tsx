@@ -3,17 +3,17 @@
 import * as React from 'react'
 import { usePathname } from 'next/navigation'
 import {
-  Home,
+  House as Home,
   Plus,
   FileText,
-  MessageSquare,
-  ChevronDown,
-  Search,
+  ChatCircle as MessageSquare,
+  CaretDown as ChevronDown,
+  MagnifyingGlass as Search,
   Clock,
   Folder,
-  MoreHorizontal,
-  Settings,
-} from 'lucide-react'
+  DotsThree as MoreHorizontal,
+  Gear as Settings,
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -84,12 +84,12 @@ function NotionStyleLayoutContent({ children }: NotionStyleLayoutProps) {
                 <ChevronDown className="h-4 w-4 text-muted-foreground shrink-0" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56">
+            <DropdownMenuContent align="start" className="w-56 text-sm">
               {workspaces.map((workspace) => (
                 <DropdownMenuItem
                   key={workspace.id}
                   onClick={() => setActiveWorkspace(workspace)}
-                  className="gap-2"
+                  className="gap-2 text-sm"
                 >
                   <Avatar className="h-5 w-5">
                     <AvatarFallback className="bg-primary text-primary-foreground text-[10px]">
@@ -103,8 +103,8 @@ function NotionStyleLayoutContent({ children }: NotionStyleLayoutProps) {
                 </DropdownMenuItem>
               ))}
               <Separator className="my-1" />
-              <DropdownMenuItem className="gap-2 text-muted-foreground">
-                <Plus className="h-4 w-4" />
+              <DropdownMenuItem className="gap-2 text-sm">
+                <Plus weight="bold" className="h-4 w-4" />
                 <span>Novo workspace</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -149,7 +149,7 @@ function NotionStyleLayoutContent({ children }: NotionStyleLayoutProps) {
               className="w-full justify-start gap-2 h-8 px-2 text-sm font-normal text-left"
             >
               <FileText className="h-4 w-4 shrink-0" />
-              <span className="text-left">Documentos</span>
+              <span className="text-left">Files</span>
             </Button>
           </div>
 
@@ -188,7 +188,7 @@ function NotionStyleLayoutContent({ children }: NotionStyleLayoutProps) {
             <div className="flex items-center gap-1 px-2 mb-1">
               <Folder className="h-3.5 w-3.5 text-muted-foreground" />
               <span className="text-xs font-medium text-muted-foreground">
-                Documentos Recentes
+                Recent Files
               </span>
             </div>
 

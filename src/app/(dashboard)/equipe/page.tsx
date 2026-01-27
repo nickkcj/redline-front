@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Search, Plus, Mail, MoreVertical } from 'lucide-react'
+import { MagnifyingGlass, Plus, EnvelopeSimple, DotsThreeVertical } from '@phosphor-icons/react'
 
 const membros = [
   {
@@ -118,7 +118,7 @@ export default function EquipePage() {
         {/* Barra de Pesquisa */}
         <div className="flex items-center gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <MagnifyingGlass weight="bold" className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Pesquisar membros..."
               className="pl-10"
@@ -161,10 +161,10 @@ export default function EquipePage() {
                   {/* Email e Ações */}
                   <div className="flex items-center gap-2">
                     <Button variant="ghost" size="icon" className="h-9 w-9">
-                      <Mail className="h-4 w-4" />
+                      <EnvelopeSimple weight="bold" className="h-4 w-4" />
                     </Button>
                     <Button variant="ghost" size="icon" className="h-9 w-9">
-                      <MoreVertical className="h-4 w-4" />
+                      <DotsThreeVertical weight="bold" className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>

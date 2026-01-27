@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { Link, File, Image, ChevronRight, X } from 'lucide-react'
+import { Link, File, Image, CaretRight, X } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'

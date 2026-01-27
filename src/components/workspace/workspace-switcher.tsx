@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { Check, ChevronsUpDown, Plus, Settings, LogOut, Briefcase } from 'lucide-react'
+import { Check, CaretUpDown, Plus, Gear, SignOut, Briefcase } from '@phosphor-icons/react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,10 +42,10 @@ export function WorkspaceSwitcher() {
               </span>
             </div>
           </div>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <CaretUpDown weight="bold" className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-[240px]" align="start">
+      <DropdownMenuContent className="w-[240px] text-sm" align="start">
         <DropdownMenuLabel className="text-xs text-muted-foreground">
           {activeWorkspace.name}
         </DropdownMenuLabel>
@@ -53,7 +53,7 @@ export function WorkspaceSwitcher() {
           <DropdownMenuItem
             key={workspace.id}
             onSelect={() => setActiveWorkspace(workspace.id)}
-            className="flex items-center justify-between gap-2"
+            className="flex items-center justify-between gap-2 text-sm"
           >
             <div className="flex items-center gap-2">
               <div className="flex h-6 w-6 items-center justify-center rounded border bg-background">
@@ -62,28 +62,28 @@ export function WorkspaceSwitcher() {
               <span className="truncate">{workspace.name}</span>
             </div>
             {workspace.id === activeWorkspaceId && (
-              <Check className="h-4 w-4 text-primary" />
+              <Check weight="bold" className="h-4 w-4 text-primary" />
             )}
           </DropdownMenuItem>
         ))}
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="gap-2">
-          <Plus className="h-4 w-4" />
-          <span className="text-muted-foreground">Create workspace</span>
+        <DropdownMenuItem className="gap-2 text-sm">
+          <Plus weight="bold" className="h-4 w-4" />
+          <span>Create workspace</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="gap-2" onSelect={() => setSettingsOpen(true)}>
-          <Settings className="h-4 w-4" />
-          <span className="text-muted-foreground">Workspace settings</span>
+        <DropdownMenuItem className="gap-2 text-sm" onSelect={() => setSettingsOpen(true)}>
+          <Gear weight="bold" className="h-4 w-4" />
+          <span>Workspace settings</span>
         </DropdownMenuItem>
-        <DropdownMenuItem className="gap-2">
-          <Briefcase className="h-4 w-4" />
-          <span className="text-muted-foreground">Invite members</span>
+        <DropdownMenuItem className="gap-2 text-sm">
+          <Briefcase weight="bold" className="h-4 w-4" />
+          <span>Invite members</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="gap-2">
-          <LogOut className="h-4 w-4" />
-          <span className="text-muted-foreground">Log out</span>
+        <DropdownMenuItem className="gap-2 text-sm">
+          <SignOut weight="bold" className="h-4 w-4" />
+          <span>Log out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

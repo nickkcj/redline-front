@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { Loader2 } from 'lucide-react'
+import { CircleNotch } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 
 interface GoogleLoginButtonProps {
@@ -19,7 +19,7 @@ export function GoogleLoginButton({ onGoogleLogin, isGoogleLoading }: GoogleLogi
       className="w-full"
     >
       {isGoogleLoading ? (
-        <Loader2 className="size-4 animate-spin" />
+        <CircleNotch weight="bold" className="size-4 animate-spin" />
       ) : (
         <Image
           src="/google-logo.png"

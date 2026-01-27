@@ -1,6 +1,6 @@
 'use client'
 
-import { Mail, ArrowLeft } from 'lucide-react'
+import { EnvelopeSimple, ArrowLeft } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
@@ -13,7 +13,7 @@ export function MagicLinkSuccess({ email, onBackToLogin }: MagicLinkSuccessProps
   return (
     <div className="flex flex-col gap-4">
       <Alert variant="success">
-        <Mail className="size-4" />
+        <EnvelopeSimple weight="bold" className="size-4" />
         <AlertTitle>Email enviado!</AlertTitle>
         <AlertDescription>
           Verifique sua caixa de entrada em <span className="font-medium">{email}</span> e clique no link para entrar.
@@ -25,7 +25,7 @@ export function MagicLinkSuccess({ email, onBackToLogin }: MagicLinkSuccessProps
         onClick={onBackToLogin}
         className="w-full"
       >
-        <ArrowLeft className="size-4" />
+        <ArrowLeft weight="bold" className="size-4" />
         Voltar para o login
       </Button>
     </div>

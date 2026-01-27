@@ -21,7 +21,7 @@ import {
   MessageContent,
 } from "@/components/ui/ai-elements/message"
 import { Response } from "@/components/ui/ai-elements/response"
-import { Globe, FileText, X, Sparkles, MessageSquare } from "lucide-react"
+import { Globe, FileText, X, Sparkle, ChatCircle } from "@phosphor-icons/react"
 import { DocumentSelector } from "./document-selector"
 import {
   useChatMessages,
@@ -338,7 +338,7 @@ export function ModernChatArea({
           {/* Header */}
           <div className="text-center space-y-3">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-              <Sparkles className="w-8 h-8 text-primary" />
+              <Sparkle weight="bold" className="w-8 h-8 text-primary" />
             </div>
             <h1 className="text-4xl font-bold tracking-tight">
               Como posso ajudar?
@@ -361,7 +361,7 @@ export function ModernChatArea({
                 variant="outline"
                 className="h-auto py-4 px-4 text-left justify-start hover:bg-accent"
               >
-                <MessageSquare className="w-4 h-4 mr-3 shrink-0 text-muted-foreground" />
+                <ChatCircle weight="bold" className="w-4 h-4 mr-3 shrink-0 text-muted-foreground" />
                 <span className="text-sm line-clamp-2">{suggestion}</span>
               </Button>
             ))}

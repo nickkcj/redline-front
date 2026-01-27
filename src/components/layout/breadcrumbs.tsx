@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home } from "lucide-react";
+import { House } from "@phosphor-icons/react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -55,7 +55,7 @@ export function Breadcrumbs() {
         <BreadcrumbItem>
           <BreadcrumbLink asChild>
             <Link href="/" className="flex items-center gap-1">
-              <Home className="h-4 w-4" />
+              <House weight="bold" className="h-4 w-4" />
               <span className="sr-only">Home</span>
             </Link>
           </BreadcrumbLink>

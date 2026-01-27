@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { Clock, FileText, Video, Calendar } from 'lucide-react'
+import { Clock, FileText, VideoCamera, Calendar } from '@phosphor-icons/react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 

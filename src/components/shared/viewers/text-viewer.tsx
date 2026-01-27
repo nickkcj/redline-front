@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react'
-import { Loader2, AlertCircle } from 'lucide-react'
+import { CircleNotch, WarningCircle } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 
 interface TextViewerProps {

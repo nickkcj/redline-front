@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Users, History, Settings, CreditCard, Mail } from "lucide-react"
+import { Users, ClockCounterClockwise, Gear, CreditCard, EnvelopeSimple } from "@phosphor-icons/react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { BreadcrumbHeader } from "@/components/layout/breadcrumb-header"
 import { MembersTab } from "@/components/features/admin/members-tab"
@@ -55,7 +55,7 @@ export default function AdminPage({ params }: AdminPageProps) {
         <div className="max-w-6xl mx-auto py-6 pl-8 pr-4">
           <div className="mb-8">
             <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
-              <Settings className="h-8 w-8" />
+              <Gear weight="bold" className="h-8 w-8" />
               Administração
             </h1>
             <p className="text-muted-foreground mt-2">
@@ -66,7 +66,7 @@ export default function AdminPage({ params }: AdminPageProps) {
           <Tabs defaultValue="access" className="space-y-6">
             <TabsList className="w-full justify-start bg-muted/50 p-1">
               <TabsTrigger value="audit" className="flex-1 max-w-[200px] gap-2">
-                <History className="h-4 w-4" />
+                <ClockCounterClockwise weight="bold" className="h-4 w-4" />
                 Auditoria
               </TabsTrigger>
               <TabsTrigger value="access" className="flex-1 max-w-[200px] gap-2">

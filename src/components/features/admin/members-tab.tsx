@@ -7,7 +7,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Trash2, UserPlus, Shield } from 'lucide-react'
+import { Plus, Trash, UserPlus, Shield } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -182,7 +182,7 @@ export function MembersManagementTable({ workspaceId }: MembersManagementTablePr
                   size="icon"
                   onClick={() => openRemoveDialog(member.id)}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash weight="bold" className="h-4 w-4" />
                 </Button>
               </div>
             </CardHeader>

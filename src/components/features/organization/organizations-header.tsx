@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Plus } from "lucide-react"
+import { Plus } from "@phosphor-icons/react"
 
 interface OrganizationsHeaderProps {
   organizationCount: number

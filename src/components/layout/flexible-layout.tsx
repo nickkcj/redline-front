@@ -17,13 +17,13 @@ import {
   SidebarRail,
 } from '@/components/ui/sidebar'
 import {
-  Home,
+  House as Home,
   Folder,
   Users,
-  Settings,
+  Gear as Settings,
   FileText,
   Plus,
-} from 'lucide-react'
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 
@@ -46,7 +46,7 @@ const menuItems = [
     url: '/projetos',
   },
   {
-    title: 'Documentos',
+    title: 'Files',
     icon: FileText,
     url: '/documentos',
   },

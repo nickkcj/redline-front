@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { X, FileText, Home, MessageSquare, Plus } from 'lucide-react'
+import { X, FileText, House, ChatCircle, Plus } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { useWorkspaceStore, Tab } from '@/store/workspace-store'
 import { Button } from '@/components/ui/button'
@@ -20,8 +20,8 @@ export function TabBar() {
 
   const getIcon = (type: string) => {
     switch (type) {
-      case 'home': return Home
-      case 'chat': return MessageSquare
+      case 'home': return House
+      case 'chat': return ChatCircle
       case 'document': return FileText
       default: return FileText
     }

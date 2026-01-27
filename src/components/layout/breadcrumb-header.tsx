@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { PanelLeft, ChevronLeft, ChevronRight } from "lucide-react"
+import { SidebarSimple, CaretLeft, CaretRight } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 import {
   Breadcrumb,
@@ -47,7 +47,7 @@ export function BreadcrumbHeader({ breadcrumbs, actions }: BreadcrumbHeaderProps
             className="h-8 w-8 p-0"
             aria-label="Toggle sidebar"
           >
-            <PanelLeft className="h-4 w-4" />
+            <SidebarSimple weight="bold" className="h-4 w-4" />
           </Button>
 
           {/* Navigation Buttons */}
@@ -59,7 +59,7 @@ export function BreadcrumbHeader({ breadcrumbs, actions }: BreadcrumbHeaderProps
               disabled
               title="Go back"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <CaretLeft weight="bold" className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
@@ -68,7 +68,7 @@ export function BreadcrumbHeader({ breadcrumbs, actions }: BreadcrumbHeaderProps
               disabled
               title="Go forward"
             >
-              <ChevronRight className="h-4 w-4" />
+              <CaretRight weight="bold" className="h-4 w-4" />
             </Button>
           </div>
 

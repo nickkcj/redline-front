@@ -6,16 +6,16 @@ import {
   Download,
   Link as LinkIcon,
   Copy,
-  SquareStack,
-  Pencil,
+  Stack,
+  PencilSimple,
   ArrowRight,
-  Trash2,
-  RotateCcw,
-  ExternalLink,
+  Trash,
+  ArrowCounterClockwise,
+  ArrowSquareOut,
   Square,
   Columns,
-  MoreHorizontal,
-} from 'lucide-react'
+  DotsThree,
+} from '@phosphor-icons/react'
 import {
   Popover,
   PopoverContent,

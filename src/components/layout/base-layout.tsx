@@ -3,11 +3,9 @@
 import * as React from "react"
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar"
 import { AppSidebar } from "./app-sidebar"
-import { DocumentSidebar } from "./document-sidebar"
 import { DocumentViewerPanel } from "./document-viewer-panel"
 import { UnifiedDocumentViewer } from "@/components/shared/viewers"
-import { useDocumentViewer } from "@/contexts/document-viewer-context"
-import { useSidebarControl } from "@/contexts/sidebar-control-context"
+import { useDocumentViewer, DocumentViewerProvider } from "@/contexts/document-viewer-context"
 import { SearchProvider, useSearch } from "@/contexts/search-context"
 import { SearchCommand } from "@/components/workspace/search-command"
 
@@ -18,7 +16,6 @@ interface BaseLayoutProps {
 
 function BaseLayoutContent({ children, className }: BaseLayoutProps) {
   const { isOpen: isDocumentViewerOpen } = useDocumentViewer()
-  const { documentsOpen } = useSidebarControl()
   const { isOpen: isSearchOpen, openSearch, closeSearch } = useSearch()
 
   return (
@@ -26,13 +23,6 @@ function BaseLayoutContent({ children, className }: BaseLayoutProps) {
       <div className="flex h-screen w-full">
         {/* Main Sidebar */}
         <AppSidebar />
-
-        {/* Document Sidebar - appears next to main sidebar when open */}
-        {documentsOpen && (
-          <div className="w-72 border-r border-sidebar-border bg-sidebar">
-            <DocumentSidebar />
-          </div>
-        )}
 
         {/* Main Content Area */}
         <SidebarInset className="flex-1 flex flex-row min-w-0">
@@ -64,9 +54,11 @@ export function BaseLayout({ children, className }: BaseLayoutProps) {
   return (
     <SidebarProvider>
       <SearchProvider>
-        <BaseLayoutContent className={className}>
-          {children}
-        </BaseLayoutContent>
+        <DocumentViewerProvider>
+          <BaseLayoutContent className={className}>
+            {children}
+          </BaseLayoutContent>
+        </DocumentViewerProvider>
       </SearchProvider>
     </SidebarProvider>
   )

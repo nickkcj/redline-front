@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { History, MessageSquare, Calendar, Trash2, Sparkles } from "lucide-react";
+import { ClockCounterClockwise, ChatCircle, Calendar, Trash, Sparkle } from "@phosphor-icons/react";
 import { useChats, useDeleteChat } from "@/hooks/api/use-chat";
 import { useCurrentWorkspace } from "@/lib/stores/app.store";
 import { formatDistanceToNow, isToday, isYesterday, isThisWeek, startOfToday, startOfYesterday, startOfWeek } from "date-fns";
@@ -108,7 +108,7 @@ export function ChatHistorySheet({
       ) : (
         <SheetTrigger asChild>
           <Button variant="outline" size="sm">
-            <History className="w-4 h-4 mr-2" />
+            <ClockCounterClockwise weight="bold" className="w-4 h-4 mr-2" />
             Histórico
           </Button>
         </SheetTrigger>
@@ -118,7 +118,7 @@ export function ChatHistorySheet({
         <SheetHeader className="px-6 py-5 border-b bg-muted/30">
           <SheetTitle className="flex items-center gap-2.5 text-base">
             <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-              <History className="w-4 h-4 text-primary" />
+              <ClockCounterClockwise weight="bold" className="w-4 h-4 text-primary" />
             </div>
             <span>Histórico de Conversas</span>
           </SheetTitle>
@@ -143,7 +143,7 @@ export function ChatHistorySheet({
             {!isLoading && !error && (!chatsData?.chats || chatsData.chats.length === 0) && (
               <div className="flex flex-col items-center justify-center py-16 text-center px-4">
                 <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
-                  <MessageSquare className="w-8 h-8 text-muted-foreground" />
+                  <ChatCircle weight="bold" className="w-8 h-8 text-muted-foreground" />
                 </div>
                 <h3 className="text-base font-semibold mb-1.5">Nenhuma conversa ainda</h3>
                 <p className="text-sm text-muted-foreground max-w-[280px]">
@@ -174,9 +174,9 @@ export function ChatHistorySheet({
                           <div className="flex items-start gap-3">
                             <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
                               {chat.title === 'Nova conversa...' || chat.title === 'New Chat' ? (
-                                <MessageSquare className="w-4 h-4 text-primary/60" />
+                                <ChatCircle weight="bold" className="w-4 h-4 text-primary/60" />
                               ) : (
-                                <Sparkles className="w-4 h-4 text-primary" />
+                                <Sparkle weight="bold" className="w-4 h-4 text-primary" />
                               )}
                             </div>
 
@@ -203,7 +203,7 @@ export function ChatHistorySheet({
                                   className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                                   onClick={(e) => e.stopPropagation()}
                                 >
-                                  <Trash2 className="w-3.5 h-3.5" />
+                                  <Trash weight="bold" className="w-3.5 h-3.5" />
                                 </Button>
                               </AlertDialogTrigger>
                               <AlertDialogContent>

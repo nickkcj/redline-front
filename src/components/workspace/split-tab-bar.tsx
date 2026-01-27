@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { X, FileText, Home, MessageSquare } from 'lucide-react'
+import { X, FileText, House, ChatCircle } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { useWorkspaceStore } from '@/store/workspace-store'
 
@@ -19,8 +19,8 @@ export function SplitTabBar() {
 
   const getIcon = (type: string) => {
     switch (type) {
-      case 'home': return Home
-      case 'chat': return MessageSquare
+      case 'home': return House
+      case 'chat': return ChatCircle
       case 'document': return FileText
       default: return FileText
     }

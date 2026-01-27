@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Plus, ChevronLeft, Building2 } from "lucide-react"
+import { Plus, CaretLeft, Buildings } from "@phosphor-icons/react"
 
 interface WorkspacesHeaderProps {
   organizationName: string
@@ -26,12 +26,12 @@ export function WorkspacesHeader({
           onClick={onBackClick}
           className="gap-1 h-7 px-2 text-muted-foreground hover:text-foreground hover:bg-accent rounded-md"
         >
-          <ChevronLeft className="size-4" />
+          <CaretLeft weight="bold" className="size-4" />
           <span>Organizações</span>
         </Button>
         <span className="text-muted-foreground">/</span>
         <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-accent/50">
-          <Building2 className="size-3.5 text-muted-foreground" />
+          <Buildings weight="bold" className="size-3.5 text-muted-foreground" />
           <span className="font-medium text-foreground">{organizationName}</span>
         </div>
       </div>
@@ -53,7 +53,7 @@ export function WorkspacesHeader({
             size="sm"
             className="gap-1.5 h-8 px-3 bg-ring hover:bg-ring/90 text-white rounded-md"
           >
-            <Plus className="size-4" />
+            <Plus weight="bold" className="size-4" />
             Novo Projeto
           </Button>
         )}

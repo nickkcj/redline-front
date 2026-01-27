@@ -1,10 +1,9 @@
 'use client'
 
 import * as React from 'react'
-import { Button } from '@/components/ui/button'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Separator } from '@/components/ui/separator'
-import { FileText, Plus, ChevronRight } from 'lucide-react'
+import { FileText, File, Plus } from '@phosphor-icons/react'
+import { Button } from "@/components/ui/button"
+import { SidebarListBase, SidebarGroup, SidebarListItem } from "./sidebar-base"
 
 interface Document {
   id: number
@@ -20,10 +19,10 @@ interface DocumentsSidebarProps {
 }
 
 const defaultDocuments: Document[] = [
-  { id: 1, nome: 'Proposta Projeto A', tipo: 'PDF', data: 'Há 2 dias' },
-  { id: 2, nome: 'Contrato Cliente B', tipo: 'DOCX', data: 'Há 3 dias' },
-  { id: 3, nome: 'Relatório Mensal', tipo: 'PDF', data: 'Há 1 semana' },
-  { id: 4, nome: 'Especificações Técnicas', tipo: 'PDF', data: 'Há 2 semanas' },
+  { id: 1, nome: 'Proposta Projeto A', tipo: 'PDF', data: '2d' },
+  { id: 2, nome: 'Contrato Cliente B', tipo: 'DOCX', data: '3d' },
+  { id: 3, nome: 'Relatório Mensal', tipo: 'PDF', data: '1w' },
+  { id: 4, nome: 'Especificações Técnicas', tipo: 'PDF', data: '2w' },
 ]
 
 export function DocumentsSidebar({
@@ -31,89 +30,59 @@ export function DocumentsSidebar({
   onDocumentSelect,
   selectedDocId,
 }: DocumentsSidebarProps) {
-  const [selectedDoc, setSelectedDoc] = React.useState<number | null>(
-    selectedDocId || null
-  )
-
-  const handleDocumentClick = (id: number) => {
-    setSelectedDoc(id)
-    onDocumentSelect?.(id)
+  
+  const getIcon = (type: string) => {
+    switch (type.toLowerCase()) {
+      case 'pdf': return FileText
+      case 'docx': return FileText
+      default: return File
+    }
   }
 
   return (
-    <div className="flex h-full flex-col">
-      {/* Header */}
-      <div className="border-b p-4">
-        <h2 className="text-sm font-semibold">Documentos</h2>
-        <p className="text-xs text-muted-foreground mt-1">
-          Visualize e gerencie seus documentos
-        </p>
-      </div>
-
-      {/* Lista de documentos */}
-      <ScrollArea className="flex-1">
-        <div className="p-4 space-y-2">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-medium text-muted-foreground">
-              RECENTES
-            </span>
-            <Button variant="ghost" size="icon" className="h-6 w-6">
-              <Plus className="h-3 w-3" />
-            </Button>
-          </div>
-
-          {documents.map((doc) => (
-            <button
-              key={doc.id}
-              onClick={() => handleDocumentClick(doc.id)}
-              className={`w-full rounded-lg border p-3 text-left transition-colors hover:bg-accent ${
-                selectedDoc === doc.id ? 'bg-accent' : 'bg-background'
-              }`}
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-start gap-2 flex-1 min-w-0">
-                  <FileText className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{doc.nome}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {doc.tipo}
-                      {doc.data && ` • ${doc.data}`}
-                    </p>
-                  </div>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
-              </div>
-            </button>
-          ))}
+    <SidebarListBase
+      title="Files"
+      actions={
+        <div className="flex flex-col gap-1 w-full">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="w-full justify-start h-9 px-2 text-sm font-normal text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50"
+            title="Upload File"
+          >
+            <Plus weight="bold" className="mr-2 h-4 w-4" />
+            <span>Upload File</span>
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="w-full justify-start h-9 px-2 text-sm font-normal text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50"
+            title="New Doc"
+          >
+            <Plus weight="bold" className="mr-2 h-4 w-4" />
+            <span>New Doc</span>
+          </Button>
         </div>
-
-        {selectedDoc && (
-          <>
-            <Separator className="my-4" />
-
-            {/* Preview */}
-            <div className="p-4">
-              <div className="rounded-lg border bg-background p-4">
-                <h3 className="text-sm font-semibold mb-2">Pré-visualização</h3>
-                <div className="aspect-3/4 rounded border bg-muted flex items-center justify-center">
-                  <div className="text-center text-muted-foreground">
-                    <FileText className="h-12 w-12 mx-auto mb-2" />
-                    <p className="text-xs">Visualização do documento</p>
-                  </div>
-                </div>
-                <div className="mt-4 space-y-2">
-                  <Button className="w-full" size="sm">
-                    Abrir Documento
-                  </Button>
-                  <Button variant="outline" className="w-full" size="sm">
-                    Download
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </>
-        )}
-      </ScrollArea>
-    </div>
+      }
+    >
+      <SidebarGroup title="Recentes">
+        {documents.map((doc) => (
+          <SidebarListItem
+            key={doc.id}
+            icon={getIcon(doc.tipo)}
+            label={doc.nome}
+            active={selectedDocId === doc.id}
+            onClick={() => onDocumentSelect?.(doc.id)}
+            endContent={
+              doc.data && (
+                <span className="text-[10px] text-muted-foreground/60 shrink-0">
+                  {doc.data}
+                </span>
+              )
+            }
+          />
+        ))}
+      </SidebarGroup>
+    </SidebarListBase>
   )
 }

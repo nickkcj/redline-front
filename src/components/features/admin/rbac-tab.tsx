@@ -8,7 +8,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Trash2, Edit, Shield } from 'lucide-react'
+import { Plus, Trash, PencilSimple, Shield } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -184,14 +184,14 @@ export function RolesManagementTable({ workspaceId }: RolesManagementTableProps)
                   size="icon"
                   onClick={() => openEditDialog(role.id)}
                 >
-                  <Edit className="h-4 w-4" />
+                  <PencilSimple weight="bold" className="h-4 w-4" />
                 </Button>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => openDeleteDialog(role.id)}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash weight="bold" className="h-4 w-4" />
                 </Button>
               </div>
             </CardHeader>
@@ -288,13 +288,13 @@ export function RolesManagementTable({ workspaceId }: RolesManagementTableProps)
         </DialogContent>
       </Dialog>
 
-      {/* Edit Role Dialog */}
+      {/* PencilSimple weight="bold" Role Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Editar Função</DialogTitle>
+            <DialogTitle>PencilSimple weight="bold"ar Função</DialogTitle>
             <DialogDescription>
-              Edite o nome, descrição e permissões da função
+              PencilSimple weight="bold"e o nome, descrição e permissões da função
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Mail, Plus, Trash2, Clock, CheckCircle2, XCircle } from "lucide-react"
+import { EnvelopeSimple, Plus, Trash, Clock, CheckCircle, XCircle } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -111,7 +111,7 @@ export function InvitesTab({ workspaceId }: InvitesTabProps) {
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <div>
             <CardTitle className="flex items-center gap-2">
-              <Mail className="h-5 w-5" />
+              <EnvelopeSimple weight="bold" className="h-5 w-5" />
               Convites por Email
             </CardTitle>
             <CardDescription className="mt-2">
@@ -126,7 +126,7 @@ export function InvitesTab({ workspaceId }: InvitesTabProps) {
         <CardContent>
           {!invites || invites.length === 0 ? (
             <div className="text-center py-12">
-              <Mail className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <EnvelopeSimple weight="bold" className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground">Nenhum convite enviado</p>
               <p className="text-sm text-muted-foreground mt-1">
                 Convide pessoas para colaborar neste workspace
@@ -148,7 +148,7 @@ export function InvitesTab({ workspaceId }: InvitesTabProps) {
                         <p className="font-medium">{invite.email}</p>
                         {used ? (
                           <Badge variant="default" className="gap-1">
-                            <CheckCircle2 className="h-3 w-3" />
+                            <CheckCircle weight="bold" className="h-3 w-3" />
                             Aceito
                           </Badge>
                         ) : expired ? (
@@ -196,7 +196,7 @@ export function InvitesTab({ workspaceId }: InvitesTabProps) {
                         }}
                         disabled={isCanceling}
                       >
-                        <Trash2 className="h-4 w-4 text-destructive" />
+                        <Trash weight="bold" className="h-4 w-4 text-destructive" />
                       </Button>
                     )}
                   </div>

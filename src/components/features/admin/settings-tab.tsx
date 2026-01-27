@@ -1,6 +1,6 @@
 "use client"
 
-import { Trash2 } from "lucide-react"
+import { Trash } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -87,7 +87,7 @@ export function SettingsTab({ workspaceId }: SettingsTabProps) {
               Deletar este workspace removerá permanentemente todos os dados, incluindo chats, documentos e configurações. Esta ação não pode ser desfeita.
             </p>
             <Button variant="destructive" onClick={handleDelete}>
-              <Trash2 className="h-4 w-4 mr-2" />
+              <Trash weight="bold" className="h-4 w-4 mr-2" />
               Deletar Workspace
             </Button>
           </div>

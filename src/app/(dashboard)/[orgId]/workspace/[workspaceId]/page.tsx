@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Plus, History } from "lucide-react";
+import { Plus, ClockCounterClockwise } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { BreadcrumbHeader } from "@/components/layout/breadcrumb-header";
 import { ModernChatArea } from "@/components/features/chat";
@@ -61,12 +61,12 @@ export default function WorkspacePage({ params }: WorkspacePageProps) {
   // Header actions
   const actions = (
     <div className="flex items-center gap-2">
-      <ChatHistorySheet
+      <ChatClockCounterClockwise weight="bold"Sheet
         onSelectChat={handleSelectChat}
         currentChatId={currentChatId || undefined}
         trigger={
           <Button variant="outline" size="sm">
-            <History className="h-4 w-4 mr-2" />
+            <ClockCounterClockwise weight="bold" className="h-4 w-4 mr-2" />
             Histórico
           </Button>
         }

@@ -2,7 +2,7 @@
 
 import type { WorkspaceSummary } from "@/lib/api/types/organization.types"
 import { Button } from "@/components/ui/button"
-import { MoreHorizontal, Pencil, Trash2, LogOut } from "lucide-react"
+import { DotsThree, PencilSimple, Trash, SignOut } from "@phosphor-icons/react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,22 +43,22 @@ export function WorkspaceCard({
               className="h-7 w-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent"
               onClick={(e) => e.stopPropagation()}
             >
-              <MoreHorizontal className="h-4 w-4" />
+              <DotsThree weight="bold" className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-44">
+          <DropdownMenuContent align="end" className="w-44 text-sm">
             {canManage && (
               <>
-                <DropdownMenuItem onClick={onEdit} className="gap-2">
-                  <Pencil className="h-4 w-4" />
+                <DropdownMenuItem onClick={onEdit} className="gap-2 text-sm">
+                  <PencilSimple weight="bold" className="h-4 w-4" />
                   Editar
                 </DropdownMenuItem>
                 <DropdownMenuItem 
                   onClick={onDelete} 
                   variant="destructive"
-                  className="gap-2"
+                  className="gap-2 text-sm"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash weight="bold" className="h-4 w-4" />
                   Excluir
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -66,9 +66,9 @@ export function WorkspaceCard({
             )}
             <DropdownMenuItem 
               onClick={onLeave}
-              className="gap-2 text-tag-orange-foreground focus:text-tag-orange-foreground"
+              className="gap-2 text-sm text-tag-orange-foreground focus:text-tag-orange-foreground"
             >
-              <LogOut className="h-4 w-4" />
+              <SignOut weight="bold" className="h-4 w-4" />
               Sair do projeto
             </DropdownMenuItem>
           </DropdownMenuContent>

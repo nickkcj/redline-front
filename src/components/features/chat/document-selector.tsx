@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
-import { FileText, Search, Check, X } from "lucide-react"
+import { FileText, MagnifyingGlass, Check, X } from "@phosphor-icons/react"
 import { cn } from "@/lib/utils"
 import type { DocumentResponseDto } from "@/lib/api/types/document.types"
 
@@ -68,9 +68,9 @@ export function DocumentSelector({
             className
           )}
         >
-          <FileText className="h-4 w-4" />
+          <FileText weight="bold" className="h-4 w-4" />
           <span className="text-sm">
-            Documentos
+            Files
             {markedDocuments.length > 0 && ` (${markedDocuments.length})`}
           </span>
         </Button>
@@ -79,14 +79,14 @@ export function DocumentSelector({
         <div className="flex flex-col h-[400px]">
           {/* Header */}
           <div className="p-3 border-b">
-            <h4 className="font-medium text-sm mb-2">Documentos do Workspace</h4>
+            <h4 className="font-medium text-sm mb-2">Workspace Files</h4>
             <p className="text-xs text-muted-foreground mb-3">
               Selecione documentos para adicionar ao contexto do chat
             </p>
 
             {/* Search */}
             <div className="relative">
-              <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <MagnifyingGlass weight="bold" className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Buscar documentos..."
                 value={search}

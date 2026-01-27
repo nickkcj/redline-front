@@ -1,7 +1,7 @@
 'use client'
 
 import { Editor } from '@tiptap/react'
-import { Bold, Italic, Underline, Strikethrough, Code, Link as LinkIcon, Highlighter } from 'lucide-react'
+import { TextB, TextItalic, TextUnderline, TextStrikethrough, Code, Link as LinkIcon, Highlighter } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 
@@ -33,7 +33,7 @@ export const EditorBubbleMenu = ({ editor }: EditorBubbleMenuProps) => {
         className="h-8 w-8"
         onClick={() => editor.chain().focus().toggleBold().run()}
       >
-        <Bold className="h-4 w-4" />
+        <TextB weight="bold" className="h-4 w-4" />
       </Button>
       <Button
         variant={editor.isActive('italic') ? 'secondary' : 'ghost'}
@@ -41,7 +41,7 @@ export const EditorBubbleMenu = ({ editor }: EditorBubbleMenuProps) => {
         className="h-8 w-8"
         onClick={() => editor.chain().focus().toggleItalic().run()}
       >
-        <Italic className="h-4 w-4" />
+        <TextItalic weight="bold" className="h-4 w-4" />
       </Button>
       <Button
         variant={editor.isActive('underline') ? 'secondary' : 'ghost'}
@@ -49,7 +49,7 @@ export const EditorBubbleMenu = ({ editor }: EditorBubbleMenuProps) => {
         className="h-8 w-8"
         onClick={() => editor.chain().focus().toggleUnderline().run()}
       >
-        <Underline className="h-4 w-4" />
+        <TextUnderline weight="bold" className="h-4 w-4" />
       </Button>
       <Button
         variant={editor.isActive('strike') ? 'secondary' : 'ghost'}
@@ -57,7 +57,7 @@ export const EditorBubbleMenu = ({ editor }: EditorBubbleMenuProps) => {
         className="h-8 w-8"
         onClick={() => editor.chain().focus().toggleStrike().run()}
       >
-        <Strikethrough className="h-4 w-4" />
+        <TextStrikethrough weight="bold" className="h-4 w-4" />
       </Button>
       <Separator orientation="vertical" className="h-6" />
       <Button

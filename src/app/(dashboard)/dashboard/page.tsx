@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { TrendingUp, TrendingDown, Users, FileText, Folder } from 'lucide-react'
+import { TrendUp, TrendDown, Users, FileText, Folder } from '@phosphor-icons/react'
 
 export default function DashboardPage() {
   return (
@@ -32,7 +32,7 @@ export default function DashboardPage() {
             <CardContent>
               <div className="text-2xl font-bold">24</div>
               <div className="flex items-center text-xs text-muted-foreground mt-1">
-                <TrendingUp className="mr-1 h-3 w-3 text-green-500" />
+                <TrendUp weight="bold" className="mr-1 h-3 w-3 text-green-500" />
                 <span className="text-green-500">+12%</span>
                 <span className="ml-1">desde o mês passado</span>
               </div>
@@ -49,7 +49,7 @@ export default function DashboardPage() {
             <CardContent>
               <div className="text-2xl font-bold">156</div>
               <div className="flex items-center text-xs text-muted-foreground mt-1">
-                <TrendingUp className="mr-1 h-3 w-3 text-green-500" />
+                <TrendUp weight="bold" className="mr-1 h-3 w-3 text-green-500" />
                 <span className="text-green-500">+8%</span>
                 <span className="ml-1">desde a semana passada</span>
               </div>
@@ -66,7 +66,7 @@ export default function DashboardPage() {
             <CardContent>
               <div className="text-2xl font-bold">12</div>
               <div className="flex items-center text-xs text-muted-foreground mt-1">
-                <TrendingDown className="mr-1 h-3 w-3 text-red-500" />
+                <TrendDown weight="bold" className="mr-1 h-3 w-3 text-red-500" />
                 <span className="text-red-500">-2</span>
                 <span className="ml-1">este mês</span>
               </div>

@@ -3,21 +3,21 @@
 import * as React from 'react'
 import {
   FileText,
-  Search,
+  MagnifyingGlass,
   Monitor,
-  Video,
+  VideoCamera,
   Sun,
   Layout,
   ShoppingCart,
-  Gamepad2,
+  GameController,
   Archive,
-  ArrowUpDown,
+  ArrowsDownUp,
   User,
-  LayoutGrid,
+  GridFour,
   File,
   Calendar,
-  Filter
-} from "lucide-react"
+  Funnel
+} from "@phosphor-icons/react"
 
 import {
   CommandDialog,
@@ -80,7 +80,7 @@ export function SearchCommand({
         {/* Filter Bar */}
         <div className="flex items-center gap-1 p-2 border-b bg-muted/10 text-xs text-muted-foreground overflow-x-auto no-scrollbar">
            <Button variant="ghost" size="sm" className="h-6 px-2 text-xs gap-1 text-muted-foreground">
-              <ArrowUpDown className="h-3 w-3" />
+              <ArrowsDownUp weight="bold" className="h-3 w-3" />
               <span>Sort</span>
            </Button>
            <Button variant="ghost" size="sm" className="h-6 px-2 text-xs gap-1 text-muted-foreground">
@@ -92,7 +92,7 @@ export function SearchCommand({
               <span>Created by</span>
            </Button>
            <Button variant="ghost" size="sm" className="h-6 px-2 text-xs gap-1 text-muted-foreground">
-              <LayoutGrid className="h-3 w-3" />
+              <GridFour weight="bold" className="h-3 w-3" />
               <span>Teamspace</span>
            </Button>
            <Button variant="ghost" size="sm" className="h-6 px-2 text-xs gap-1 text-muted-foreground">
@@ -124,7 +124,7 @@ export function SearchCommand({
             <CommandShortcut className="text-[10px] text-muted-foreground/60 border-0 ml-2">Castro / ... / New database</CommandShortcut>
           </CommandItem>
           <CommandItem value="Davinci">
-            <Video className="mr-2 h-4 w-4 text-orange-400 shrink-0" />
+            <VideoCamera weight="bold" className="mr-2 h-4 w-4 text-orange-400 shrink-0" />
             <span className="truncate flex-1 min-w-0">Davinci</span>
             <CommandShortcut className="text-[10px] text-muted-foreground/60 border-0 ml-2">Castro / ... / Course</CommandShortcut>
           </CommandItem>

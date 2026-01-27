@@ -8,13 +8,13 @@ import {
   Bell,
   Globe,
   Monitor,
-  Settings,
+  Gear,
   Users,
   Shield,
   CreditCard,
   Upload,
   Check
-} from 'lucide-react'
+} from '@phosphor-icons/react'
 import {
   Dialog,
   DialogContent,
@@ -81,7 +81,7 @@ export function SettingsModal() {
               className="w-full justify-start gap-2 px-3"
               onClick={() => setActiveTab('general')}
             >
-              <Settings className="h-4 w-4" />
+              <Gear weight="bold" className="h-4 w-4" />
               General
             </Button>
             <Button

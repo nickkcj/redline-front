@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import remarkBreaks from 'remark-breaks'
-import { Loader2, AlertCircle } from 'lucide-react'
+import { CircleNotch, WarningCircle } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 
 interface MarkdownViewerProps {

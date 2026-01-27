@@ -3,7 +3,7 @@
 import type { OrganizationWithWorkspaces } from "@/lib/api/types/organization.types"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Building, MoreVertical, Edit, Trash2 } from "lucide-react"
+import { Buildings, DotsThreeVertical, PencilSimple, Trash } from "@phosphor-icons/react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,7 +37,7 @@ export function OrganizationCard({
       <div className="flex items-start justify-between mb-4 gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2 font-medium">
-            <Building className="size-3.5" />
+            <Buildings weight="bold" className="size-3.5" />
             <span>Organização</span>
           </div>
           <h3 className="text-2xl font-semibold text-foreground mb-2 break-words group-hover:text-foreground transition-colors">
@@ -65,22 +65,22 @@ export function OrganizationCard({
                   className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity text-foreground hover:text-foreground hover:bg-muted"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <MoreVertical className="h-4 w-4" />
+                  <DotsThreeVertical weight="bold" className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-40 !bg-background !border-border">
+              <DropdownMenuContent align="start" className="w-40 text-sm !bg-background !border-border">
                 <DropdownMenuItem
                   onClick={onEdit}
-                  className="text-foreground hover:bg-muted"
+                  className="text-sm text-foreground hover:bg-muted"
                 >
-                  <Edit className="mr-2 h-4 w-4" />
+                  <PencilSimple weight="bold" className="mr-2 h-4 w-4" />
                   Editar
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={onDelete}
-                  className="text-red-600 hover:bg-red-50"
+                  className="text-sm text-red-600 hover:bg-red-50"
                 >
-                  <Trash2 className="mr-2 h-4 w-4" />
+                  <Trash weight="bold" className="mr-2 h-4 w-4" />
                   Excluir
                 </DropdownMenuItem>
               </DropdownMenuContent>

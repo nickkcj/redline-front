@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '@/components/providers/auth-provider'
 import { toast } from 'sonner'
-import { Loader2 } from 'lucide-react'
+import { CircleNotch } from '@phosphor-icons/react'
 
 export function MagicLinkHandler() {
   const router = useRouter()
@@ -94,7 +94,7 @@ export function MagicLinkHandler() {
 
   return (
     <div className="w-screen h-screen flex flex-col items-center justify-center bg-background">
-      <Loader2 size={40} className="text-muted-foreground animate-spin mb-4" />
+      <CircleNotch weight="bold" size={40} className="text-muted-foreground animate-spin mb-4" />
       <p className="text-sm text-muted-foreground">{loadingMessage}</p>
     </div>
   )

@@ -1,6 +1,6 @@
 "use client"
 
-import { AlertCircle } from "lucide-react"
+import { WarningCircle } from "@phosphor-icons/react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -49,7 +49,7 @@ export function ErrorState({
 
   const content = (
     <Alert variant="destructive" className={cn("", className)}>
-      <AlertCircle className="h-4 w-4" />
+      <WarningCircle weight="fill" className="h-4 w-4" />
       <AlertTitle>{title}</AlertTitle>
       <AlertDescription className="mt-2">
         {errorMessage}

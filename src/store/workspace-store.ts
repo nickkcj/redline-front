@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { nanoid } from 'nanoid'
 
-export type TabType = 'home' | 'chat' | 'document'
+export type TabType = 'home' | 'chat' | 'document' | 'files' | 'spaces' | 'agents' | 'pages' | 'templates'
 
 export interface Tab {
   id: string

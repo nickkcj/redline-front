@@ -1,12 +1,31 @@
 "use client"
 
 import React, { useState, useEffect, useCallback, useRef } from 'react'
-import { Document, Page, pdfjs } from 'react-pdf'
-import { Loader2 } from 'lucide-react'
+import { CircleNotch } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { getDynamicHeaders } from '@/lib/utils/get-dynamic-headers'
-import 'react-pdf/dist/Page/AnnotationLayer.css'
-import 'react-pdf/dist/Page/TextLayer.css'
+import dynamic from 'next/dynamic'
+
+// Dynamically import react-pdf components with no SSR
+const Document = dynamic(() => import('react-pdf').then(mod => mod.Document), {
+  ssr: false,
+  loading: () => (
+    <div className="flex flex-col items-center justify-center py-12">
+      <CircleNotch weight="bold" className="h-8 w-8 animate-spin mb-2" />
+      <p className="text-sm text-muted-foreground">Carregando visualizador...</p>
+    </div>
+  ),
+})
+
+const Page = dynamic(() => import('react-pdf').then(mod => mod.Page), {
+  ssr: false,
+})
+
+// Import CSS only on client side
+if (typeof window !== 'undefined') {
+  import('react-pdf/dist/Page/AnnotationLayer.css')
+  import('react-pdf/dist/Page/TextLayer.css')
+}
 
 interface PDFViewerProps {
   url: string
@@ -31,9 +50,13 @@ export function PDFViewer({
 
   // Configure PDF.js worker only on client side
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
+    const initPdfWorker = async () => {
+      if (typeof window !== 'undefined') {
+        const { pdfjs } = await import('react-pdf')
+        pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs'
+      }
     }
+    initPdfWorker()
   }, [])
 
   // Handler to load more pages
@@ -215,7 +238,7 @@ export function PDFViewer({
         <div className="flex justify-center py-4">
           {loading && (
             <div className="flex flex-col items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin mb-2" />
+              <CircleNotch weight="bold" className="h-8 w-8 animate-spin mb-2" />
               <p className="text-sm text-muted-foreground">Carregando PDF...</p>
             </div>
           )}

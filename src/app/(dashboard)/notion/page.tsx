@@ -6,13 +6,13 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { 
   Plus, 
-  MessageSquare, 
+  ChatCircle, 
   FileText, 
-  TrendingUp,
+  TrendUp,
   Users,
   Clock,
-  Sparkles,
-} from 'lucide-react'
+  Sparkle,
+} from '@phosphor-icons/react'
 import Link from 'next/link'
 
 export default function NotionStylePage() {
@@ -68,7 +68,7 @@ export default function NotionStylePage() {
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-500/10">
-                  <MessageSquare className="h-5 w-5 text-purple-600" />
+                  <ChatCircle weight="bold" className="h-5 w-5 text-purple-600" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold">24</p>
@@ -182,7 +182,7 @@ export default function NotionStylePage() {
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-primary" />
+              <Sparkle weight="bold" className="h-5 w-5 text-primary" />
               <CardTitle>Templates Populares</CardTitle>
             </div>
             <CardDescription>Comece rapidamente com nossos templates</CardDescription>

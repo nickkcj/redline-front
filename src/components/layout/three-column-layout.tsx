@@ -17,14 +17,14 @@ import {
   SidebarRail,
 } from '@/components/ui/sidebar'
 import {
-  Home,
+  House as Home,
   Folder,
   Users,
-  Settings,
+  Gear as Settings,
   FileText,
   Plus,
-  ChevronRight,
-} from 'lucide-react'
+  CaretRight as ChevronRight,
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -47,7 +47,7 @@ const menuItems = [
     url: '/projetos',
   },
   {
-    title: 'Documentos',
+    title: 'Files',
     icon: FileText,
     url: '/documentos',
   },
@@ -159,7 +159,7 @@ export function ThreeColumnLayout({ children }: ThreeColumnLayoutProps) {
           <div className="flex h-full flex-col">
             {/* Header da sidebar direita */}
             <div className="border-b p-4">
-              <h2 className="text-sm font-semibold">Documentos</h2>
+              <h2 className="text-sm font-semibold">Files</h2>
               <p className="text-xs text-muted-foreground mt-1">
                 Visualize e gerencie seus documentos
               </p>

@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useAuth } from "@/components/providers/auth-provider";
 import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
+import { SignOut } from "@phosphor-icons/react";
 
 export function Navbar() {
   const router = useRouter();
@@ -43,7 +43,7 @@ export function Navbar() {
             onClick={handleLogout}
             className="gap-1.5 text-muted-foreground hover:text-foreground h-7 px-2 text-sm"
           >
-            <LogOut className="h-3.5 w-3.5" />
+            <SignOut weight="bold" className="h-3.5 w-3.5" />
             Sair
           </Button>
         </div>

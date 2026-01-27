@@ -1,6 +1,6 @@
 "use client"
 
-import { Loader2 } from "lucide-react"
+import { CircleNotch } from "@phosphor-icons/react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
@@ -35,7 +35,7 @@ export function LoadingState({
   if (variant === "fullPage") {
     return (
       <div className={cn("flex min-h-screen flex-col items-center justify-center gap-4", className)}>
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <CircleNotch weight="bold" className="h-8 w-8 animate-spin text-muted-foreground" />
         {text && <p className="text-sm text-muted-foreground">{text}</p>}
       </div>
     )
@@ -44,7 +44,7 @@ export function LoadingState({
   if (variant === "spinner") {
     return (
       <div className={cn("flex items-center justify-center gap-3", className)}>
-        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        <CircleNotch weight="bold" className="h-5 w-5 animate-spin text-muted-foreground" />
         {text && <p className="text-sm text-muted-foreground">{text}</p>}
       </div>
     )

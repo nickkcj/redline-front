@@ -1,7 +1,8 @@
 'use client'
 
 import * as React from 'react'
-import { Send, Bot, User, Sparkles, Paperclip, ChevronDown, ChevronRight, Slack, Github, Trello, Figma, Mail, Globe, ThumbsUp, ThumbsDown, Copy, PlusCircle, Globe as GlobeIcon, StopCircle, AtSign, ArrowUp, Loader2 } from 'lucide-react'
+import { PaperPlaneTilt, Robot, User, Sparkle, Paperclip, CaretDown, CaretRight, SlackLogo, GithubLogo, TrelloLogo, FigmaLogo, EnvelopeSimple, Globe, ThumbsUp, ThumbsDown, Copy, PlusCircle, StopCircle, At, ArrowUp, CircleNotch, MagnifyingGlass, GridFour, Cpu, Microphone, Waveform, Baby, Heart, Airplane, Wrench, Translate, Question } from '@phosphor-icons/react'
+import { useStatusBar } from '@/hooks/use-status-bar'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -25,15 +26,15 @@ const conversations: Record<string, Message[]> = {
   ],
   // Chat 2: Discussão arquitetura
   'chat-2': [
-    { id: '1', role: 'user', content: 'Microserviços vs Monolito para o MVP? O que você recomenda?' },
-    { id: '2', role: 'assistant', content: 'Para o estágio atual do projeto (MVP), minha recomendação é iniciar com um **Monolito Modular**.\n\n**Por que Monolito Modular?**\n*   **Velocidade de Desenvolvimento:** É mais rápido de configurar e iterar, pois não há overhead de rede ou orquestração complexa de deploy.\n*   **Simplicidade Operacional:** Deploy único, log único, monitoramento simplificado.\n*   **Refatoração Futura:** Se os módulos forem bem definidos (ex: Auth, Pagamentos, Core) dentro do monolito, a extração para microserviços futuros será muito mais fácil quando a escala exigir.\n\nMicroserviços agora adicionariam uma complexidade de infraestrutura desnecessária para o volume de tráfego inicial esperado.', thought: 'Analisando trade-offs de arquitetura para startups em fase inicial...' }
+    { id: '1', role: 'user', content: 'Microphone weight="bold"roserviços vs Monolito para o MVP? O que você recomenda?' },
+    { id: '2', role: 'assistant', content: 'Para o estágio atual do projeto (MVP), minha recomendação é iniciar com um **Monolito Modular**.\n\n**Por que Monolito Modular?**\n*   **Velocidade de Desenvolvimento:** É mais rápido de configurar e iterar, pois não há overhead de rede ou orquestração complexa de deploy.\n*   **Simplicidade Operacional:** Deploy único, log único, monitoramento simplificado.\n*   **Refatoração Futura:** Se os módulos forem bem definidos (ex: Auth, Pagamentos, Core) dentro do monolito, a extração para microserviços futuros será muito mais fácil quando a escala exigir.\n\nMicrophone weight="bold"roserviços agora adicionariam uma complexidade de infraestrutura desnecessária para o volume de tráfego inicial esperado.', thought: 'Analisando trade-offs de arquitetura para startups em fase inicial...' }
   ],
   // Chat 3: Review de código
   'chat-3': [
     { id: '1', role: 'user', content: 'Pode analisar esse trecho de código?\n```typescript\nconst data = await fetch("/api/user");\nconsole.log(data);```' },
     { id: '2', role: 'assistant', content: 'Claro! Analisando o trecho, identifiquei alguns pontos de atenção:\n\n1.  **Falta de Tratamento de Erro:** O `fetch` pode falhar (rede, 404, 500). É ideal envolver em um bloco `try/catch`.\n2.  **Conversão de Resposta:** O `fetch` retorna uma `Response`, não os dados JSON diretamente. Você precisa chamar `await data.json()`.\n3.  **Verificação de Status:** Mesmo que a requisição complete, o status pode não ser 200. Verifique `if (!data.ok)`.\n\nAqui está uma versão melhorada:\n```typescript\ntry {\n  const response = await fetch("/api/user");\n  if (!response.ok) throw new Error("Erro na requisição");\n  const data = await response.json();\n  console.log(data);\n} catch (error) {\n  console.error(error);\n}```' }
   ],
-  // Chat 4: Planejamento Sprint
+  // Chat 4: Airplane weight="bold"jamento Sprint
   'chat-4': [
     { id: '1', role: 'user', content: 'Quais itens devemos priorizar na próxima sprint?' },
     { id: '2', role: 'assistant', content: 'Considerando o roadmap e os prazos, sugiro priorizar:\n\n*   **Finalização do Dashboard:** O cliente precisa visualizar as métricas principais até sexta-feira.\n*   **Correção de Bugs Críticos:** Os issues #45 e #89 relacionados ao checkout precisam ser resolvidos antes de qualquer nova feature.\n*   **Integração com Stripe:** Se sobrar tempo, iniciar a configuração do ambiente de teste.\n\nIsso garante a entrega de valor imediato e estabilidade do sistema atual.' }
@@ -54,7 +55,7 @@ I'm the new and improved Scaffold AI — built to help you learn, create, and ge
 
 • **Databases:** I can build you new databases for tasks, projects, or habits, or jump into existing ones to add properties, filters, groups, and charts.
 • **Page editing:** I can help write or polish any page — whether it's drafting from scratch, rewriting for clarity, summarizing long text, or reorganizing content into a clean structure.
-• **Workspace search:** Ask me a question and I'll dig through Scaffold, Slack, Google Drive, and more to bring you the answer.
+• **Workspace search:** Ask me a question and I'll dig through Scaffold, SlackLogo weight="bold", Google Drive, and more to bring you the answer.
 • **Data analysis:** I'll crunch the numbers in your databases, run the queries, and lay out the insights in reports, tables, or charts.
 • **Web research:** Need the latest facts? I'll scan the web, compare sources, and give you a concise brief you can trust.
 • **File processing:** Share a PDF or image with me — I'll pull out the important bits and turn them into notes or databases you can use.
@@ -66,6 +67,9 @@ Try this: Ask me to create a project tracker database, or search your workspace 
 }
 
 export function ChatView({ tabId, tabData }: { tabId: string; tabData?: any }) {
+  // Status bar hook
+  const { setLoading, setSuccess } = useStatusBar()
+  
   // Determine if it's a new chat or an existing one from history
   // If tabId is in our conversations map, load it. Otherwise, assume new or welcome.
   
@@ -101,6 +105,9 @@ export function ChatView({ tabId, tabData }: { tabId: string; tabData?: any }) {
     setMessages([...messages, newMsg])
     setInputValue('')
     
+    // Update status bar
+    setLoading('Processando mensagem...')
+    
     // Show thinking animation
     setIsThinking(true)
     
@@ -124,6 +131,7 @@ export function ChatView({ tabId, tabData }: { tabId: string; tabData?: any }) {
         content: "I'm a demo bot. I can't really think yet!",
         thought: "Processing user input..."
       }])
+      setSuccess('Resposta recebida')
     }, 2000)
   }
 
@@ -146,60 +154,80 @@ export function ChatView({ tabId, tabData }: { tabId: string; tabData?: any }) {
   
   if (messages.length === 0) {
     return (
-      <div className="flex flex-col h-full items-center justify-center p-8 space-y-6 relative overflow-hidden">
-        <div className="text-center space-y-2 relative z-10">
-          <h2 className="text-3xl font-semibold tracking-tight">What's our quest today?</h2>
+      <div className="flex flex-col h-full items-center justify-center p-8 space-y-8 relative overflow-hidden bg-background">
+        <div className="text-center space-y-2 relative z-10 mb-4">
+          <h2 className="text-4xl font-serif tracking-tight text-foreground/90">perplexity</h2>
         </div>
 
         <div className="w-full max-w-2xl space-y-6 relative z-10">
-           <div className="relative shadow-lg rounded-xl bg-card border border-border">
-             <Input 
-               className="h-14 pl-4 pr-12 rounded-xl border-muted-foreground/10 text-lg shadow-sm focus-visible:ring-1 focus-visible:ring-ring/50 bg-card text-foreground placeholder:text-muted-foreground" 
-               placeholder="Ask, search, or make anything..."
-               value={inputValue}
-               onChange={(e) => setInputValue(e.target.value)}
-               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-             />
-             <div className="absolute right-2 top-2 flex items-center gap-1">
-                <Button size="icon" variant="ghost" className="h-10 w-10 text-muted-foreground hover:text-foreground hover:bg-transparent grayscale">
-                    <div className="flex items-center gap-1 text-[10px] font-medium opacity-60">
-                        <span>Auto</span>
-                    </div>
-                </Button>
-                <Button size="icon" className="h-10 w-10 rounded-lg grayscale" onClick={handleSend}>
-                    <Send className="h-4 w-4" />
-                </Button>
+           <div className="relative rounded-xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
+             <div className="flex items-center px-4 py-3 gap-3">
+               {/* Left Icons */}
+               <div className="flex items-center gap-2 text-muted-foreground/70">
+                 <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-foreground">
+                   <MagnifyingGlass weight="bold" className="h-4 w-4" />
+                 </Button>
+                 <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-foreground">
+                   <Globe className="h-4 w-4" />
+                 </Button>
+                 <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-foreground">
+                   <GridFour weight="bold" className="h-4 w-4" />
+                 </Button>
+               </div>
+               
+               <Input 
+                 className="flex-1 border-0 shadow-none focus-visible:ring-0 bg-transparent px-0 text-base placeholder:text-muted-foreground/50 h-auto py-2" 
+                 placeholder="Ask anything. Type @ for mentions and / for shortcuts."
+                 value={inputValue}
+                 onChange={(e) => setInputValue(e.target.value)}
+                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+               />
+
+               {/* Right Icons */}
+               <div className="flex items-center gap-2 text-muted-foreground/70">
+                  <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-foreground">
+                    <Globe className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-foreground">
+                    <Cpu className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-foreground">
+                    <Paperclip className="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-foreground">
+                    <Microphone weight="bold" className="h-4 w-4" />
+                  </Button>
+                  <Button size="icon" className="h-8 w-8 rounded-full bg-teal-700 hover:bg-teal-800 text-white">
+                    <Waveform weight="bold" className="h-4 w-4" />
+                  </Button>
+               </div>
              </div>
            </div>
 
-           {/* Integrations Row */}
-           <div className="flex items-center justify-between px-2 py-1">
-              <span className="text-xs text-muted-foreground font-medium">Get better answers from your apps</span>
-              <div className="flex items-center gap-3 opacity-60 grayscale hover:grayscale-0 transition-all">
-                  <Slack className="h-4 w-4" />
-                  <div className="h-4 w-4 flex items-center justify-center bg-[#555] rounded-[3px] text-white">
-                     <span className="text-[10px] font-bold">D</span>
-                  </div>
-                  <Github className="h-4 w-4" />
-                  <Trello className="h-4 w-4" />
-                  <Mail className="h-4 w-4" />
-                  <Globe className="h-4 w-4" />
-              </div>
-           </div>
-
-           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+           <div className="flex flex-wrap items-center justify-center gap-2">
              {[
-                 { icon: Sparkles, text: "What's new in Scaffold AI" },
-                 { icon: Paperclip, text: "Analyze PDFs or images" },
-                 { icon: Send, text: "Draft email" },
-                 { icon: Bot, text: "Brainstorm ideas" }
+                 { icon: Baby, text: "Parenting" },
+                 { icon: Heart, text: "Health" },
+                 { icon: Airplane, text: "Travel" },
+                 { icon: PaperPlaneTilt, text: "Local" },
+                 { icon: Wrench, text: "Troubleshoot" }
              ].map((item, i) => (
-               <Button key={i} variant="outline" className="h-auto py-4 px-4 justify-start text-left whitespace-normal border-muted-foreground/10 hover:border-muted-foreground/20 hover:bg-muted/30 gap-3">
-                 <item.icon className="h-5 w-5 text-muted-foreground" />
-                 <span className="text-xs font-medium text-muted-foreground">{item.text}</span>
+               <Button key={i} variant="outline" className="h-8 px-3 gap-2 text-xs font-medium text-muted-foreground hover:text-foreground bg-transparent border-muted-foreground/20 hover:bg-muted/50 rounded-full">
+                 <item.icon className="h-3.5 w-3.5" />
+                 <span>{item.text}</span>
                </Button>
              ))}
            </div>
+        </div>
+        
+        {/* Footer Help Buttons */}
+        <div className="absolute bottom-8 right-8 flex gap-2">
+            <Button variant="outline" size="icon" className="h-8 w-8 rounded-full border-muted-foreground/20 text-muted-foreground">
+                <Translate weight="bold" className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="icon" className="h-8 w-8 rounded-full border-muted-foreground/20 text-muted-foreground">
+                <Question weight="bold" className="h-4 w-4" />
+            </Button>
         </div>
       </div>
     )
@@ -223,7 +251,7 @@ export function ChatView({ tabId, tabData }: { tabId: string; tabData?: any }) {
                   <Collapsible>
                     <CollapsibleTrigger asChild>
                       <Button variant="ghost" size="sm" className="h-6 px-0 text-muted-foreground gap-1 hover:no-underline mb-1">
-                        <ChevronRight className="h-3 w-3" />
+                        <CaretRight weight="bold" className="h-3 w-3" />
                         <span className="text-xs italic">Thought</span>
                       </Button>
                     </CollapsibleTrigger>
@@ -294,7 +322,7 @@ export function ChatView({ tabId, tabData }: { tabId: string; tabData?: any }) {
            {/* Top: Context */}
            <div className="flex items-center">
               <Button variant="ghost" size="sm" className="h-7 rounded-full bg-muted hover:bg-accent text-xs font-normal text-muted-foreground px-3 border border-transparent transition-all gap-1.5 grayscale">
-                 <AtSign className="h-3.5 w-3.5" />
+                 <At weight="bold" className="h-3.5 w-3.5" />
                  Add context
               </Button>
            </div>
@@ -308,7 +336,7 @@ export function ChatView({ tabId, tabData }: { tabId: string; tabData?: any }) {
              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
            />
            
-           {/* Bottom: Tools & Send */}
+           {/* Robot weight="bold"tom: Tools & PaperPlaneTilt */}
            <div className="flex items-center justify-between pt-1">
               <div className="flex items-center gap-4">
                  <button className="text-muted-foreground hover:text-foreground transition-colors grayscale">

@@ -2,21 +2,21 @@
 
 import { forwardRef, useEffect, useImperativeHandle, useState } from 'react'
 import {
-  Heading1,
-  Heading2,
-  Heading3,
-  List,
-  ListOrdered,
+  TextHOne,
+  TextHTwo,
+  TextHThree,
+  ListBullets,
+  ListNumbers,
   CheckSquare,
-  ChevronRight,
+  CaretRight,
   Image as ImageIcon,
   Code,
   Table,
-  Quote,
+  Quotes,
   Info,
   Minus,
   FileText,
-} from 'lucide-react'
+} from '@phosphor-icons/react'
 
 export interface SlashCommandItem {
   title: string

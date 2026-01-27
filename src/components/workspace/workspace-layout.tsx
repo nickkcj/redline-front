@@ -1,9 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { Plus, Columns, Columns3, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useWorkspaceStore } from '@/store/workspace-store'
-import { SidebarLeft } from './sidebar-left'
 import { TabBar } from './tab-bar'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -11,30 +9,23 @@ import { SearchProvider } from '@/contexts/search-context'
 import { SearchCommand } from './search-command'
 import { useSearch } from '@/contexts/search-context'
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb'
-import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog"
 import { HomeView } from './views/home-view'
 import { ChatView } from './views/chat-view'
 import { DocumentView } from './views/document-view'
+// import { DocumentosPage } from '@/app/(dashboard)/documentos/page' // Não pode importar de page.tsx
 import { SettingsModal } from './settings-modal'
+import { StatusBar } from './status-bar'
+import { BaseLayout } from '@/components/layout/base-layout'
+import { useStatusBarStore } from '@/hooks/use-status-bar'
 
 function WorkspaceLayoutContent() {
   const { 
-    sidebarLeftOpen, 
-    toggleSidebarLeft, 
     tabs,
     activeTabId,
     activeWorkspaceId,
@@ -60,12 +51,6 @@ function WorkspaceLayoutContent() {
   const thirdTab = tabs.find(t => t.id === activeThirdTabId)
   const activeWorkspace = workspaces.find(w => w.id === activeWorkspaceId) || workspaces[0]
   
-  // Resize State
-  const [sidebarWidth, setSidebarWidth] = React.useState(256)
-  const [isResizing, setIsResizing] = React.useState(false)
-  const sidebarRef = React.useRef<HTMLDivElement>(null)
-  const hasResized = React.useRef(false)
-  
   // Split Resize State
   const [splitWidth, setSplitWidth] = React.useState(50) // Percentage
   const [thirdColumnWidth, setThirdColumnWidth] = React.useState(33.33) // Percentage for 3-column
@@ -80,50 +65,51 @@ function WorkspaceLayoutContent() {
   const [draggedColumn, setDraggedColumn] = React.useState<'main' | 'split' | 'third' | null>(null)
   const [dragOverColumn, setDragOverColumn] = React.useState<'main' | 'split' | 'third' | null>(null)
   
+  // Status Bar State
+  const [zoom, setZoom] = React.useState(100)
+  const { message: statusMessage, type: statusType, setSuccess } = useStatusBarStore()
+  
   // Determine which tab to show in breadcrumb
   const breadcrumbTab = isSplit 
     ? (focusedPanel === 'main' ? activeTab : focusedPanel === 'split' ? splitTab : thirdTab)
     : activeTab
 
-  const startResizing = React.useCallback((e: React.MouseEvent) => {
-    e.preventDefault()
-    setIsResizing(true)
-    hasResized.current = false
-  }, [])
-
-  const stopResizing = React.useCallback(() => {
-    setIsResizing(false)
-  }, [])
-
-  const resize = React.useCallback(
-    (e: MouseEvent) => {
-      if (isResizing) {
-        hasResized.current = true
-        setSidebarWidth((prevWidth) => {
-            const newWidth = e.clientX
-            if (newWidth < 160) return 160
-            if (newWidth > 480) return 480
-            return newWidth
-        })
-      }
-    },
-    [isResizing]
-  )
-
-  React.useEffect(() => {
-    window.addEventListener("mousemove", resize)
-    window.addEventListener("mouseup", stopResizing)
-    return () => {
-      window.removeEventListener("mousemove", resize)
-      window.removeEventListener("mouseup", stopResizing)
+  // Build breadcrumbs for StatusBar
+  const statusBarBreadcrumbs = React.useMemo(() => {
+    const crumbs = []
+    if (activeWorkspace) {
+      crumbs.push({ id: 'workspace', label: activeWorkspace.name })
     }
-  }, [resize, stopResizing])
+    if (breadcrumbTab) {
+      crumbs.push({ id: breadcrumbTab.id, label: breadcrumbTab.title })
+    }
+    if (isSplit && isThreeColumnSplit) {
+      crumbs.push({ id: 'mode', label: '3 telas' })
+    } else if (isSplit) {
+      crumbs.push({ id: 'mode', label: '2 telas' })
+    }
+    return crumbs
+  }, [activeWorkspace, breadcrumbTab, isSplit, isThreeColumnSplit])
 
-  const handleResizerClick = () => {
-      if (!hasResized.current) {
-          toggleSidebarLeft()
+  // Handle split mode changes from StatusBar
+  const handleSplitModeChange = React.useCallback((mode: 'none' | 'horizontal' | 'vertical') => {
+    if (mode === 'none') {
+      if (isSplit) {
+        toggleSplit()
+        setSuccess('Usando 1 tela')
       }
-  }
+    } else if (mode === 'horizontal') {
+      if (!isSplit) toggleSplit()
+      if (isThreeColumnSplit) toggleThreeColumnSplit()
+      setSuccess('Dividido em 2 telas')
+    } else if (mode === 'vertical') {
+      if (!isSplit) toggleSplit()
+      if (!isThreeColumnSplit) toggleThreeColumnSplit()
+      setSuccess('Dividido em 3 telas')
+    }
+  }, [isSplit, isThreeColumnSplit, toggleSplit, toggleThreeColumnSplit, setSuccess])
+
+  const currentSplitMode = isThreeColumnSplit ? 'vertical' : isSplit ? 'horizontal' : 'none'
 
   // Split Resize Handlers
   const startResizingSplit = React.useCallback((e: React.MouseEvent) => {
@@ -178,6 +164,16 @@ function WorkspaceLayoutContent() {
         return <ChatView tabId={tab.id} tabData={tab.data} />
       case 'document':
         return <DocumentView tabId={tab.id} tabData={tab.data} />
+      case 'files':
+        return <div className="p-4">Files view - TODO: criar componente separado</div>
+      case 'spaces':
+        return <div className="p-8">Spaces View Placeholder</div>
+      case 'agents':
+        return <div className="p-8">Agents View Placeholder</div>
+      case 'pages':
+        return <div className="p-8">Pages View Placeholder</div>
+      case 'templates':
+        return <div className="p-8">Templates View Placeholder</div>
       default:
         return <div>Unknown tab type</div>
     }
@@ -325,121 +321,14 @@ function WorkspaceLayoutContent() {
   }, [isSplit, activeSplitTabId])
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-background">
-      <SidebarLeft width={sidebarWidth} />
-      
-      {/* Resizer Handle (Only if open) */}
-      {sidebarLeftOpen && (
-        <div
-          className="w-1 hover:w-1.5 -ml-0.5 z-50 cursor-col-resize flex flex-col justify-center group relative h-full hover:bg-primary/10 transition-colors"
-          onMouseDown={startResizing}
-          onClick={handleResizerClick}
-        >
-           {/* Visual line */}
-           <div className="absolute inset-y-0 left-1/2 w-px bg-transparent group-hover:bg-primary/50 transition-colors" />
-        </div>
-      )}
-
-      {/* Collapsed Bar (Only if closed) */}
-      {!sidebarLeftOpen && (
-         <div 
-            className="w-3 h-full bg-muted/10 hover:bg-muted/20 cursor-pointer border-r flex flex-col items-center justify-center shrink-0 transition-colors z-50 group"
-            onClick={toggleSidebarLeft}
-            title="Open Sidebar"
-         >
-            <div className="h-8 w-1 rounded-full bg-muted-foreground/20 group-hover:bg-primary/50 transition-colors" /> 
-         </div>
-      )}
-
-      <div className="flex flex-1 flex-col min-w-0">
-        {/* Top Bar: Tabs + Actions + Right Sidebar Toggle */}
-        <div className="flex items-end border-b h-10 bg-muted/10 gap-2">
+    <BaseLayout>
+      <div className="flex flex-1 flex-col min-w-0 h-full">
+        {/* Top Bar: Tabs Only */}
+        <div className="flex items-end border-b h-10 bg-muted/10">
           {/* Tabs Area */}
           <div className="flex-1 flex items-end overflow-hidden min-w-0">
              <TabBar />
           </div>
-
-          {/* Action Buttons: Split - Right aligned */}
-          <div className="flex items-center h-full pb-1 gap-0">
-             {/* Split Screen Toggle */}
-             <Button 
-               variant={isSplit ? "secondary" : "ghost"} 
-               size="icon" 
-               onClick={toggleSplit} 
-               className={cn("h-8 w-8 rounded-none", isSplit && !isThreeColumnSplit && "bg-muted text-foreground")}
-               title="Split Screen"
-             >
-               <Columns className="h-4 w-4" />
-             </Button>
-             
-             {/* Three Column Split Toggle - Only show when split is active */}
-             {isSplit && (
-               <Button 
-                 variant={isThreeColumnSplit ? "secondary" : "ghost"} 
-                 size="icon" 
-                 onClick={toggleThreeColumnSplit} 
-                 className={cn("h-8 w-8 rounded-none", isThreeColumnSplit && "bg-muted text-foreground")}
-                 title="Three Column Split"
-               >
-                 <Columns3 className="h-4 w-4" />
-               </Button>
-             )}
-          </div>
-        </div>
-
-        {/* Breadcrumb Bar */}
-        <div className="flex items-center px-4 py-2 h-10 justify-between">
-             <div className="flex items-center gap-2">
-                {/* Navigation Buttons */}
-                <div className="flex items-center gap-0.5">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7"
-                    disabled
-                    title="Go back"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7"
-                    disabled
-                    title="Go forward"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-                
-                <Breadcrumb>
-                  <BreadcrumbList>
-                    <BreadcrumbItem>
-                      <BreadcrumbLink href="/home">{activeWorkspace.name}</BreadcrumbLink>
-                    </BreadcrumbItem>
-                    <BreadcrumbSeparator />
-                    <BreadcrumbItem>
-                      <BreadcrumbPage>
-                        {breadcrumbTab?.title || 'Home'}
-                      </BreadcrumbPage>
-                    </BreadcrumbItem>
-                  </BreadcrumbList>
-                </Breadcrumb>
-             </div>
-             
-             {/* Logo - Right Aligned */}
-             <div className="flex items-center">
-                 <img 
-                   src="/scaffold_White_inter_BLack.png" 
-                   alt="Scaffold Logo" 
-                   className="h-5 w-auto dark:hidden"
-                 />
-                 <img 
-                   src="/scaffold_White_inter.png" 
-                   alt="Scaffold Logo" 
-                   className="h-5 w-auto hidden dark:block"
-                 />
-             </div>
         </div>
 
         {/* View Content */}
@@ -530,6 +419,17 @@ function WorkspaceLayoutContent() {
              </>
            )}
         </main>
+
+        {/* Status Bar */}
+        <StatusBar
+          breadcrumbs={statusBarBreadcrumbs}
+          statusMessage={statusMessage}
+          statusType={statusType}
+          zoom={zoom}
+          onZoomChange={setZoom}
+          splitMode={currentSplitMode}
+          onSplitModeChange={handleSplitModeChange}
+        />
       </div>
 
       <SettingsModal />
@@ -575,7 +475,7 @@ function WorkspaceLayoutContent() {
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </BaseLayout>
   )
 }
 

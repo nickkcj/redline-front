@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Mail, CheckCircle2, AlertCircle, Loader2 } from "lucide-react"
+import { EnvelopeSimple, CheckCircle, WarningCircle, CircleNotch } from "@phosphor-icons/react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"

@@ -18,14 +18,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import type { ChatStatus, FileUIPart } from "ai";
 import {
-  ImageIcon,
-  Loader2Icon,
-  PaperclipIcon,
-  PlusIcon,
-  SendIcon,
-  SquareIcon,
-  XIcon,
-} from "lucide-react";
+  Image,
+  CircleNotch,
+  Paperclip,
+  Plus,
+  PaperPlaneTilt,
+  Square,
+  X,
+} from "@phosphor-icons/react";
 import { nanoid } from "nanoid";
 import {
   type ChangeEventHandler,
@@ -98,7 +98,7 @@ export function PromptInputAttachment({
         />
       ) : (
         <div className="flex size-full items-center justify-center text-muted-foreground">
-          <PaperclipIcon className="size-4" />
+          <Paperclip weight="bold" className="size-4" />
         </div>
       )}
       <Button
@@ -109,7 +109,7 @@ export function PromptInputAttachment({
         type="button"
         variant="outline"
       >
-        <XIcon className="h-3 w-3" />
+        <X weight="bold" className="h-3 w-3" />
       </Button>
     </div>
   );
@@ -183,7 +183,7 @@ export const PromptInputActionAddAttachments = ({
         attachments.openFileDialog();
       }}
     >
-      <ImageIcon className="mr-2 size-4" /> {label}
+      <Image weight="bold" className="mr-2 size-4" /> {label}
     </DropdownMenuItem>
   );
 };
@@ -572,7 +572,7 @@ export const PromptInputActionMenuTrigger = ({
 }: PromptInputActionMenuTriggerProps) => (
   <DropdownMenuTrigger asChild>
     <PromptInputButton className={className} {...props}>
-      {children ?? <PlusIcon className="size-4" />}
+      {children ?? <Plus weight="bold" className="size-4" />}
     </PromptInputButton>
   </DropdownMenuTrigger>
 );
@@ -612,14 +612,14 @@ export const PromptInputSubmit = ({
   children,
   ...props
 }: PromptInputSubmitProps) => {
-  let Icon = <SendIcon className="size-4" />;
+  let Icon = <PaperPlaneTilt weight="bold" className="size-4" />;
 
   if (status === "submitted") {
-    Icon = <Loader2Icon className="size-4 animate-spin" />;
+    Icon = <CircleNotch weight="bold" className="size-4 animate-spin" />;
   } else if (status === "streaming") {
-    Icon = <SquareIcon className="size-4" />;
+    Icon = <Square weight="fill" className="size-4" />;
   } else if (status === "error") {
-    Icon = <XIcon className="size-4" />;
+    Icon = <X weight="bold" className="size-4" />;
   }
 
   return (

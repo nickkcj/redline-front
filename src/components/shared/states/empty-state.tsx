@@ -1,6 +1,6 @@
 "use client"
 
-import { LucideIcon } from "lucide-react"
+import { Icon } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { ReactNode } from "react"
@@ -9,7 +9,7 @@ interface EmptyStateProps {
   /**
    * Ícone do Lucide para exibir
    */
-  icon?: LucideIcon
+  icon?: Icon
   /**
    * Título do empty state
    */

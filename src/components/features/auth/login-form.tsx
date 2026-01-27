@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Loader2 } from 'lucide-react'
+import { CircleNotch } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
@@ -56,7 +56,7 @@ export function LoginForm({ onMagicLinkRequest, isMagicLinkLoading }: LoginFormP
         className="w-full"
       >
         {isMagicLinkLoading && (
-          <Loader2 className="size-4 animate-spin" />
+          <CircleNotch weight="bold" className="size-4 animate-spin" />
         )}
         {isMagicLinkLoading ? 'Enviando...' : 'Entrar com Email'}
       </Button>

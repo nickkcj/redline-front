@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Calendar } from "lucide-react"
+import { Calendar } from "@phosphor-icons/react"
 import {
   Select,
   SelectContent,

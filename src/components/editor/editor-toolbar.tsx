@@ -2,31 +2,31 @@
 
 import { Editor } from '@tiptap/react'
 import {
-  Bold,
-  Italic,
-  Underline,
-  Strikethrough,
+  TextB,
+  TextItalic,
+  TextUnderline,
+  TextStrikethrough,
   Code,
   Link as LinkIcon,
   Image as ImageIcon,
-  List,
-  ListOrdered,
+  ListBullets,
+  ListNumbers,
   CheckSquare,
-  Quote,
-  Undo,
-  Redo,
-  AlignLeft,
-  AlignCenter,
-  AlignRight,
-  AlignJustify,
-  Heading1,
-  Heading2,
-  Heading3,
-  Type,
+  Quotes,
+  ArrowCounterClockwise,
+  ArrowClockwise,
+  TextAlignLeft,
+  TextAlignCenter,
+  TextAlignRight,
+  TextAlignJustify,
+  TextHOne,
+  TextHTwo,
+  TextHThree,
+  TextT,
   Table,
   Highlighter,
   Download,
-} from 'lucide-react'
+} from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import {
@@ -119,25 +119,25 @@ export const EditorToolbar = ({ editor, onExport }: EditorToolbarProps) => {
           <SelectContent>
             <SelectItem value="paragraph">
               <div className="flex items-center gap-2">
-                <Type className="h-4 w-4" />
+                <TextT weight="bold" className="h-4 w-4" />
                 Normal
               </div>
             </SelectItem>
             <SelectItem value="h1">
               <div className="flex items-center gap-2">
-                <Heading1 className="h-4 w-4" />
+                <TextHOne weight="bold" className="h-4 w-4" />
                 Heading 1
               </div>
             </SelectItem>
             <SelectItem value="h2">
               <div className="flex items-center gap-2">
-                <Heading2 className="h-4 w-4" />
+                <TextHTwo weight="bold" className="h-4 w-4" />
                 Heading 2
               </div>
             </SelectItem>
             <SelectItem value="h3">
               <div className="flex items-center gap-2">
-                <Heading3 className="h-4 w-4" />
+                <TextHThree weight="bold" className="h-4 w-4" />
                 Heading 3
               </div>
             </SelectItem>
@@ -153,7 +153,7 @@ export const EditorToolbar = ({ editor, onExport }: EditorToolbarProps) => {
           className="h-8 w-8"
           onClick={() => editor.chain().focus().toggleBold().run()}
         >
-          <Bold className="h-4 w-4" />
+          <TextB weight="bold" className="h-4 w-4" />
         </Button>
         <Button
           variant={editor.isActive('italic') ? 'secondary' : 'ghost'}
@@ -161,7 +161,7 @@ export const EditorToolbar = ({ editor, onExport }: EditorToolbarProps) => {
           className="h-8 w-8"
           onClick={() => editor.chain().focus().toggleItalic().run()}
         >
-          <Italic className="h-4 w-4" />
+          <TextItalic weight="bold" className="h-4 w-4" />
         </Button>
         <Button
           variant={editor.isActive('underline') ? 'secondary' : 'ghost'}
@@ -169,7 +169,7 @@ export const EditorToolbar = ({ editor, onExport }: EditorToolbarProps) => {
           className="h-8 w-8"
           onClick={() => editor.chain().focus().toggleUnderline().run()}
         >
-          <Underline className="h-4 w-4" />
+          <TextUnderline weight="bold" className="h-4 w-4" />
         </Button>
         <Button
           variant={editor.isActive('strike') ? 'secondary' : 'ghost'}
@@ -177,7 +177,7 @@ export const EditorToolbar = ({ editor, onExport }: EditorToolbarProps) => {
           className="h-8 w-8"
           onClick={() => editor.chain().focus().toggleStrike().run()}
         >
-          <Strikethrough className="h-4 w-4" />
+          <TextStrikethrough weight="bold" className="h-4 w-4" />
         </Button>
         <Button
           variant={editor.isActive('code') ? 'secondary' : 'ghost'}
@@ -195,7 +195,7 @@ export const EditorToolbar = ({ editor, onExport }: EditorToolbarProps) => {
           <PopoverTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8">
               <div className="flex flex-col items-center">
-                <Type className="h-4 w-4" />
+                <TextT weight="bold" className="h-4 w-4" />
                 <div
                   className="h-0.5 w-4 mt-0.5"
                   style={{
@@ -260,25 +260,25 @@ export const EditorToolbar = ({ editor, onExport }: EditorToolbarProps) => {
 
         <Separator orientation="vertical" className="h-6" />
 
-        {/* Lists */}
+        {/* ListBullets weight="bold"s */}
         <Button
-          variant={editor.isActive('bulletList') ? 'secondary' : 'ghost'}
+          variant={editor.isActive('bulletListBullets weight="bold"') ? 'secondary' : 'ghost'}
           size="icon"
           className="h-8 w-8"
           onClick={() => editor.chain().focus().toggleBulletList().run()}
         >
-          <List className="h-4 w-4" />
+          <ListBullets weight="bold" className="h-4 w-4" />
         </Button>
         <Button
-          variant={editor.isActive('orderedList') ? 'secondary' : 'ghost'}
+          variant={editor.isActive('orderedListBullets weight="bold"') ? 'secondary' : 'ghost'}
           size="icon"
           className="h-8 w-8"
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
         >
-          <ListOrdered className="h-4 w-4" />
+          <ListBullets weight="bold"Ordered className="h-4 w-4" />
         </Button>
         <Button
-          variant={editor.isActive('taskList') ? 'secondary' : 'ghost'}
+          variant={editor.isActive('taskListBullets weight="bold"') ? 'secondary' : 'ghost'}
           size="icon"
           className="h-8 w-8"
           onClick={() => editor.chain().focus().toggleTaskList().run()}
@@ -295,7 +295,7 @@ export const EditorToolbar = ({ editor, onExport }: EditorToolbarProps) => {
           className="h-8 w-8"
           onClick={() => editor.chain().focus().setTextAlign('left').run()}
         >
-          <AlignLeft className="h-4 w-4" />
+          <TextAlignLeft weight="bold" className="h-4 w-4" />
         </Button>
         <Button
           variant={editor.isActive({ textAlign: 'center' }) ? 'secondary' : 'ghost'}
@@ -303,7 +303,7 @@ export const EditorToolbar = ({ editor, onExport }: EditorToolbarProps) => {
           className="h-8 w-8"
           onClick={() => editor.chain().focus().setTextAlign('center').run()}
         >
-          <AlignCenter className="h-4 w-4" />
+          <TextAlignCenter weight="bold" className="h-4 w-4" />
         </Button>
         <Button
           variant={editor.isActive({ textAlign: 'right' }) ? 'secondary' : 'ghost'}
@@ -311,7 +311,7 @@ export const EditorToolbar = ({ editor, onExport }: EditorToolbarProps) => {
           className="h-8 w-8"
           onClick={() => editor.chain().focus().setTextAlign('right').run()}
         >
-          <AlignRight className="h-4 w-4" />
+          <TextAlignRight weight="bold" className="h-4 w-4" />
         </Button>
         <Button
           variant={editor.isActive({ textAlign: 'justify' }) ? 'secondary' : 'ghost'}
@@ -319,7 +319,7 @@ export const EditorToolbar = ({ editor, onExport }: EditorToolbarProps) => {
           className="h-8 w-8"
           onClick={() => editor.chain().focus().setTextAlign('justify').run()}
         >
-          <AlignJustify className="h-4 w-4" />
+          <TextAlignJustify weight="bold" className="h-4 w-4" />
         </Button>
 
         <Separator orientation="vertical" className="h-6" />
@@ -337,7 +337,7 @@ export const EditorToolbar = ({ editor, onExport }: EditorToolbarProps) => {
           className="h-8 w-8"
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
         >
-          <Quote className="h-4 w-4" />
+          <Quotes weight="bold" className="h-4 w-4" />
         </Button>
         <Button
           variant="ghost"
@@ -352,7 +352,7 @@ export const EditorToolbar = ({ editor, onExport }: EditorToolbarProps) => {
 
         <Separator orientation="vertical" className="h-6" />
 
-        {/* Undo/Redo */}
+        {/* ArrowCounterClockwise weight="bold"/ArrowClockwise weight="bold" */}
         <Button
           variant="ghost"
           size="icon"
@@ -360,7 +360,7 @@ export const EditorToolbar = ({ editor, onExport }: EditorToolbarProps) => {
           onClick={() => editor.chain().focus().undo().run()}
           disabled={!editor.can().undo()}
         >
-          <Undo className="h-4 w-4" />
+          <ArrowCounterClockwise weight="bold" className="h-4 w-4" />
         </Button>
         <Button
           variant="ghost"
@@ -369,7 +369,7 @@ export const EditorToolbar = ({ editor, onExport }: EditorToolbarProps) => {
           onClick={() => editor.chain().focus().redo().run()}
           disabled={!editor.can().redo()}
         >
-          <Redo className="h-4 w-4" />
+          <ArrowClockwise weight="bold" className="h-4 w-4" />
         </Button>
 
         {onExport && (

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react"
 import dynamic from "next/dynamic"
-import { Loader2, AlertCircle, X, Download, ExternalLink } from "lucide-react"
+import { CircleNotch, WarningCircle, X, Download, ArrowSquareOut } from "@phosphor-icons/react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { MarkdownViewer } from "./markdown-viewer"

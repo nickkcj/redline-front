@@ -3,7 +3,7 @@
 import React, { useState, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 import { Button } from '@/components/ui/button'
-import { ZoomIn, ZoomOut, FileText, X, AlertCircle, Loader2 } from 'lucide-react'
+import { MagnifyingGlassPlus, MagnifyingGlassMinus, FileText, X, WarningCircle, CircleNotch } from '@phosphor-icons/react'
 import { MarkdownViewer } from '@/components/shared/viewers/markdown-viewer'
 import { TextViewer } from '@/components/shared/viewers/text-viewer'
 import { ImageViewer } from '@/components/shared/viewers/image-viewer'
@@ -18,7 +18,7 @@ const PDFViewer = dynamic(
     ssr: false,
     loading: () => (
       <div className="flex items-center justify-center h-full">
-        <Loader2 className="h-8 w-8 animate-spin" />
+        <CircleNotch weight="bold" className="h-8 w-8 animate-spin" />
       </div>
     )
   }
@@ -78,7 +78,7 @@ export function DocumentViewerPanel({ className }: DocumentViewerPanelProps) {
         <div className="flex items-center justify-between p-3">
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <div className="p-2 bg-muted rounded-lg">
-              <FileText className="h-4 w-4" />
+              <FileText weight="bold" className="h-4 w-4" />
             </div>
             <div className="min-w-0 flex-1">
               <h3 className="font-semibold text-base truncate">
