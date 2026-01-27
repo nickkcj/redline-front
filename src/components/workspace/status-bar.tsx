@@ -3,10 +3,8 @@
 import * as React from 'react'
 import { useTheme } from 'next-themes'
 import {
-  Sun,
-  Moon,
-  SplitHorizontal,
-  SplitVertical,
+  Columns,
+  Layout,
   Square,
   CaretRight,
   MagnifyingGlassPlus,
@@ -14,7 +12,8 @@ import {
   Info,
   CheckCircle,
   WarningCircle,
-  CircleNotch
+  CircleNotch,
+  Check
 } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
@@ -40,7 +39,13 @@ interface StatusBarProps {
   onZoomChange?: (zoom: number) => void
   splitMode?: 'none' | 'horizontal' | 'vertical'
   onSplitModeChange?: (mode: 'none' | 'horizontal' | 'vertical') => void
+  showShareMenu?: boolean
+  workspaces?: { id: string; name: string }[]
+  activeWorkspaceId?: string
+  onWorkspaceChange?: (id: string) => void
 }
+
+import { ShareMenu } from '@/components/features/share/share-menu'
 
 export function StatusBar({
   breadcrumbs = [],
@@ -49,7 +54,11 @@ export function StatusBar({
   zoom = 100,
   onZoomChange,
   splitMode = 'none',
-  onSplitModeChange
+  onSplitModeChange,
+  showShareMenu = false,
+  workspaces = [],
+  activeWorkspaceId,
+  onWorkspaceChange
 }: StatusBarProps) {
   const { theme, setTheme } = useTheme()
   const [localZoom, setLocalZoom] = React.useState(zoom)
@@ -95,9 +104,9 @@ export function StatusBar({
   const getSplitIcon = () => {
     switch (splitMode) {
       case 'horizontal':
-        return <SplitHorizontal weight="bold" className="h-4 w-4" />
+        return <Columns weight="bold" className="h-4 w-4" />
       case 'vertical':
-        return <SplitVertical weight="bold" className="h-4 w-4" />
+        return <Layout weight="bold" className="h-4 w-4" />
       default:
         return <Square weight="bold" className="h-4 w-4" />
     }
@@ -105,45 +114,9 @@ export function StatusBar({
 
   return (
     <div className="h-8 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex items-center justify-between px-3 text-xs select-none">
-      {/* Left Section - Breadcrumbs */}
-      <div className="flex items-center gap-2 flex-1 min-w-0">
-        {breadcrumbs.length > 0 ? (
-          <div className="flex items-center gap-1.5 text-muted-foreground overflow-hidden">
-            {breadcrumbs.map((crumb, index) => (
-              <React.Fragment key={crumb.id}>
-                <button
-                  className="hover:text-foreground transition-colors truncate max-w-[120px]"
-                  title={crumb.label}
-                >
-                  {crumb.label}
-                </button>
-                {index < breadcrumbs.length - 1 && (
-                  <CaretRight weight="bold" className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
-                )}
-              </React.Fragment>
-            ))}
-          </div>
-        ) : (
-          <span className="text-muted-foreground">Nenhuma janela ativa</span>
-        )}
-      </div>
-
-      {/* Center Section - Status Message */}
-      <div className="flex items-center gap-2 px-4">
-        {getStatusIcon()}
-        <span className={cn(
-          "text-muted-foreground whitespace-nowrap",
-          statusType === 'error' && "text-red-500",
-          statusType === 'warning' && "text-yellow-500",
-          statusType === 'success' && "text-green-500"
-        )}>
-          {statusMessage}
-        </span>
-      </div>
-
-      {/* Right Section - Controls */}
-      <div className="flex items-center gap-1">
-        {/* Split Mode */}
+      {/* Left Section - Breadcrumbs & Status */}
+      <div className="flex items-center gap-4 flex-1 min-w-0">
+        {/* Split Mode - Moved to left */}
         <TooltipProvider delayDuration={0}>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -152,22 +125,22 @@ export function StatusBar({
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-6 w-6 p-0"
+                    className="h-6 w-6 p-0 shrink-0"
                   >
                     {getSplitIcon()}
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" side="top" className="text-xs">
+                <DropdownMenuContent align="start" side="top" className="text-xs">
                   <DropdownMenuItem onClick={() => onSplitModeChange?.('none')} className="text-xs">
                     <Square weight="bold" className="h-3.5 w-3.5 mr-2" />
                     Usar 1 tela
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => onSplitModeChange?.('horizontal')} className="text-xs">
-                    <SplitHorizontal weight="bold" className="h-3.5 w-3.5 mr-2" />
+                    <Columns weight="bold" className="h-3.5 w-3.5 mr-2" />
                     Dividir em 2 telas
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => onSplitModeChange?.('vertical')} className="text-xs">
-                    <SplitVertical weight="bold" className="h-3.5 w-3.5 mr-2" />
+                    <Layout weight="bold" className="h-3.5 w-3.5 mr-2" />
                     Dividir em 3 telas
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -179,41 +152,80 @@ export function StatusBar({
           </Tooltip>
         </TooltipProvider>
 
-        <div className="w-px h-4 bg-border mx-1" />
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          {breadcrumbs.length > 0 ? (
+            <div className="flex items-center gap-1.5 text-muted-foreground overflow-hidden">
+              {breadcrumbs.map((crumb, index) => (
+                <React.Fragment key={crumb.id}>
+                  {crumb.id === 'workspace' && workspaces.length > 0 ? (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button
+                          className="hover:text-foreground transition-colors truncate max-w-[120px] flex items-center gap-1"
+                          title={crumb.label}
+                        >
+                          {crumb.label}
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start" className="w-[200px]">
+                        {workspaces.map((ws) => (
+                          <DropdownMenuItem
+                            key={ws.id}
+                            onClick={() => onWorkspaceChange?.(ws.id)}
+                            className="flex items-center justify-between"
+                          >
+                            <span>{ws.name}</span>
+                            {ws.id === activeWorkspaceId && (
+                              <Check className="h-4 w-4 text-primary" />
+                            )}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  ) : (
+                    <button
+                      className="hover:text-foreground transition-colors truncate max-w-[120px]"
+                      title={crumb.label}
+                    >
+                      {crumb.label}
+                    </button>
+                  )}
+                  {index < breadcrumbs.length - 1 && (
+                    <CaretRight weight="bold" className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
+          ) : (
+            <span className="text-muted-foreground">Nenhuma janela ativa</span>
+          )}
+        </div>
 
-        {/* Theme Toggle */}
+        {/* Status Message (moved from center) */}
+        {statusType !== 'idle' && (
+          <div className="flex items-center gap-2 px-2 border-l border-border/50">
+            {getStatusIcon()}
+            <span className={cn(
+              "text-muted-foreground whitespace-nowrap",
+              statusType === 'error' && "text-red-500",
+              statusType === 'warning' && "text-yellow-500",
+              statusType === 'success' && "text-green-500"
+            )}>
+              {statusMessage}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Center Section - Zoom Controls */}
+      <div className="flex items-center gap-2 absolute left-1/2 -translate-x-1/2">
         <TooltipProvider delayDuration={0}>
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-6 w-6 p-0"
-                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              >
-                {theme === 'dark' ? (
-                  <Sun weight="bold" className="h-4 w-4" />
-                ) : (
-                  <Moon weight="bold" className="h-4 w-4" />
-                )}
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top">
-              <p>{theme === 'dark' ? 'Modo claro' : 'Modo escuro'}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-
-        <div className="w-px h-4 bg-border mx-1" />
-
-        {/* Zoom Controls */}
-        <TooltipProvider delayDuration={0}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 w-6 p-0"
+                className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
                 onClick={handleZoomOut}
                 disabled={localZoom <= 50}
               >
@@ -238,7 +250,7 @@ export function StatusBar({
           />
           <button
             onClick={handleZoomReset}
-            className="text-muted-foreground hover:text-foreground transition-colors min-w-[40px] text-right font-mono"
+            className="text-muted-foreground hover:text-foreground transition-colors min-w-[32px] text-right font-mono tabular-nums"
           >
             {localZoom}%
           </button>
@@ -250,7 +262,7 @@ export function StatusBar({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-6 w-6 p-0"
+                className="h-6 w-6 p-0 text-muted-foreground hover:text-foreground"
                 onClick={handleZoomIn}
                 disabled={localZoom >= 200}
               >
@@ -262,6 +274,14 @@ export function StatusBar({
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
+      </div>
+
+      {/* Right Section - Controls */}
+      <div className="flex items-center gap-1">
+        {/* Share Menu - Added to status bar */}
+        {showShareMenu && (
+          <ShareMenu />
+        )}
       </div>
     </div>
   )

@@ -9,6 +9,7 @@ export interface Tab {
   title: string
   data?: any // For storing chat ID, document ID, content, etc.
   groupId?: string // ID do grupo de abas (para split view)
+  zoom?: number // Zoom level for this tab
 }
 
 export interface Workspace {
@@ -27,10 +28,13 @@ interface WorkspaceState {
   // Tab State
   tabs: Tab[]
   activeTabId: string | null
+  focusedTabId: string | null
   addTab: (type: TabType, title: string, data?: any) => void
   closeTab: (id: string) => void
   setActiveTab: (id: string) => void
+  setFocusedTabId: (id: string | null) => void
   updateTab: (id: string, updates: Partial<Tab>) => void
+  setTabZoom: (id: string, zoom: number) => void
 
   // UI State
   sidebarLeftOpen: boolean
@@ -51,7 +55,7 @@ interface WorkspaceState {
   toggleThreeColumnSplit: () => void
   setSplitTab: (id: string | null) => void
   setThirdTab: (id: string | null) => void
-  reorderColumns: (newOrder: { main: string, split: string, third: string }) => void
+  reorderColumns: (newOrder: { main: string, split: string | null, third: string | null }) => void
   setSplitChoiceDialogOpen: (open: boolean) => void
   setPendingSplitTabId: (id: string | null) => void
   closeSplitTab: (which: 'main' | 'split' | 'third') => void
@@ -75,21 +79,55 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   setActiveWorkspace: (id) => set({ activeWorkspaceId: id }),
 
   // Tab Defaults
-  tabs: [{ id: 'tab-home', type: 'home', title: 'Home' }],
+  tabs: [{ id: 'tab-home', type: 'home', title: 'Home', zoom: 100 }],
   activeTabId: 'tab-home',
+  focusedTabId: 'tab-home',
 
   addTab: (type, title, data) => {
     set((state) => {
-      // Se há uma aba ativa, substituir seu conteúdo
+      // Se estiver em modo split, agrupar as abas atuais e abrir a nova separadamente
+      if (state.isSplit && state.activeTabId && state.activeSplitTabId) {
+        const groupId = nanoid()
+        
+        // Atualizar as abas atuais para pertencerem ao grupo
+        const updatedTabs = state.tabs.map(t => {
+          if (t.id === state.activeTabId || t.id === state.activeSplitTabId || (state.isThreeColumnSplit && t.id === state.activeThirdTabId)) {
+            return { ...t, groupId }
+          }
+          return t
+        })
+        
+        // Criar a nova aba
+        const newTab: Tab = {
+          id: nanoid(),
+          type,
+          title,
+          data,
+          zoom: 100
+        }
+        
+        return {
+          tabs: [...updatedTabs, newTab],
+          activeTabId: newTab.id,
+          focusedTabId: newTab.id,
+          isSplit: false, // Desativar split para focar na nova aba
+          activeSplitTabId: null,
+          isThreeColumnSplit: false,
+          activeThirdTabId: null
+        }
+      }
+
+      // Se há uma aba ativa (sem split), substituir seu conteúdo
       if (state.activeTabId) {
         // Se estiver em split, desativar split ao substituir
         return {
           tabs: state.tabs.map((t) => 
             t.id === state.activeTabId 
-              ? { ...t, type, title, data, groupId: undefined }
+              ? { ...t, type, title, data, groupId: undefined, zoom: 100 }
               : t
           ),
           activeTabId: state.activeTabId, // Mantém a mesma aba ativa
+          focusedTabId: state.activeTabId,
           isSplit: false, // Desativa split ao substituir
           activeSplitTabId: null
         }
@@ -100,11 +138,13 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
         id: nanoid(),
         type,
         title,
-        data
+        data,
+        zoom: 100
       }
       return {
         tabs: [...state.tabs, newTab],
         activeTabId: newTab.id,
+        focusedTabId: newTab.id,
         isSplit: false, // Nova aba não abre em split
         activeSplitTabId: null
       }
@@ -212,6 +252,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
         return { 
           tabs: [homeTab], 
           activeTabId: homeTab.id,
+          focusedTabId: homeTab.id,
           isSplit: false,
           isThreeColumnSplit: false,
           activeSplitTabId: null,
@@ -222,6 +263,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
       return { 
         tabs: updatedTabs, 
         activeTabId: newActiveId,
+        focusedTabId: newActiveId,
         activeSplitTabId: newSplitId,
         activeThirdTabId: newThirdId,
         isSplit: shouldDisableSplit ? false : state.isSplit,
@@ -245,6 +287,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
           activeTabId: first.id,
           activeSplitTabId: second.id,
           activeThirdTabId: third.id,
+          focusedTabId: id,
           isSplit: true,
           isThreeColumnSplit: true
         }
@@ -252,9 +295,28 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
         // Restaurar split de 2 colunas
         const otherTab = groupTabs.find(t => t.id !== id)
         if (otherTab) {
+          // Check if the clicked tab was previously in split or main slot
+          // Ideally we keep their positions unless user dragged them.
+          // But here we are just restoring the view.
+          // If we want to keep positions, we need to know which was main and which was split.
+          // For now, let's assume the clicked one becomes focused, but we need to decide which slot.
+          
+          // If the clicked tab is ALREADY active or split active, just focus it.
+          if (state.isSplit && (state.activeTabId === id || state.activeSplitTabId === id)) {
+             return { focusedTabId: id }
+          }
+
+          // If we are restoring from a closed state or switching from another tab:
+          // We can try to preserve order if we knew it.
+          // Let's just put the clicked tab in main for now as per original logic, BUT update focusedTabId.
+          // Wait, original logic was: activeTabId: id, activeSplitTabId: otherTab.id.
+          // This swaps them if 'id' was the split tab.
+          
+          // Let's stick to original logic for slot assignment but ensure focusedTabId is set.
           return {
             activeTabId: id,
             activeSplitTabId: otherTab.id,
+            focusedTabId: id,
             isSplit: true,
             isThreeColumnSplit: false,
             activeThirdTabId: null
@@ -267,15 +329,22 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
     // e desativar split se estiver ativo
     return {
       activeTabId: id,
+      focusedTabId: id,
       isSplit: false,
       isThreeColumnSplit: false,
       activeSplitTabId: null,
       activeThirdTabId: null
     }
   }),
+
+  setFocusedTabId: (id) => set({ focusedTabId: id }),
   
   updateTab: (id, updates) => set((state) => ({
     tabs: state.tabs.map((t) => (t.id === id ? { ...t, ...updates } : t))
+  })),
+
+  setTabZoom: (id, zoom) => set((state) => ({
+    tabs: state.tabs.map((t) => (t.id === id ? { ...t, zoom } : t))
   })),
 
   // UI Defaults
@@ -464,7 +533,8 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
       id: nanoid(),
       type,
       title,
-      data
+      data,
+      zoom: 100
     }
     set((state) => ({
       tabs: [...state.tabs, newTab],
@@ -479,7 +549,8 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
       id: nanoid(),
       type,
       title,
-      data
+      data,
+      zoom: 100
     }
     set((state) => {
       // If split is not active, activate it
@@ -498,7 +569,8 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
       id: nanoid(),
       type,
       title,
-      data
+      data,
+      zoom: 100
     }
     set((state) => {
       // Adicionar nova aba e ativar split sem modal

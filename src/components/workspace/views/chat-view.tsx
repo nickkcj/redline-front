@@ -1,14 +1,16 @@
 'use client'
 
 import * as React from 'react'
-import { PaperPlaneTilt, Robot, User, Sparkle, Paperclip, CaretDown, CaretRight, SlackLogo, GithubLogo, TrelloLogo, FigmaLogo, EnvelopeSimple, Globe, ThumbsUp, ThumbsDown, Copy, PlusCircle, StopCircle, At, ArrowUp, CircleNotch, MagnifyingGlass, GridFour, Cpu, Microphone, Waveform, Baby, Heart, Airplane, Wrench, Translate, Question } from '@phosphor-icons/react'
+import { PaperPlaneTilt, Robot, User, Sparkle, Paperclip, CaretDown, CaretRight, SlackLogo, GithubLogo, FigmaLogo, EnvelopeSimple, Globe, ThumbsUp, ThumbsDown, Copy, PlusCircle, StopCircle, At, ArrowUp, CircleNotch, MagnifyingGlass, GridFour, Cpu, Microphone, Waveform, Baby, Heart, Airplane, Wrench, Translate, Question, ShoppingBag, Graph, MapPin, Star, ArrowRight } from '@phosphor-icons/react'
 import { useStatusBar } from '@/hooks/use-status-bar'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
+import { cn } from '@/lib/utils'
 
 interface Message {
   id: string
@@ -85,6 +87,7 @@ export function ChatView({ tabId, tabData }: { tabId: string; tabData?: any }) {
   const [inputValue, setInputValue] = React.useState('')
   const [isThinking, setIsThinking] = React.useState(false)
   const [thinkingText, setThinkingText] = React.useState('Thinking...')
+  const [suggestions, setSuggestions] = React.useState<string[]>([])
 
   // Reset messages when tabId changes
   React.useEffect(() => {
@@ -95,6 +98,24 @@ export function ChatView({ tabId, tabData }: { tabId: string; tabData?: any }) {
     }
   }, [tabId, tabData])
 
+  // Update suggestions when input changes
+  React.useEffect(() => {
+    if (!inputValue.trim()) {
+      setSuggestions([])
+      return
+    }
+    
+    // Mock suggestions based on input
+    const baseSuggestions = [
+      `${inputValue} tutorial`,
+      `${inputValue} examples`,
+      `${inputValue} documentation`,
+      `how to use ${inputValue}`,
+      `best practices for ${inputValue}`
+    ]
+    setSuggestions(baseSuggestions)
+  }, [inputValue])
+
   const handleSend = () => {
     if (!inputValue.trim() || isThinking) return
     const newMsg: Message = {
@@ -104,6 +125,7 @@ export function ChatView({ tabId, tabData }: { tabId: string; tabData?: any }) {
     }
     setMessages([...messages, newMsg])
     setInputValue('')
+    setSuggestions([]) // Clear suggestions
     
     // Update status bar
     setLoading('Processando mensagem...')
@@ -154,80 +176,123 @@ export function ChatView({ tabId, tabData }: { tabId: string; tabData?: any }) {
   
   if (messages.length === 0) {
     return (
-      <div className="flex flex-col h-full items-center justify-center p-8 space-y-8 relative overflow-hidden bg-background">
-        <div className="text-center space-y-2 relative z-10 mb-4">
-          <h2 className="text-4xl font-serif tracking-tight text-foreground/90">perplexity</h2>
+      <div className="flex flex-col h-full items-center justify-center p-4 md:p-8 space-y-8 relative overflow-hidden bg-background">
+        <div className="text-center space-y-2 relative z-10 mb-4 flex flex-col items-center">
+           {/* Custom Logo */}
+           <div className="relative w-48 h-16 mb-4">
+             <Image 
+               src="/logoSaca_preta.png" 
+               alt="Scaffold Logo" 
+               fill
+               className="object-contain dark:hidden"
+               priority
+             />
+             <Image 
+               src="/logoSca_branca.png" 
+               alt="Scaffold Logo" 
+               fill
+               className="object-contain hidden dark:block"
+               priority
+             />
+           </div>
         </div>
 
-        <div className="w-full max-w-2xl space-y-6 relative z-10">
-           <div className="relative rounded-xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
-             <div className="flex items-center px-4 py-3 gap-3">
-               {/* Left Icons */}
-               <div className="flex items-center gap-2 text-muted-foreground/70">
-                 <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-foreground">
-                   <MagnifyingGlass weight="bold" className="h-4 w-4" />
-                 </Button>
-                 <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-foreground">
-                   <Globe className="h-4 w-4" />
-                 </Button>
-                 <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-foreground">
-                   <GridFour weight="bold" className="h-4 w-4" />
-                 </Button>
-               </div>
-               
-               <Input 
-                 className="flex-1 border-0 shadow-none focus-visible:ring-0 bg-transparent px-0 text-base placeholder:text-muted-foreground/50 h-auto py-2" 
-                 placeholder="Ask anything. Type @ for mentions and / for shortcuts."
+        <div className="w-full max-w-2xl space-y-0 relative z-10">
+           <div className={cn(
+             "relative rounded-xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md flex flex-col",
+             suggestions.length > 0 ? "rounded-b-none border-b-0" : ""
+           )}>
+             <div className="p-3">
+               <Textarea 
+                 className="w-full border-0 shadow-none  bg-transparent px-2 text-sm placeholder:text-muted-foreground/50 h-auto min-h-[50px] resize-none focus-visible:ring-0 focus-visible:ring-offset-0" 
+                 placeholder="Ask anything..."
                  value={inputValue}
                  onChange={(e) => setInputValue(e.target.value)}
-                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                 onKeyDown={(e) => {
+                   if (e.key === 'Enter' && !e.shiftKey) {
+                     e.preventDefault()
+                     handleSend()
+                   }
+                 }}
+                 autoFocus
                />
-
-               {/* Right Icons */}
-               <div className="flex items-center gap-2 text-muted-foreground/70">
-                  <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-foreground">
-                    <Globe className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-foreground">
-                    <Cpu className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-foreground">
-                    <Paperclip className="h-4 w-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-foreground">
-                    <Microphone weight="bold" className="h-4 w-4" />
-                  </Button>
-                  <Button size="icon" className="h-8 w-8 rounded-full bg-teal-700 hover:bg-teal-800 text-white">
-                    <Waveform weight="bold" className="h-4 w-4" />
-                  </Button>
+               
+               <div className="flex items-center justify-between px-2 pt-2">
+                 <div className="flex items-center gap-2">
+                   <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-muted-foreground hover:text-foreground rounded-full bg-muted/50 hover:bg-muted text-xs font-medium">
+                     <MagnifyingGlass weight="bold" className="h-3.5 w-3.5" />
+                     Focus
+                   </Button>
+                   <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted text-xs font-medium">
+                     <Paperclip weight="bold" className="h-3.5 w-3.5" />
+                     Attach
+                   </Button>
+                   <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted text-xs font-medium">
+                     <Microphone weight="bold" className="h-3.5 w-3.5" />
+                     Voice
+                   </Button>
+                 </div>
+                 
+                 <div className="flex items-center gap-3">
+                   <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] text-muted-foreground font-medium">Pro</span>
+                      <div className="h-4 w-7 bg-muted rounded-full relative cursor-pointer">
+                        <div className="absolute left-0.5 top-0.5 h-3 w-3 bg-background rounded-full shadow-sm"></div>
+                      </div>
+                   </div>
+                   <Button 
+                      size="icon" 
+                      className={cn(
+                        "h-8 w-8 rounded-full transition-all duration-200",
+                        inputValue.trim() 
+                          ? "bg-primary hover:bg-primary/90 text-primary-foreground" 
+                          : "bg-muted text-muted-foreground cursor-not-allowed"
+                      )}
+                      onClick={inputValue.trim() ? handleSend : undefined}
+                      disabled={!inputValue.trim()}
+                   >
+                      <ArrowRight weight="bold" className="h-4 w-4" />
+                   </Button>
+                 </div>
                </div>
              </div>
            </div>
 
-           <div className="flex flex-wrap items-center justify-center gap-2">
-             {[
-                 { icon: Baby, text: "Parenting" },
-                 { icon: Heart, text: "Health" },
-                 { icon: Airplane, text: "Travel" },
-                 { icon: PaperPlaneTilt, text: "Local" },
-                 { icon: Wrench, text: "Troubleshoot" }
-             ].map((item, i) => (
-               <Button key={i} variant="outline" className="h-8 px-3 gap-2 text-xs font-medium text-muted-foreground hover:text-foreground bg-transparent border-muted-foreground/20 hover:bg-muted/50 rounded-full">
-                 <item.icon className="h-3.5 w-3.5" />
-                 <span>{item.text}</span>
-               </Button>
-             ))}
-           </div>
-        </div>
-        
-        {/* Footer Help Buttons */}
-        <div className="absolute bottom-8 right-8 flex gap-2">
-            <Button variant="outline" size="icon" className="h-8 w-8 rounded-full border-muted-foreground/20 text-muted-foreground">
-                <Translate weight="bold" className="h-4 w-4" />
-            </Button>
-            <Button variant="outline" size="icon" className="h-8 w-8 rounded-full border-muted-foreground/20 text-muted-foreground">
-                <Question weight="bold" className="h-4 w-4" />
-            </Button>
+           {/* Suggestions Dropdown */}
+           {suggestions.length > 0 && (
+             <div className="border border-t-0 border-border bg-card rounded-b-xl shadow-sm overflow-hidden">
+               {suggestions.map((suggestion, i) => (
+                 <button
+                   key={i}
+                   className="w-full text-left px-4 py-3 text-sm text-muted-foreground hover:bg-muted/50 hover:text-foreground flex items-center gap-3 transition-colors border-t border-border/50 first:border-t-0"
+                   onClick={() => {
+                     setInputValue(suggestion.trim())
+                   }}
+                 >
+                   <MagnifyingGlass weight="bold" className="h-4 w-4 opacity-50" />
+                   {suggestion}
+                 </button>
+               ))}
+             </div>
+           )}
+
+           {/* Action Buttons (Only when no suggestions/empty input) */}
+           {suggestions.length === 0 && (
+             <div className="flex flex-wrap items-center justify-center gap-2 pt-6">
+               {[
+                   { icon: ShoppingBag, text: "Shopping" },
+                   { icon: Graph, text: "Analyze" },
+                   { icon: MapPin, text: "Local" },
+                   { icon: Star, text: "Recommend" },
+                   { icon: Heart, text: "Health" }
+               ].map((item, i) => (
+                 <Button key={i} variant="outline" className="h-8 px-3 gap-2 text-xs font-medium text-muted-foreground hover:text-foreground bg-transparent border-muted-foreground/20 hover:bg-muted/50 rounded-full">
+                   <item.icon weight="fill" className="h-3.5 w-3.5" />
+                   <span>{item.text}</span>
+                 </Button>
+               ))}
+             </div>
+           )}
         </div>
       </div>
     )
@@ -318,56 +383,59 @@ export function ChatView({ tabId, tabData }: { tabId: string; tabData?: any }) {
       </ScrollArea>
 
       <div className="p-4 pb-6">
-        <div className="relative bg-card rounded-3xl border border-border shadow-sm flex flex-col p-3 gap-2">
-           {/* Top: Context */}
-           <div className="flex items-center">
-              <Button variant="ghost" size="sm" className="h-7 rounded-full bg-muted hover:bg-accent text-xs font-normal text-muted-foreground px-3 border border-transparent transition-all gap-1.5 grayscale">
-                 <At weight="bold" className="h-3.5 w-3.5" />
-                 Add context
-              </Button>
-           </div>
-           
-           {/* Input */}
-           <Input 
-             className="min-h-[24px] p-0 px-1 border-0 shadow-none resize-none bg-card focus-visible:ring-0 focus-visible:ring-offset-0 text-[15px] placeholder:text-muted-foreground font-normal text-foreground" 
-             placeholder="Ask, search, or make anything..."
-             value={inputValue}
-             onChange={(e) => setInputValue(e.target.value)}
-             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-           />
-           
-           {/* Robot weight="bold"tom: Tools & PaperPlaneTilt */}
-           <div className="flex items-center justify-between pt-1">
-              <div className="flex items-center gap-4">
-                 <button className="text-muted-foreground hover:text-foreground transition-colors grayscale">
-                    <Paperclip className="h-4 w-4" />
-                 </button>
-                 
-                 <div className="flex items-center gap-4">
-                    <button className="text-muted-foreground hover:text-foreground transition-colors text-xs font-medium grayscale">
-                       Auto
-                    </button>
-                    <button className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors text-xs font-medium grayscale">
-                       <GlobeIcon className="h-3.5 w-3.5" />
-                       All sources
-                    </button>
+        <div className="relative bg-card rounded-xl border border-border shadow-sm flex flex-col">
+           <div className="p-3">
+             <Textarea 
+               className="w-full border-0 shadow-none bg-transparent px-2 text-sm placeholder:text-sm placeholder:text-muted-foreground/50 h-auto min-h-[50px] max-h-[200px] resize-none focus-visible:ring-0 focus-visible:ring-offset-0" 
+               placeholder="Ask anything..."
+               value={inputValue}
+               onChange={(e) => setInputValue(e.target.value)}
+               onKeyDown={(e) => {
+                 if (e.key === 'Enter' && !e.shiftKey) {
+                   e.preventDefault()
+                   handleSend()
+                 }
+               }}
+             />
+             
+             <div className="flex items-center justify-between px-2 pt-2">
+               <div className="flex items-center gap-2">
+                 <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted text-xs font-medium">
+                   <MagnifyingGlass weight="bold" className="h-3.5 w-3.5" />
+                   Focus
+                 </Button>
+                 <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted text-xs font-medium">
+                   <Paperclip weight="bold" className="h-3.5 w-3.5" />
+                   Attach
+                 </Button>
+                 <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted text-xs font-medium">
+                   <Microphone weight="bold" className="h-3.5 w-3.5" />
+                   Voice
+                 </Button>
+               </div>
+               
+               <div className="flex items-center gap-3">
+                 <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] text-muted-foreground font-medium">Pro</span>
+                    <div className="h-4 w-7 bg-muted rounded-full relative cursor-pointer">
+                      <div className="absolute left-0.5 top-0.5 h-3 w-3 bg-background rounded-full shadow-sm"></div>
+                    </div>
                  </div>
-              </div>
-
-              <div className="flex items-center">
                  <Button 
                     size="icon" 
-                    className={`h-8 w-8 rounded-full transition-all duration-200 grayscale ${
-                        inputValue.trim() 
-                        ? 'bg-foreground hover:bg-foreground/90 text-background' 
-                        : 'bg-muted text-muted-foreground cursor-not-allowed'
-                    }`} 
+                    className={cn(
+                      "h-8 w-8 rounded-full transition-all duration-200",
+                      inputValue.trim() 
+                        ? "bg-primary hover:bg-primary/90 text-primary-foreground" 
+                        : "bg-muted text-muted-foreground cursor-not-allowed"
+                    )}
                     onClick={inputValue.trim() ? handleSend : undefined}
                     disabled={!inputValue.trim()}
                  >
-                    <ArrowUp className="h-5 w-5" />
+                    <ArrowRight weight="bold" className="h-4 w-4" />
                  </Button>
-              </div>
+               </div>
+             </div>
            </div>
         </div>
       </div>

@@ -15,7 +15,8 @@ import {
   ArrowCircleUp,
   MaskHappy,
   Check,
-  Question
+  Question,
+  Moon
 } from "@phosphor-icons/react"
 import {
   Popover,
@@ -26,6 +27,8 @@ import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { useWorkspaceStore } from "@/store/workspace-store"
+import { useTheme } from "next-themes"
+import { Switch } from "@/components/ui/switch"
 
 interface AccountSettingsMenuProps {
   children: React.ReactNode
@@ -33,6 +36,7 @@ interface AccountSettingsMenuProps {
 
 export function AccountSettingsMenu({ children }: AccountSettingsMenuProps) {
   const { setSettingsOpen } = useWorkspaceStore()
+  const { theme, setTheme } = useTheme()
   const [isOpen, setIsOpen] = React.useState(false)
 
   const handlePreferencesClick = () => {
@@ -52,23 +56,27 @@ export function AccountSettingsMenu({ children }: AccountSettingsMenuProps) {
         sideOffset={10}
       >
         <div className="flex flex-col gap-0.5">
-          {/* Header */}
-          <div className="flex items-center gap-2 px-2 py-1.5 rounded-md bg-muted/50 mb-1">
-            <User weight="bold" className="h-4 w-4" />
-            <span className="text-sm font-medium">Account</span>
+          {/* Header - Theme */}
+          <div className="w-full flex items-center justify-between px-2 h-8 text-sm font-normal text-muted-foreground hover:text-foreground hover:bg-muted rounded-md cursor-pointer mb-1 transition-colors">
+            <div className="flex items-center gap-3">
+              <User weight="bold" className="h-4 w-4" />
+              <span className="text-left">Theme</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Moon weight="bold" className="h-3.5 w-3.5 text-muted-foreground" />
+              <Switch 
+                checked={theme === 'dark'}
+                onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+                className="h-4 w-7 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input [&>span]:h-3 [&>span]:w-3 [&>span]:data-[state=checked]:translate-x-3"
+              />
+            </div>
           </div>
 
           {/* Menu Items */}
           <MenuItem icon={Gear} label="Preferences" onClick={handlePreferencesClick} />
-          <MenuItem icon={Palette} label="Personalization" />
           <MenuItem icon={Robot} label="Assistant" />
-          <MenuItem icon={Keyboard} label="Shortcuts" />
-          <MenuItem icon={ListChecks} label="Tasks" hasDot />
-          <MenuItem icon={Bell} label="Notifications" />
           <MenuItem icon={Plugs} label="Connectors" />
           <MenuItem icon={Plug} label="API" />
-          <MenuItem icon={Heart} label="Pro Perks" />
-          <MenuItem icon={Gear} label="All settings" onClick={handlePreferencesClick} />
 
           <Separator className="my-1" />
 

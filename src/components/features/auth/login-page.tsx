@@ -123,7 +123,7 @@ export function LoginPage() {
         <div className="absolute inset-0 flex items-center justify-center p-12 z-20">
           <div className="relative w-full max-w-sm h-20">
             <Image
-              src="/scaffold_White_inter.png"
+              src="/logoSca_branca.png"
               alt="Scaffold"
               fill
               className="object-contain"
@@ -153,6 +153,24 @@ export function LoginPage() {
         <div className="w-full max-w-sm space-y-8">
           {/* Title */}
           <div className="flex flex-col items-center text-center space-y-2">
+            {/* Mobile/Form Logo */}
+            <div className="relative w-48 h-12 mb-4 lg:hidden">
+              <Image 
+                src="/logoSaca_preta.png" 
+                alt="Scaffold" 
+                fill
+                className="object-contain dark:hidden"
+                priority
+              />
+              <Image 
+                src="/logoSca_branca.png" 
+                alt="Scaffold" 
+                fill
+                className="object-contain hidden dark:block"
+                priority
+              />
+            </div>
+
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">
               Criar uma conta
             </h1>

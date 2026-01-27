@@ -23,6 +23,21 @@ import { SettingsModal } from './settings-modal'
 import { StatusBar } from './status-bar'
 import { BaseLayout } from '@/components/layout/base-layout'
 import { useStatusBarStore } from '@/hooks/use-status-bar'
+import { ShareMenu } from '@/components/features/share/share-menu'
+import { DotsSixVertical } from '@phosphor-icons/react'
+
+const DragHandle = ({ column, onDragStart, className }: { column: 'main' | 'split' | 'third', onDragStart: (e: React.DragEvent, col: 'main' | 'split' | 'third') => void, className?: string }) => (
+  <div
+    draggable
+    onDragStart={(e) => onDragStart(e, column)}
+    className={cn(
+      "absolute top-2 z-50 p-1.5 rounded-md cursor-grab active:cursor-grabbing text-muted-foreground/50 hover:text-foreground hover:bg-muted/50 transition-colors opacity-0 group-hover:opacity-100",
+      className
+    )}
+  >
+     <DotsSixVertical className="h-4 w-4" />
+  </div>
+)
 
 function WorkspaceLayoutContent() {
   const { 
@@ -43,8 +58,26 @@ function WorkspaceLayoutContent() {
     pendingSplitTabId,
     setSplitChoiceDialogOpen,
     setPendingSplitTabId,
-    setActiveTab
+    setActiveTab,
+    focusedTabId,
+    setFocusedTabId,
+    setTabZoom
   } = useWorkspaceStore()
+
+  const handleWorkspaceChange = (id: string) => {
+    // 1. Set active workspace
+    // setActiveWorkspace(id) // setActiveWorkspace is missing in destructuring, need to add it to destructuring above
+    // Since it's missing, let's fix destructuring first. But wait, I can access it from store directly or add to destructuring.
+    // Let's assume I will add it.
+    useWorkspaceStore.getState().setActiveWorkspace(id)
+    
+    // 2. Navigate to Home tab
+    // Find a 'home' tab or create one if not exists. The store handles tabs globally for now, 
+    // so we can just activate 'tab-home' which is the default home tab.
+    // Ideally tabs should be filtered by workspace, but current mock store is simple.
+    // Just activating 'tab-home' simulates "going to home of selected workspace".
+    setActiveTab('tab-home')
+  }
 
   const activeTab = tabs.find(t => t.id === activeTabId)
   const splitTab = tabs.find(t => t.id === activeSplitTabId)
@@ -59,20 +92,41 @@ function WorkspaceLayoutContent() {
   const hasResizedSplit = React.useRef(false)
   
   // Focused Panel State (for breadcrumb)
-  const [focusedPanel, setFocusedPanel] = React.useState<'main' | 'split' | 'third'>('main')
+  // const [focusedPanel, setFocusedPanel] = React.useState<'main' | 'split' | 'third'>('main')
+  
+  const focusedPanel = React.useMemo(() => {
+    if (focusedTabId === activeTabId) return 'main'
+    if (focusedTabId === activeSplitTabId) return 'split'
+    if (focusedTabId === activeThirdTabId) return 'third'
+    return 'main'
+  }, [focusedTabId, activeTabId, activeSplitTabId, activeThirdTabId])
   
   // Drag and Drop State
   const [draggedColumn, setDraggedColumn] = React.useState<'main' | 'split' | 'third' | null>(null)
   const [dragOverColumn, setDragOverColumn] = React.useState<'main' | 'split' | 'third' | null>(null)
   
   // Status Bar State
-  const [zoom, setZoom] = React.useState(100)
+  // const [zoom, setZoom] = React.useState(100)
   const { message: statusMessage, type: statusType, setSuccess } = useStatusBarStore()
   
   // Determine which tab to show in breadcrumb
   const breadcrumbTab = isSplit 
     ? (focusedPanel === 'main' ? activeTab : focusedPanel === 'split' ? splitTab : thirdTab)
     : activeTab
+
+  // Get zoom level for the focused tab
+  const currentZoom = React.useMemo(() => {
+    if (focusedPanel === 'main' && activeTab) return activeTab.zoom || 100
+    if (focusedPanel === 'split' && splitTab) return splitTab.zoom || 100
+    if (focusedPanel === 'third' && thirdTab) return thirdTab.zoom || 100
+    return 100
+  }, [focusedPanel, activeTab, splitTab, thirdTab])
+
+  const handleZoomChange = (newZoom: number) => {
+    if (focusedPanel === 'main' && activeTabId) setTabZoom(activeTabId, newZoom)
+    if (focusedPanel === 'split' && activeSplitTabId) setTabZoom(activeSplitTabId, newZoom)
+    if (focusedPanel === 'third' && activeThirdTabId) setTabZoom(activeThirdTabId, newZoom)
+  }
 
   // Build breadcrumbs for StatusBar
   const statusBarBreadcrumbs = React.useMemo(() => {
@@ -248,14 +302,14 @@ function WorkspaceLayoutContent() {
 
   // Drag and Drop Handlers
   const handleDragStart = (e: React.DragEvent, column: 'main' | 'split' | 'third') => {
-    if (!isThreeColumnSplit) return
+    if (!isSplit && !isThreeColumnSplit) return
     setDraggedColumn(column)
     e.dataTransfer.effectAllowed = 'move'
     e.dataTransfer.setData('text/plain', column)
   }
 
   const handleDragOver = (e: React.DragEvent, column: 'main' | 'split' | 'third') => {
-    if (!isThreeColumnSplit || !draggedColumn || draggedColumn === column) return
+    if ((!isSplit && !isThreeColumnSplit) || !draggedColumn || draggedColumn === column) return
     e.preventDefault()
     e.dataTransfer.dropEffect = 'move'
     setDragOverColumn(column)
@@ -266,7 +320,7 @@ function WorkspaceLayoutContent() {
   }
 
   const handleDrop = (e: React.DragEvent, targetColumn: 'main' | 'split' | 'third') => {
-    if (!isThreeColumnSplit || !draggedColumn || draggedColumn === targetColumn) return
+    if ((!isSplit && !isThreeColumnSplit) || !draggedColumn || draggedColumn === targetColumn) return
     
     e.preventDefault()
     
@@ -274,7 +328,7 @@ function WorkspaceLayoutContent() {
     const currentOrder = {
       main: activeTabId!,
       split: activeSplitTabId!,
-      third: activeThirdTabId!
+      third: activeThirdTabId
     }
     
     // Trocar as posições
@@ -300,9 +354,9 @@ function WorkspaceLayoutContent() {
     if (!isSplit) {
       setSplitWidth(50)
       setThirdColumnWidth(33.33)
-      setFocusedPanel('main')
+      if (activeTabId) setFocusedTabId(activeTabId)
     }
-  }, [isSplit])
+  }, [isSplit, activeTabId, setFocusedTabId])
   
   // Reset widths when switching to/from 3 column mode
   React.useEffect(() => {
@@ -315,20 +369,22 @@ function WorkspaceLayoutContent() {
   
   // Reset focused panel to main when split tab changes
   React.useEffect(() => {
-    if (isSplit && !activeSplitTabId) {
-      setFocusedPanel('main')
+    if (isSplit && !activeSplitTabId && activeTabId) {
+      setFocusedTabId(activeTabId)
     }
-  }, [isSplit, activeSplitTabId])
+  }, [isSplit, activeSplitTabId, activeTabId, setFocusedTabId])
 
   return (
     <BaseLayout>
       <div className="flex flex-1 flex-col min-w-0 h-full">
         {/* Top Bar: Tabs Only */}
-        <div className="flex items-end border-b h-10 bg-muted/10">
+        <div className="flex items-center border-b h-10 bg-muted/10 pr-2">
           {/* Tabs Area */}
-          <div className="flex-1 flex items-end overflow-hidden min-w-0">
+          <div className="flex-1 flex items-end overflow-hidden min-w-0 h-full">
              <TabBar />
           </div>
+          
+          {/* Share Menu - Removed from header */}
         </div>
 
         {/* View Content */}
@@ -338,22 +394,24 @@ function WorkspaceLayoutContent() {
         >
            <div 
              className={cn(
-               "overflow-auto h-full", 
+               "overflow-auto h-full relative group", 
                isSplit ? "border-r" : "w-full",
-               isThreeColumnSplit && "cursor-grab active:cursor-grabbing",
-               isThreeColumnSplit && draggedColumn === 'main' && "opacity-50",
-               isThreeColumnSplit && dragOverColumn === 'main' && "ring-2 ring-primary ring-offset-2"
+               (isSplit || isThreeColumnSplit) && dragOverColumn === 'main' && "ring-2 ring-primary ring-offset-2"
              )}
-             style={isSplit ? { width: isThreeColumnSplit ? `${thirdColumnWidth}%` : `${splitWidth}%` } : {}}
-             onClick={() => isSplit && setFocusedPanel('main')}
-             draggable={isThreeColumnSplit}
-             onDragStart={(e) => handleDragStart(e, 'main')}
+             style={{
+               ...(isSplit ? { width: isThreeColumnSplit ? `${thirdColumnWidth}%` : `${splitWidth}%` } : {}),
+             }}
+             onClick={() => {
+               if (isSplit && activeTabId) setFocusedTabId(activeTabId)
+             }}
              onDragOver={(e) => handleDragOver(e, 'main')}
              onDragLeave={handleDragLeave}
              onDrop={(e) => handleDrop(e, 'main')}
-             onDragEnd={handleDragEnd}
            >
-              {activeTabId ? renderTabContent(activeTabId) : <div className="p-8">No active tab</div>}
+              {(isSplit || isThreeColumnSplit) && <DragHandle column="main" onDragStart={handleDragStart} className="right-2" />}
+              <div style={{ zoom: (activeTab?.zoom || 100) / 100, height: '100%' }}>
+                {activeTabId ? renderTabContent(activeTabId) : <div className="p-8">No active tab</div>}
+              </div>
            </div>
            
            {isSplit && (
@@ -369,21 +427,22 @@ function WorkspaceLayoutContent() {
                
                <div 
                  className={cn(
-                   "overflow-auto h-full bg-background", 
-                   isThreeColumnSplit && "border-r cursor-grab active:cursor-grabbing",
-                   isThreeColumnSplit && draggedColumn === 'split' && "opacity-50",
-                   isThreeColumnSplit && dragOverColumn === 'split' && "ring-2 ring-primary ring-offset-2"
+                   "overflow-auto h-full bg-background relative group", 
+                   isThreeColumnSplit && "border-r",
+                   (isSplit || isThreeColumnSplit) && dragOverColumn === 'split' && "ring-2 ring-primary ring-offset-2"
                  )}
                  style={{ width: isThreeColumnSplit ? `${thirdColumnWidth}%` : `${100 - splitWidth}%` }}
-                 onClick={() => setFocusedPanel('split')}
-                 draggable={isThreeColumnSplit}
-                 onDragStart={(e) => handleDragStart(e, 'split')}
+                 onClick={() => {
+                   if (activeSplitTabId) setFocusedTabId(activeSplitTabId)
+                 }}
                  onDragOver={(e) => handleDragOver(e, 'split')}
                  onDragLeave={handleDragLeave}
                  onDrop={(e) => handleDrop(e, 'split')}
-                 onDragEnd={handleDragEnd}
                >
-                 {activeSplitTabId ? renderTabContent(activeSplitTabId) : renderSplitSelection()}
+                 {(isSplit || isThreeColumnSplit) && <DragHandle column="split" onDragStart={handleDragStart} className="left-2" />}
+                 <div style={{ zoom: (splitTab?.zoom || 100) / 100, height: '100%' }}>
+                   {activeSplitTabId ? renderTabContent(activeSplitTabId) : renderSplitSelection()}
+                 </div>
                </div>
                
                {/* Third Column */}
@@ -399,20 +458,21 @@ function WorkspaceLayoutContent() {
                    
                    <div 
                      className={cn(
-                       "overflow-auto h-full bg-background cursor-grab active:cursor-grabbing",
-                       draggedColumn === 'third' && "opacity-50",
+                       "overflow-auto h-full bg-background relative group",
                        dragOverColumn === 'third' && "ring-2 ring-primary ring-offset-2"
                      )}
                      style={{ width: `${100 - (thirdColumnWidth * 2)}%` }}
-                     onClick={() => setFocusedPanel('third')}
-                     draggable={isThreeColumnSplit}
-                     onDragStart={(e) => handleDragStart(e, 'third')}
+                     onClick={() => {
+                       if (activeThirdTabId) setFocusedTabId(activeThirdTabId)
+                     }}
                      onDragOver={(e) => handleDragOver(e, 'third')}
                      onDragLeave={handleDragLeave}
                      onDrop={(e) => handleDrop(e, 'third')}
-                     onDragEnd={handleDragEnd}
                    >
-                     {activeThirdTabId ? renderTabContent(activeThirdTabId) : renderSplitSelection(true)}
+                     <DragHandle column="third" onDragStart={handleDragStart} className="left-2" />
+                     <div style={{ zoom: (thirdTab?.zoom || 100) / 100, height: '100%' }}>
+                       {activeThirdTabId ? renderTabContent(activeThirdTabId) : renderSplitSelection(true)}
+                     </div>
                    </div>
                  </>
                )}
@@ -425,10 +485,14 @@ function WorkspaceLayoutContent() {
           breadcrumbs={statusBarBreadcrumbs}
           statusMessage={statusMessage}
           statusType={statusType}
-          zoom={zoom}
-          onZoomChange={setZoom}
+          zoom={currentZoom}
+          onZoomChange={handleZoomChange}
           splitMode={currentSplitMode}
           onSplitModeChange={handleSplitModeChange}
+          showShareMenu={activeTab?.type === 'chat' || activeTab?.type === 'document'}
+          workspaces={workspaces}
+          activeWorkspaceId={activeWorkspaceId}
+          onWorkspaceChange={handleWorkspaceChange}
         />
       </div>
 

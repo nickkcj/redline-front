@@ -33,7 +33,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
   const currentOrganization = useCurrentOrganization()
   const currentWorkspace = useCurrentWorkspace()
-  const { addTabInSplit, addTab, tabs, setActiveTab, setSettingsOpen } = useWorkspaceStore()
+  const { addTabInSplit, addTab, addTabInNewWindow, tabs, setActiveTab, setSettingsOpen } = useWorkspaceStore()
   
   const [hoveredItem, setHoveredItem] = React.useState<string | null>(null)
   const timeoutRef = React.useRef<NodeJS.Timeout | null>(null)
@@ -72,11 +72,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       if (existingTab) {
         setActiveTab(existingTab.id)
       } else {
-        // Create new tab
+        // Create new tab (não substitui a atual)
         const title = type.charAt(0).toUpperCase() + type.slice(1)
         // For chat, we might want to start a new chat or go to history
-        const data = type === 'chat' ? { chatId: 'new' } : undefined
-        addTab(type, title, data)
+        const data = type === 'chat' ? { chatId: 'new', isEmpty: true } : undefined
+        addTabInNewWindow(type, title, data)
       }
     } else {
       router.push(url)
@@ -86,16 +86,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const handleNewChat = (e: React.MouseEvent) => {
     if (e.shiftKey) {
-      addTabInSplit('chat', 'New Chat', { chatId: 'new' })
-      setHoveredItem(null)
-      return
-    }
-
-    if (currentOrganization && currentWorkspace) {
-      router.push(`/${currentOrganization.id}/workspace/${currentWorkspace.id}`)
+      // Shift+Click: adicionar em split
+      addTabInSplit('chat', 'New Chat', { chatId: 'new', isEmpty: true })
     } else {
-      router.push('/chat')
+      // Click normal: criar nova aba (não substitui a atual)
+      addTabInNewWindow('chat', 'New Chat', { chatId: 'new', isEmpty: true })
     }
+    
     setHoveredItem(null)
   }
 
@@ -111,8 +108,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <Sidebar collapsible="none" className="border-r relative z-50" style={{ width: "var(--sidebar-width-icon)" }} {...props}>
         <SidebarContent className="flex flex-col gap-1 p-0 pt-4">
           <div className="flex justify-center pb-4 pt-2">
-            <img src="/iso_Ad.png" alt="Logo" className="h-8 w-8 dark:hidden" />
-            <img src="/iso_Aw.png" alt="Logo" className="h-8 w-8 hidden dark:block" />
+            <img src="/iso_Aw.png" alt="Logo" className="h-8 w-8 dark:hidden" />
+            <img src="/iso_Ad.png" alt="Logo" className="h-8 w-8 hidden dark:block" />
           </div>
           <div className="flex justify-center pb-2">
             <Tooltip>
@@ -231,9 +228,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       >
         <ChatHistoryList 
           onSelectChat={(chatId) => {
-            if (currentOrganization && currentWorkspace) {
-              router.push(`/${currentOrganization.id}/workspace/${currentWorkspace.id}?chatId=${chatId}`)
-            }
+            // Criar nova aba de chat (não substitui a atual)
+            const title = chatId === 'new' ? 'New Chat' : `Chat ${chatId}`
+            addTabInNewWindow('chat', title, { chatId, isEmpty: chatId === 'new' })
+            setHoveredItem(null) // Fechar sidebar flutuante
           }}
         />
       </FloatingSidebar>
