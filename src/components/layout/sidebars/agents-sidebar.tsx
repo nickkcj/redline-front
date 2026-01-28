@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Plus, Robot } from "@phosphor-icons/react"
+import { Plus, Graph } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 import { SidebarListBase, SidebarGroup, SidebarListItem } from "./sidebar-base"
 
@@ -20,14 +20,14 @@ export function AgentsSidebar() {
       }
     >
       <SidebarGroup title="My Agents">
-        <SidebarListItem icon={Robot} label="Research Assistant" />
-        <SidebarListItem icon={Robot} label="Code Reviewer" />
-        <SidebarListItem icon={Robot} label="Content Writer" />
+        <SidebarListItem icon={Graph} label="Research Assistant" />
+        <SidebarListItem icon={Graph} label="Code Reviewer" />
+        <SidebarListItem icon={Graph} label="Content Writer" />
       </SidebarGroup>
       
       <SidebarGroup title="Shared">
-        <SidebarListItem icon={Robot} label="Customer Support Bot" />
-        <SidebarListItem icon={Robot} label="Data Analyst" />
+        <SidebarListItem icon={Graph} label="Customer Support Bot" />
+        <SidebarListItem icon={Graph} label="Data Analyst" />
       </SidebarGroup>
     </SidebarListBase>
   )

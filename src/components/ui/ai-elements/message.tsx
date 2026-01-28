@@ -13,32 +13,37 @@ import type { MessageRole } from "@/lib/api/types/chat.types";
 export type MessageProps = HTMLAttributes<HTMLDivElement> & {
   from: MessageRole | UIMessage["role"];
   avatar?: React.ReactNode;
+  name?: string;
   children?: React.ReactNode;
 };
 
-export const Message = ({ className, from, avatar, children, ...props }: MessageProps) => {
+export const Message = ({ className, from, avatar, name, children, ...props }: MessageProps) => {
   const isUser = String(from).toLowerCase() === "user";
 
   return (
     <div
       className={cn(
         "group flex w-full gap-2 pt-2",
-        isUser ? "justify-end" : "justify-start",
+        isUser ? "justify-end" : "flex-col items-start",
         className
       )}
       {...props}
     >
       {isUser ? (
-        // Para mensagens do usuário: MessageContent primeiro, depois avatar
+        // Para mensagens do usuário: MessageContent primeiro (sem avatar)
         <>
           {children}
-          {avatar}
         </>
       ) : (
-        // Para mensagens da AI: avatar primeiro, depois MessageContent
+        // Para mensagens da AI: avatar e nome na linha de cima, conteúdo abaixo
         <>
-          {avatar}
-          {children}
+          <div className="flex items-center gap-2 select-none">
+            {avatar}
+            {name && <span className="text-sm font-medium">{name}</span>}
+          </div>
+          <div className="pl-0 w-full">
+            {children}
+          </div>
         </>
       )}
     </div>
@@ -71,19 +76,26 @@ export const MessageContent = ({
   variant,
   from,
   ...props
-}: MessageContentProps) => (
-  <div
-    className={cn(
-      messageContentVariants({ variant, className }),
-      String(from).toLowerCase() === "user"
-        ? "bg-primary text-primary-foreground ml-auto"
-        : "bg-muted text-foreground mr-auto"
-    )}
-    {...props}
-  >
-    {children}
-  </div>
-);
+}: MessageContentProps) => {
+  const isUser = String(from).toLowerCase() === "user";
+  const isFlat = variant === "flat";
+
+  return (
+    <div
+      className={cn(
+        messageContentVariants({ variant, className }),
+        isUser
+          ? "bg-primary text-primary-foreground ml-auto"
+          : isFlat
+            ? "bg-transparent text-foreground p-0 max-w-none"
+            : "bg-muted text-foreground mr-auto"
+      )}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+};
 
 export type MessageAvatarProps = ComponentProps<typeof Avatar> & {
   src: string;

@@ -24,7 +24,7 @@ import { StatusBar } from './status-bar'
 import { BaseLayout } from '@/components/layout/base-layout'
 import { useStatusBarStore } from '@/hooks/use-status-bar'
 import { ShareMenu } from '@/components/features/share/share-menu'
-import { DotsSixVertical } from '@phosphor-icons/react'
+import { DotsSixVertical, X } from '@phosphor-icons/react'
 
 const DragHandle = ({ column, onDragStart, className }: { column: 'main' | 'split' | 'third', onDragStart: (e: React.DragEvent, col: 'main' | 'split' | 'third') => void, className?: string }) => (
   <div
@@ -38,6 +38,25 @@ const DragHandle = ({ column, onDragStart, className }: { column: 'main' | 'spli
      <DotsSixVertical className="h-4 w-4" />
   </div>
 )
+
+const CloseButton = ({ onClick, className }: { onClick: (e: React.MouseEvent) => void, className?: string }) => (
+  <button
+    onClick={(e) => {
+      e.stopPropagation()
+      onClick(e)
+    }}
+    className={cn(
+      "absolute top-2 z-50 p-1.5 rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-muted/50 transition-colors opacity-0 group-hover:opacity-100",
+      className
+    )}
+  >
+    <X className="h-4 w-4" />
+  </button>
+)
+
+import { ChatsView } from './views/chats-view'
+
+// ... existing imports ...
 
 function WorkspaceLayoutContent() {
   const { 
@@ -61,7 +80,8 @@ function WorkspaceLayoutContent() {
     setActiveTab,
     focusedTabId,
     setFocusedTabId,
-    setTabZoom
+    setTabZoom,
+    closeSplitTab
   } = useWorkspaceStore()
 
   const handleWorkspaceChange = (id: string) => {
@@ -85,9 +105,15 @@ function WorkspaceLayoutContent() {
   const activeWorkspace = workspaces.find(w => w.id === activeWorkspaceId) || workspaces[0]
   
   // Split Resize State
-  const [splitWidth, setSplitWidth] = React.useState(50) // Percentage
-  const [thirdColumnWidth, setThirdColumnWidth] = React.useState(33.33) // Percentage for 3-column
+  const [splitWidth, setSplitWidth] = React.useState(50) // Percentage (width of main column in 2-col mode)
+  const [thirdColumnWidth, setThirdColumnWidth] = React.useState(33.33) // Percentage (width of each column in 3-col mode - INITIAL)
+  // We need to track the width of the FIRST column and SECOND column separately in 3-col mode for full resize control
+  // Or simpler: first resize handle controls split between 1st and 2nd. Second handle controls split between 2nd and 3rd.
+  const [firstColumnWidth, setFirstColumnWidth] = React.useState(33.33)
+  const [secondColumnWidth, setSecondColumnWidth] = React.useState(33.33)
+  
   const [isResizingSplit, setIsResizingSplit] = React.useState(false)
+  const [isResizingThird, setIsResizingThird] = React.useState(false) // New state for second resizer
   const splitResizeRef = React.useRef<HTMLDivElement>(null)
   const hasResizedSplit = React.useRef(false)
   
@@ -173,31 +199,53 @@ function WorkspaceLayoutContent() {
     hasResizedSplit.current = false
   }, [])
 
+  const startResizingThird = React.useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsResizingThird(true)
+  }, [])
+
   const stopResizingSplit = React.useCallback(() => {
     setIsResizingSplit(false)
+    setIsResizingThird(false)
   }, [])
 
   const resizeSplit = React.useCallback(
     (e: MouseEvent) => {
-      if (isResizingSplit && splitResizeRef.current) {
+      if ((isResizingSplit || isResizingThird) && splitResizeRef.current) {
         hasResizedSplit.current = true
-        const container = splitResizeRef.current.parentElement
-        if (container) {
-          const containerRect = container.getBoundingClientRect()
-          const relativeX = e.clientX - containerRect.left
-          const percentage = (relativeX / containerRect.width) * 100
-          
-          // Limit between 20% and 80%
-          const clampedPercentage = Math.max(20, Math.min(80, percentage))
-          setSplitWidth(clampedPercentage)
+        const container = splitResizeRef.current // main container
+        const containerRect = container.getBoundingClientRect()
+        const relativeX = e.clientX - containerRect.left
+        const percentage = (relativeX / containerRect.width) * 100
+        
+        if (isThreeColumnSplit) {
+            // In 3 column mode
+            if (isResizingSplit) {
+                // Resizing first handle (between col 1 and 2)
+                // Limit: min 20%, max 80% (but also consider col 2 and 3 needs space)
+                // Let's simplifly: min 15%, max (100 - secondHandlePosition - 15%)?
+                // Easier: just set firstColumnWidth. 
+                const clampedFirst = Math.max(15, Math.min(percentage, 100 - secondColumnWidth - 15))
+                setFirstColumnWidth(clampedFirst)
+            } else if (isResizingThird) {
+                // Resizing second handle (between col 2 and 3)
+                // The percentage is position from left. So width of col 2 is (percentage - firstColumnWidth)
+                const clampedPos = Math.max(firstColumnWidth + 15, Math.min(percentage, 85))
+                setSecondColumnWidth(clampedPos - firstColumnWidth)
+            }
+        } else {
+            // Normal 2 column mode
+            const clampedPercentage = Math.max(20, Math.min(80, percentage))
+            setSplitWidth(clampedPercentage)
         }
       }
     },
-    [isResizingSplit]
+    [isResizingSplit, isResizingThird, isThreeColumnSplit, firstColumnWidth, secondColumnWidth]
   )
 
   React.useEffect(() => {
-    if (isResizingSplit) {
+    if (isResizingSplit || isResizingThird) {
       window.addEventListener("mousemove", resizeSplit)
       window.addEventListener("mouseup", stopResizingSplit)
       return () => {
@@ -205,7 +253,7 @@ function WorkspaceLayoutContent() {
         window.removeEventListener("mouseup", stopResizingSplit)
       }
     }
-  }, [isResizingSplit, resizeSplit, stopResizingSplit])
+  }, [isResizingSplit, isResizingThird, resizeSplit, stopResizingSplit])
 
   const renderTabContent = (tabId: string) => {
     const tab = tabs.find(t => t.id === tabId)
@@ -214,6 +262,8 @@ function WorkspaceLayoutContent() {
     switch (tab.type) {
       case 'home':
         return <HomeView />
+      case 'chats':
+        return <ChatsView />
       case 'chat':
         return <ChatView tabId={tab.id} tabData={tab.data} />
       case 'document':
@@ -324,21 +374,27 @@ function WorkspaceLayoutContent() {
     
     e.preventDefault()
     
-    // Criar nova ordem baseada no drag
-    const currentOrder = {
-      main: activeTabId!,
-      split: activeSplitTabId!,
-      third: activeThirdTabId
+    // Use a typed object to allow flexible swapping
+    const currentOrder: Record<string, string | null> = {
+      main: activeTabId || '',
+      split: activeSplitTabId || null,
+      third: activeThirdTabId || null
     }
     
-    // Trocar as posições
-    const newOrder = { ...currentOrder }
-    const temp = newOrder[draggedColumn]
-    newOrder[draggedColumn] = newOrder[targetColumn]
-    newOrder[targetColumn] = temp
+    // Swap positions
+    const temp = currentOrder[draggedColumn]
+    currentOrder[draggedColumn] = currentOrder[targetColumn]
+    currentOrder[targetColumn] = temp
     
-    // Aplicar nova ordem
-    reorderColumns(newOrder)
+    // Ensure main is a string (default to empty if null)
+    const newMain = currentOrder.main || ''
+
+    // Apply new order
+    reorderColumns({
+        main: newMain,
+        split: currentOrder.split,
+        third: currentOrder.third
+    })
     
     setDraggedColumn(null)
     setDragOverColumn(null)
@@ -353,7 +409,8 @@ function WorkspaceLayoutContent() {
   React.useEffect(() => {
     if (!isSplit) {
       setSplitWidth(50)
-      setThirdColumnWidth(33.33)
+      setFirstColumnWidth(33.33)
+      setSecondColumnWidth(33.33)
       if (activeTabId) setFocusedTabId(activeTabId)
     }
   }, [isSplit, activeTabId, setFocusedTabId])
@@ -361,7 +418,8 @@ function WorkspaceLayoutContent() {
   // Reset widths when switching to/from 3 column mode
   React.useEffect(() => {
     if (isThreeColumnSplit) {
-      setThirdColumnWidth(33.33)
+      setFirstColumnWidth(33.33)
+      setSecondColumnWidth(33.33)
     } else {
       setSplitWidth(50)
     }
@@ -399,7 +457,7 @@ function WorkspaceLayoutContent() {
                (isSplit || isThreeColumnSplit) && dragOverColumn === 'main' && "ring-2 ring-primary ring-offset-2"
              )}
              style={{
-               ...(isSplit ? { width: isThreeColumnSplit ? `${thirdColumnWidth}%` : `${splitWidth}%` } : {}),
+               ...(isSplit ? { width: isThreeColumnSplit ? `${firstColumnWidth}%` : `${splitWidth}%` } : {}),
              }}
              onClick={() => {
                if (isSplit && activeTabId) setFocusedTabId(activeTabId)
@@ -408,7 +466,12 @@ function WorkspaceLayoutContent() {
              onDragLeave={handleDragLeave}
              onDrop={(e) => handleDrop(e, 'main')}
            >
-              {(isSplit || isThreeColumnSplit) && <DragHandle column="main" onDragStart={handleDragStart} className="right-2" />}
+              {(isSplit || isThreeColumnSplit) && (
+                <>
+                    <DragHandle column="main" onDragStart={handleDragStart} className="left-8" />
+                    <CloseButton onClick={() => closeSplitTab('main')} className="left-2" />
+                </>
+              )}
               <div style={{ zoom: (activeTab?.zoom || 100) / 100, height: '100%' }}>
                 {activeTabId ? renderTabContent(activeTabId) : <div className="p-8">No active tab</div>}
               </div>
@@ -416,7 +479,7 @@ function WorkspaceLayoutContent() {
            
            {isSplit && (
              <>
-               {/* Split Resizer Handle */}
+               {/* Split Resizer Handle 1 */}
                <div
                  className="w-1 hover:w-1.5 z-50 cursor-col-resize flex flex-col justify-center group relative h-full hover:bg-primary/10 transition-colors"
                  onMouseDown={startResizingSplit}
@@ -431,7 +494,7 @@ function WorkspaceLayoutContent() {
                    isThreeColumnSplit && "border-r",
                    (isSplit || isThreeColumnSplit) && dragOverColumn === 'split' && "ring-2 ring-primary ring-offset-2"
                  )}
-                 style={{ width: isThreeColumnSplit ? `${thirdColumnWidth}%` : `${100 - splitWidth}%` }}
+                 style={{ width: isThreeColumnSplit ? `${secondColumnWidth}%` : `${100 - splitWidth}%` }}
                  onClick={() => {
                    if (activeSplitTabId) setFocusedTabId(activeSplitTabId)
                  }}
@@ -439,7 +502,12 @@ function WorkspaceLayoutContent() {
                  onDragLeave={handleDragLeave}
                  onDrop={(e) => handleDrop(e, 'split')}
                >
-                 {(isSplit || isThreeColumnSplit) && <DragHandle column="split" onDragStart={handleDragStart} className="left-2" />}
+                 {(isSplit || isThreeColumnSplit) && (
+                    <>
+                        <DragHandle column="split" onDragStart={handleDragStart} className="left-8" />
+                        <CloseButton onClick={() => closeSplitTab('split')} className="left-2" />
+                    </>
+                 )}
                  <div style={{ zoom: (splitTab?.zoom || 100) / 100, height: '100%' }}>
                    {activeSplitTabId ? renderTabContent(activeSplitTabId) : renderSplitSelection()}
                  </div>
@@ -451,6 +519,7 @@ function WorkspaceLayoutContent() {
                    {/* Third Column Resizer Handle */}
                    <div
                      className="w-1 hover:w-1.5 z-50 cursor-col-resize flex flex-col justify-center group relative h-full hover:bg-primary/10 transition-colors"
+                     onMouseDown={startResizingThird}
                    >
                      {/* Visual line */}
                      <div className="absolute inset-y-0 left-1/2 w-px bg-transparent group-hover:bg-primary/50 transition-colors" />
@@ -461,7 +530,7 @@ function WorkspaceLayoutContent() {
                        "overflow-auto h-full bg-background relative group",
                        dragOverColumn === 'third' && "ring-2 ring-primary ring-offset-2"
                      )}
-                     style={{ width: `${100 - (thirdColumnWidth * 2)}%` }}
+                     style={{ width: `${100 - firstColumnWidth - secondColumnWidth}%` }}
                      onClick={() => {
                        if (activeThirdTabId) setFocusedTabId(activeThirdTabId)
                      }}
@@ -469,7 +538,8 @@ function WorkspaceLayoutContent() {
                      onDragLeave={handleDragLeave}
                      onDrop={(e) => handleDrop(e, 'third')}
                    >
-                     <DragHandle column="third" onDragStart={handleDragStart} className="left-2" />
+                     <DragHandle column="third" onDragStart={handleDragStart} className="left-8" />
+                     <CloseButton onClick={() => closeSplitTab('third')} className="left-2" />
                      <div style={{ zoom: (thirdTab?.zoom || 100) / 100, height: '100%' }}>
                        {activeThirdTabId ? renderTabContent(activeThirdTabId) : renderSplitSelection(true)}
                      </div>
@@ -493,6 +563,7 @@ function WorkspaceLayoutContent() {
           workspaces={workspaces}
           activeWorkspaceId={activeWorkspaceId}
           onWorkspaceChange={handleWorkspaceChange}
+          activeTabType={activeTab?.type}
         />
       </div>
 

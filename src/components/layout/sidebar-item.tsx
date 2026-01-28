@@ -6,7 +6,8 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
 interface SidebarItemProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  icon: Icon
+  icon?: Icon
+  imageSrc?: string
   label: string
   isActive?: boolean
   isHovered?: boolean
@@ -14,7 +15,7 @@ interface SidebarItemProps extends React.ButtonHTMLAttributes<HTMLButtonElement>
 }
 
 export const SidebarItem = React.forwardRef<HTMLButtonElement, SidebarItemProps>(
-  ({ icon: IconComponent, label, isActive, isHovered, showLabel = true, className, ...props }, ref) => {
+  ({ icon: IconComponent, imageSrc, label, isActive, isHovered, showLabel = true, className, ...props }, ref) => {
     const [isHovering, setIsHovering] = React.useState(false)
     
     return (
@@ -44,10 +45,18 @@ export const SidebarItem = React.forwardRef<HTMLButtonElement, SidebarItemProps>
             isHovered && "bg-sidebar-accent text-foreground"
           )}
         >
-          <IconComponent 
-            weight={isHovering || isActive || isHovered ? "fill" : "regular"} 
-            className="h-7 w-7 transition-all duration-150" 
-          />
+          {imageSrc ? (
+            <img 
+              src={imageSrc} 
+              alt={label} 
+              className="h-7 w-7 rounded-md object-cover" 
+            />
+          ) : IconComponent && (
+            <IconComponent 
+              weight={isHovering || isActive || isHovered ? "fill" : "regular"} 
+              className="h-7 w-7 transition-all duration-150" 
+            />
+          )}
         </div>
         {showLabel && <span className="text-[10px] font-medium">{label}</span>}
       </Button>

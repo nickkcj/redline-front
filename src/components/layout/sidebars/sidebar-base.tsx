@@ -6,14 +6,20 @@ import { cn } from "@/lib/utils"
 interface SidebarListBaseProps {
   title: string
   actions?: React.ReactNode
+  headerActions?: React.ReactNode
   children: React.ReactNode
 }
 
-export function SidebarListBase({ title, actions, children }: SidebarListBaseProps) {
+export function SidebarListBase({ title, actions, headerActions, children }: SidebarListBaseProps) {
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center px-4 py-3 shrink-0">
+      <div className="flex items-center justify-between px-4 py-3 shrink-0">
         <span className="text-sm font-medium">{title}</span>
+        {headerActions && (
+          <div className="flex items-center gap-1">
+            {headerActions}
+          </div>
+        )}
       </div>
 
       {actions && (

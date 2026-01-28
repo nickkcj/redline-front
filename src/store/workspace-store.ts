@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { nanoid } from 'nanoid'
 
-export type TabType = 'home' | 'chat' | 'document' | 'files' | 'spaces' | 'agents' | 'pages' | 'templates'
+export type TabType = 'home' | 'chat' | 'chats' | 'document' | 'files' | 'spaces' | 'agents' | 'pages' | 'templates'
 
 export interface Tab {
   id: string
@@ -40,6 +40,7 @@ interface WorkspaceState {
   sidebarLeftOpen: boolean
   sidebarRightOpen: boolean
   settingsOpen: boolean
+  isCreateNewModalOpen: boolean
   isSplit: boolean
   activeSplitTabId: string | null
   isThreeColumnSplit: boolean
@@ -51,6 +52,7 @@ interface WorkspaceState {
   setSidebarLeftOpen: (open: boolean) => void
   setSidebarRightOpen: (open: boolean) => void
   setSettingsOpen: (open: boolean) => void
+  setCreateNewModalOpen: (open: boolean) => void
   toggleSplit: () => void
   toggleThreeColumnSplit: () => void
   setSplitTab: (id: string | null) => void
@@ -351,6 +353,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   sidebarLeftOpen: true,
   sidebarRightOpen: false, // Default closed as per requirement "colapsavel"
   settingsOpen: false,
+  isCreateNewModalOpen: false,
   isSplit: false,
   activeSplitTabId: null,
   isThreeColumnSplit: false,
@@ -362,6 +365,7 @@ export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
   setSidebarLeftOpen: (open) => set({ sidebarLeftOpen: open }),
   setSidebarRightOpen: (open) => set({ sidebarRightOpen: open }),
   setSettingsOpen: (open) => set({ settingsOpen: open }),
+  setCreateNewModalOpen: (open) => set({ isCreateNewModalOpen: open }),
   toggleSplit: () => set((state) => {
     if (state.isSplit) {
       // Ao desativar split, remover grupos das abas

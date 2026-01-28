@@ -17,17 +17,17 @@ import {
 } from "@/components/ui/dialog"
 
 export function TabBar() {
-  const { tabs, activeTabId, activeSplitTabId, activeThirdTabId, focusedTabId, setActiveTab, closeTab, isSplit, isThreeColumnSplit, addTab } = useWorkspaceStore()
-  const [dialogOpen, setDialogOpen] = React.useState(false)
+  const { tabs, activeTabId, activeSplitTabId, activeThirdTabId, focusedTabId, setActiveTab, closeTab, isSplit, isThreeColumnSplit, addTab, isCreateNewModalOpen, setCreateNewModalOpen } = useWorkspaceStore()
 
   const getIcon = (type: string) => {
     switch (type) {
       case 'home': return House
+      case 'chats': return ChatCircle
       case 'chat': return ChatCircle
       case 'document': return FileText
       case 'files': return FileText
       case 'spaces': return Folder
-      case 'agents': return Robot
+      case 'agents': return Graph
       case 'pages': return Book
       default: return FileText
     }
@@ -215,13 +215,13 @@ export function TabBar() {
       })}
 
       {/* New Tab Button inline */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog open={isCreateNewModalOpen} onOpenChange={setCreateNewModalOpen}>
         <DialogTrigger asChild>
             <div className="flex h-8 items-center justify-center px-2 cursor-pointer text-muted-foreground hover:bg-muted/50 rounded-t-md hover:text-foreground transition-colors ml-1">
                 <Plus className="h-4 w-4" />
             </div>
         </DialogTrigger>
-        <DialogContent className="max-w-3xl p-0 gap-0 overflow-hidden bg-[#191919] border-[#333]" showCloseButton={false}>
+        <DialogContent className="max-w-3xl p-0 gap-0 overflow-hidden bg-background border-border" showCloseButton={false}>
             <DialogHeader className="hidden">
             <DialogTitle>Create New</DialogTitle>
             <DialogDescription>
@@ -229,12 +229,12 @@ export function TabBar() {
             </DialogDescription>
             </DialogHeader>
             
-            <div className="flex flex-col h-[600px] text-[#e5e7eb]">
+            <div className="flex flex-col h-[600px] text-foreground">
               {/* Search Header */}
-              <div className="flex items-center gap-3 px-4 py-3 border-b border-[#333]">
-                <MagnifyingGlass className="h-5 w-5 text-gray-400" />
+              <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
+                <MagnifyingGlass className="h-5 w-5 text-muted-foreground" />
                 <Input 
-                  className="border-0 shadow-none focus-visible:ring-0 px-0 h-auto text-lg placeholder:text-gray-500 bg-transparent dark:bg-transparent text-gray-200" 
+                  className="border-0 shadow-none focus-visible:ring-0 px-0 h-auto text-lg placeholder:text-muted-foreground bg-transparent dark:bg-transparent text-foreground" 
                   placeholder="Open in new tab..." 
                   autoFocus
                 />
@@ -242,7 +242,7 @@ export function TabBar() {
 
               <div className="flex-1 overflow-y-auto">
                 {/* Create Actions */}
-                <div className="py-2 border-b border-[#333]">
+                <div className="py-2 border-b border-border">
                   <div className="px-2 space-y-0.5">
                     {[
                       { id: 'chat', icon: ChatCircle, label: 'New Chat' },
@@ -253,17 +253,17 @@ export function TabBar() {
                     ].map((action) => (
                       <button
                         key={action.id}
-                        className="w-full flex items-center justify-between px-3 py-2 hover:bg-[#262626] rounded-md group transition-colors text-left"
+                        className="w-full flex items-center justify-between px-3 py-2 hover:bg-muted/50 rounded-md group transition-colors text-left"
                         onClick={() => {
                           addTab(action.id === 'chat' ? 'chat' : action.id === 'agent' ? 'agents' : action.id === 'file' ? 'files' : action.id === 'space' ? 'spaces' : 'pages', action.label, { isEmpty: true })
-                          setDialogOpen(false)
+                          setCreateNewModalOpen(false)
                         }}
                       >
                         <div className="flex items-center gap-3">
-                          <action.icon className="h-5 w-5 text-gray-400 group-hover:text-white" />
-                          <span className="text-sm font-medium text-gray-300 group-hover:text-white">{action.label}</span>
+                          <action.icon className="h-5 w-5 text-muted-foreground group-hover:text-foreground" />
+                          <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground">{action.label}</span>
                         </div>
-                        <ArrowElbowDownLeft className="h-4 w-4 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <ArrowElbowDownLeft className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                       </button>
                     ))}
                   </div>
@@ -273,15 +273,15 @@ export function TabBar() {
                 <div className="py-4">
                   {/* Today */}
                   <div className="mb-6">
-                    <h4 className="text-xs font-medium text-gray-500 px-5 mb-2">Today</h4>
+                    <h4 className="text-xs font-medium text-muted-foreground px-5 mb-2">Today</h4>
                     <div className="px-2 space-y-0.5">
-                      <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-[#262626] rounded-md group transition-colors text-left relative">
+                      <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-muted/50 rounded-md group transition-colors text-left relative">
                         <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-blue-500 rounded-r-sm opacity-0 group-hover:opacity-100"></div>
-                        <FileText className="h-5 w-5 text-gray-400" />
+                        <FileText className="h-5 w-5 text-muted-foreground" />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-gray-200">Log ( MOV )</span>
-                            <span className="text-xs text-gray-500">— Castro / ... / New database</span>
+                            <span className="text-sm font-medium text-foreground">Log ( MOV )</span>
+                            <span className="text-xs text-muted-foreground">— Castro / ... / New database</span>
                           </div>
                         </div>
                       </button>
@@ -290,16 +290,16 @@ export function TabBar() {
 
                   {/* Yesterday */}
                   <div className="mb-6">
-                    <h4 className="text-xs font-medium text-gray-500 px-5 mb-2">Yesterday</h4>
+                    <h4 className="text-xs font-medium text-muted-foreground px-5 mb-2">Yesterday</h4>
                     <div className="px-2 space-y-0.5">
-                      <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-[#262626] rounded-md group transition-colors text-left">
+                      <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-muted/50 rounded-md group transition-colors text-left">
                         <div className="h-5 w-5 flex items-center justify-center">
-                           <div className="w-1.5 h-4 bg-gray-400 rounded-sm"></div>
+                           <div className="w-1.5 h-4 bg-muted-foreground rounded-sm"></div>
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium text-gray-200">Iphone Space Transform</span>
-                            <span className="text-xs text-gray-500">— Castro / ... / New database</span>
+                            <span className="text-sm font-medium text-foreground">Iphone Space Transform</span>
+                            <span className="text-xs text-muted-foreground">— Castro / ... / New database</span>
                           </div>
                         </div>
                       </button>
@@ -308,12 +308,12 @@ export function TabBar() {
 
                   {/* Past week */}
                   <div className="mb-6">
-                    <h4 className="text-xs font-medium text-gray-500 px-5 mb-2">Past week</h4>
+                    <h4 className="text-xs font-medium text-muted-foreground px-5 mb-2">Past week</h4>
                     <div className="px-2 space-y-0.5">
-                      <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-[#262626] rounded-md group transition-colors text-left">
-                        <Lightbulb className="h-5 w-5 text-gray-400" />
+                      <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-muted/50 rounded-md group transition-colors text-left">
+                        <Lightbulb className="h-5 w-5 text-muted-foreground" />
                         <div className="flex-1 min-w-0">
-                          <span className="text-sm font-medium text-gray-200">aaaa</span>
+                          <span className="text-sm font-medium text-foreground">aaaa</span>
                         </div>
                       </button>
                     </div>
@@ -321,32 +321,32 @@ export function TabBar() {
 
                   {/* Past 30 days */}
                   <div>
-                    <h4 className="text-xs font-medium text-gray-500 px-5 mb-2">Past 30 days</h4>
+                    <h4 className="text-xs font-medium text-muted-foreground px-5 mb-2">Past 30 days</h4>
                     <div className="px-2 space-y-0.5">
-                      <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-[#262626] rounded-md group transition-colors text-left">
-                        <div className="h-5 w-5 flex items-center justify-center text-gray-400">
+                      <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-muted/50 rounded-md group transition-colors text-left">
+                        <div className="h-5 w-5 flex items-center justify-center text-muted-foreground">
                           <Sparkle className="h-4 w-4" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <span className="text-sm font-medium text-gray-200">Castro</span>
+                          <span className="text-sm font-medium text-foreground">Castro</span>
                         </div>
                       </button>
-                      <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-[#262626] rounded-md group transition-colors text-left">
-                        <FileText className="h-5 w-5 text-gray-400" />
+                      <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-muted/50 rounded-md group transition-colors text-left">
+                        <FileText className="h-5 w-5 text-muted-foreground" />
                         <div className="flex-1 min-w-0">
-                          <span className="text-sm font-medium text-gray-200">ssss</span>
+                          <span className="text-sm font-medium text-foreground">ssss</span>
                         </div>
                       </button>
-                      <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-[#262626] rounded-md group transition-colors text-left">
-                        <FileText className="h-5 w-5 text-gray-400" />
+                      <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-muted/50 rounded-md group transition-colors text-left">
+                        <FileText className="h-5 w-5 text-muted-foreground" />
                         <div className="flex-1 min-w-0">
-                          <span className="text-sm font-medium text-gray-200">ASASAS</span>
+                          <span className="text-sm font-medium text-foreground">ASASAS</span>
                         </div>
                       </button>
-                      <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-[#262626] rounded-md group transition-colors text-left">
-                        <FileText className="h-5 w-5 text-gray-400" />
+                      <button className="w-full flex items-center gap-3 px-3 py-2 hover:bg-muted/50 rounded-md group transition-colors text-left">
+                        <FileText className="h-5 w-5 text-muted-foreground" />
                         <div className="flex-1 min-w-0">
-                          <span className="text-sm font-medium text-gray-200">Titulo</span>
+                          <span className="text-sm font-medium text-foreground">Titulo</span>
                         </div>
                       </button>
                     </div>
@@ -355,30 +355,30 @@ export function TabBar() {
               </div>
 
               {/* Footer */}
-              <div className="px-4 py-2 border-t border-[#333] flex items-center justify-between text-xs text-gray-500 bg-[#191919]">
+              <div className="px-4 py-2 border-t border-border flex items-center justify-between text-xs text-muted-foreground bg-muted/50">
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-1">
-                    <span className="bg-[#333] px-1.5 py-0.5 rounded text-gray-400">Ctrl</span>
+                    <span className="bg-muted px-1.5 py-0.5 rounded text-muted-foreground">Ctrl</span>
                     <span>+</span>
-                    <span className="bg-[#333] px-1.5 py-0.5 rounded text-gray-400">↵</span>
+                    <span className="bg-muted px-1.5 py-0.5 rounded text-muted-foreground">↵</span>
                     <span className="ml-1">Open in new tab</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <span className="bg-[#333] px-1.5 py-0.5 rounded text-gray-400">Ctrl</span>
+                    <span className="bg-muted px-1.5 py-0.5 rounded text-muted-foreground">Ctrl</span>
                     <span>+</span>
-                    <span className="bg-[#333] px-1.5 py-0.5 rounded text-gray-400">L</span>
+                    <span className="bg-muted px-1.5 py-0.5 rounded text-muted-foreground">L</span>
                     <span className="ml-1">Copy link</span>
                   </div>
                   <div className="flex items-center gap-1">
-                    <span className="bg-[#333] px-1.5 py-0.5 rounded text-gray-400">Shift</span>
+                    <span className="bg-muted px-1.5 py-0.5 rounded text-muted-foreground">Shift</span>
                     <span>+</span>
-                    <span className="bg-[#333] px-1.5 py-0.5 rounded text-gray-400">Ctrl</span>
+                    <span className="bg-muted px-1.5 py-0.5 rounded text-muted-foreground">Ctrl</span>
                     <span>+</span>
-                    <span className="bg-[#333] px-1.5 py-0.5 rounded text-gray-400">K</span>
+                    <span className="bg-muted px-1.5 py-0.5 rounded text-muted-foreground">K</span>
                     <span className="ml-1">Command Search</span>
                   </div>
                 </div>
-                <button className="text-gray-500 hover:text-gray-300">
+                <button className="text-muted-foreground hover:text-foreground">
                   <Gear className="h-4 w-4" />
                 </button>
               </div>

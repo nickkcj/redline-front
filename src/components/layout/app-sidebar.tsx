@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { ChatCircle, Folder, House, Bell, User as UserIcon, Plus as PlusIcon, Robot, FileText, Book as BookIcon, Layout } from "@phosphor-icons/react"
+import { ChatCircle, Folder, House, Bell, User as UserIcon, Plus as PlusIcon, Graph, FileText, Book as BookIcon, Layout, MagnifyingGlass } from "@phosphor-icons/react"
 import { useRouter, usePathname, useSearchParams } from "next/navigation"
 import {
   Sidebar,
@@ -24,7 +24,7 @@ import { HomeSidebar } from "@/components/layout/sidebars/home-sidebar"
 import { SpacesSidebar } from "@/components/layout/sidebars/spaces-sidebar"
 import { AgentsSidebar } from "@/components/layout/sidebars/agents-sidebar"
 import { PagesSidebar } from "@/components/layout/sidebars/pages-sidebar"
-import { TemplatesSidebar } from "@/components/layout/sidebars/templates-sidebar"
+import { NotificationsSidebar } from "@/components/layout/sidebars/notifications-sidebar"
 
 import { AccountSettingsMenu } from "./account-settings-menu"
 
@@ -33,7 +33,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname()
   const currentOrganization = useCurrentOrganization()
   const currentWorkspace = useCurrentWorkspace()
-  const { addTabInSplit, addTab, addTabInNewWindow, tabs, setActiveTab, setSettingsOpen } = useWorkspaceStore()
+  const { addTabInSplit, addTab, addTabInNewWindow, tabs, setActiveTab, setSettingsOpen, setCreateNewModalOpen, activeTabId } = useWorkspaceStore()
+  
+  const activeTab = tabs.find(t => t.id === activeTabId)
   
   const [hoveredItem, setHoveredItem] = React.useState<string | null>(null)
   const timeoutRef = React.useRef<NodeJS.Timeout | null>(null)
@@ -61,7 +63,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     setHoveredItem(null)
   }
 
-  const navigateTo = (url: string, type?: 'home' | 'chat' | 'files' | 'spaces' | 'agents' | 'pages' | 'templates') => {
+  const navigateTo = (url: string, type?: 'home' | 'chat' | 'chats' | 'files' | 'spaces' | 'agents' | 'pages') => {
     // If we are in the workspace layout (which we assume we are if using this sidebar in /home),
     // we should switch tabs instead of routing, unless it's a route we don't handle in tabs (like settings)
     
@@ -85,20 +87,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }
 
   const handleNewChat = (e: React.MouseEvent) => {
-    if (e.shiftKey) {
-      // Shift+Click: adicionar em split
-      addTabInSplit('chat', 'New Chat', { chatId: 'new', isEmpty: true })
-    } else {
-      // Click normal: criar nova aba (não substitui a atual)
-      addTabInNewWindow('chat', 'New Chat', { chatId: 'new', isEmpty: true })
-    }
-    
+    setCreateNewModalOpen(true)
     setHoveredItem(null)
   }
 
   const chatUrl = currentOrganization && currentWorkspace 
-    ? `/${currentOrganization.id}/workspace/${currentWorkspace.id}` 
-    : '/chat'
+    ? `/${currentOrganization.id}/workspace/${currentWorkspace.id}/chats` 
+    : '/chats'
 
   const documentsUrl = '/documentos'
   const homeUrl = '/home'
@@ -119,7 +114,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   className="h-10 w-10 rounded-full bg-sidebar-accent/50 hover:bg-sidebar-accent text-muted-foreground hover:text-foreground transition-colors"
                   onClick={handleNewChat}
                 >
-                  <PlusIcon weight="bold" className="h-6 w-6" />
+                  <MagnifyingGlass weight="bold" className="h-6 w-6" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent 
@@ -127,7 +122,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 sideOffset={10} 
                 className="bg-[#0f0f0f] text-white border-none font-semibold shadow-xl [&>svg]:hidden px-3 py-1.5 rounded-md text-xs"
               >
-                <p>New Chat</p>
+                <p>Search</p>
               </TooltipContent>
             </Tooltip>
           </div>
@@ -135,7 +130,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarItem
             icon={House}
             label="Home"
-            isActive={pathname === homeUrl}
+            isActive={pathname === homeUrl || activeTab?.type === 'home'}
             isHovered={hoveredItem === 'home'}
             onClick={() => navigateTo(homeUrl, 'home')}
             onMouseEnter={() => handleMouseEnter('home')}
@@ -144,25 +139,25 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarItem
             icon={ChatCircle}
             label="Chats"
-            isActive={pathname.startsWith(chatUrl)}
+            isActive={pathname.startsWith(chatUrl) || activeTab?.type === 'chats' || activeTab?.type === 'chat'}
             isHovered={hoveredItem === 'chat'}
-            onClick={() => navigateTo(chatUrl, 'chat')}
+            onClick={() => navigateTo(chatUrl, 'chats')}
             onMouseEnter={() => handleMouseEnter('chat')}
             onMouseLeave={handleMouseLeave}
           />
           <SidebarItem
             icon={Folder}
             label="Spaces"
-            isActive={false}
+            isActive={activeTab?.type === 'spaces'}
             isHovered={hoveredItem === 'spaces'}
             onClick={() => navigateTo('/spaces', 'spaces')}
             onMouseEnter={() => handleMouseEnter('spaces')}
             onMouseLeave={handleMouseLeave}
           />
           <SidebarItem
-            icon={Robot}
+            icon={Graph}
             label="Agents"
-            isActive={false}
+            isActive={activeTab?.type === 'agents'}
             isHovered={hoveredItem === 'agents'}
             onClick={() => navigateTo('/agents', 'agents')}
             onMouseEnter={() => handleMouseEnter('agents')}
@@ -171,7 +166,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarItem
             icon={FileText}
             label="Files"
-            isActive={pathname.startsWith(documentsUrl)}
+            isActive={activeTab?.type === 'files' || activeTab?.type === 'document'}
             isHovered={hoveredItem === 'documents'}
             onClick={() => navigateTo(documentsUrl, 'files')}
             onMouseEnter={() => handleMouseEnter('documents')}
@@ -180,19 +175,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarItem
             icon={BookIcon}
             label="Pages"
-            isActive={false}
+            isActive={activeTab?.type === 'pages'}
             isHovered={hoveredItem === 'pages'}
             onClick={() => navigateTo('/pages', 'pages')}
             onMouseEnter={() => handleMouseEnter('pages')}
-            onMouseLeave={handleMouseLeave}
-          />
-          <SidebarItem
-            icon={Layout}
-            label="Templates"
-            isActive={false}
-            isHovered={hoveredItem === 'templates'}
-            onClick={() => navigateTo('/templates', 'templates')}
-            onMouseEnter={() => handleMouseEnter('templates')}
             onMouseLeave={handleMouseLeave}
           />
         </SidebarContent>
@@ -210,7 +196,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           />
           <AccountSettingsMenu>
             <SidebarItem
-              icon={UserIcon}
+              imageSrc="/image 36.png"
               label="Account"
               isHovered={hoveredItem === 'account'}
               onMouseEnter={() => handleMouseEnter('account')}
@@ -281,11 +267,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </FloatingSidebar>
 
       <FloatingSidebar
-        isOpen={hoveredItem === 'templates'}
+        isOpen={hoveredItem === 'notifications'}
         onMouseEnter={handleFloatingMouseEnter}
         onMouseLeave={handleFloatingMouseLeave}
       >
-        <TemplatesSidebar />
+        <NotificationsSidebar />
       </FloatingSidebar>
     </>
   )

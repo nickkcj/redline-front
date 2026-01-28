@@ -309,6 +309,15 @@ export function ChatView({ tabId, tabData }: { tabId: string; tabData?: any }) {
         <div className="space-y-8 pb-4">
           {messages.map((msg, index) => (
             <div key={msg.id} className={`flex gap-4 group ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
+              {msg.role !== 'user' && (
+                <div className="flex-shrink-0">
+                  <Avatar className="h-8 w-8 border border-background">
+                    <AvatarImage src="/iso_Aw.png" className="dark:hidden" />
+                    <AvatarImage src="/iso_Ad.png" className="hidden dark:block" />
+                    <AvatarFallback>AI</AvatarFallback>
+                  </Avatar>
+                </div>
+              )}
               <div className={`flex-1 space-y-2 min-w-0 ${msg.role === 'user' ? 'flex flex-col items-end' : ''}`}>
                 
                 {/* Thought Process (Collapsible) */}

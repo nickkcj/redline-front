@@ -21,9 +21,11 @@ import {
   MessageContent,
 } from "@/components/ui/ai-elements/message"
 import { Response } from "@/components/ui/ai-elements/response"
-import { Globe, FileText, X, Sparkle, ChatCircle } from "@phosphor-icons/react"
+import { Globe, FileText, X, Sparkle, ChatCircle, ShareNetwork, Users, Lock } from "@phosphor-icons/react"
 import { DocumentSelector } from "./document-selector"
+import { ChatShareDialog } from "./chat-share-dialog"
 import {
+  useChat,
   useChatMessages,
   useCreateChat,
   useStreamChat,
@@ -73,6 +75,7 @@ export function ModernChatArea({
   }, [chatId])
 
   // Queries
+  const { data: chatData } = useChat(workspaceId, chatId || "")
   const { data: messagesData, isLoading: loadingMessages } = useChatMessages(
     workspaceId,
     chatId || "",
@@ -414,6 +417,36 @@ export function ModernChatArea({
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
+      {/* Chat Header */}
+      {chatId && (
+        <div className="flex items-center justify-between px-6 py-3 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10">
+          <div className="flex items-center gap-2">
+            <h2 className="text-sm font-semibold">
+              {chatData?.title || "Novo Chat"}
+            </h2>
+            {chatData?.id && (
+              <Badge variant="outline" className="text-[10px] h-5 px-1.5 font-normal text-muted-foreground">
+                <Lock className="w-3 h-3 mr-1" />
+                Private
+              </Badge>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="flex -space-x-2 mr-2">
+              <div className="h-6 w-6 rounded-full bg-primary/10 border-2 border-background flex items-center justify-center text-[10px] font-medium text-primary">
+                You
+              </div>
+            </div>
+            <ChatShareDialog>
+              <Button variant="outline" size="sm" className="h-7 text-xs gap-1.5">
+                <ShareNetwork className="w-3.5 h-3.5" />
+                Share
+              </Button>
+            </ChatShareDialog>
+          </div>
+        </div>
+      )}
+
       {/* Drag overlay */}
       {isDragOver && (
         <div className="absolute inset-0 bg-primary/10 z-50 flex items-center justify-center pointer-events-none">
@@ -440,12 +473,13 @@ export function ModernChatArea({
                   <Message
                     key={msg.id}
                     from={msg.role}
+                    name={String(msg.role).toLowerCase() === "user" ? "You" : undefined}
                     avatar={
                       <MessageAvatar
                         src={
                           String(msg.role).toLowerCase() === "user"
                             ? "/user-avatar.png"
-                            : "/ai-avatar.png"
+                            : "/iso_Aw.png"
                         }
                         name={String(msg.role).toLowerCase() === "user" ? "You" : "AI"}
                       />
@@ -465,7 +499,7 @@ export function ModernChatArea({
                 {isStreaming && (
                   <Message
                     from="assistant"
-                    avatar={<MessageAvatar src="/ai-avatar.png" name="AI" />}
+                    avatar={<MessageAvatar src="/iso_Aw.png" name="AI" />}
                   >
                     <MessageContent variant="flat" from="assistant">
                       {streamingContent ? (

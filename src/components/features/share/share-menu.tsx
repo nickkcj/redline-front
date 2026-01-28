@@ -39,10 +39,6 @@ export function ShareMenu() {
 
   return (
     <div className="flex items-center gap-1 pr-2">
-      <div className="flex items-center text-xs text-muted-foreground mr-3">
-        Edited Aug 31, 2025
-      </div>
-
       {/* Avatar Stack */}
       <Popover>
         <PopoverTrigger asChild>
@@ -92,7 +88,7 @@ export function ShareMenu() {
           <Button variant="ghost" size="sm" className="h-7 gap-1.5 font-normal text-muted-foreground hover:text-foreground px-2">
              <Buildings className="h-4 w-4" />
              Share
-             <CaretDown className="h-3 w-3 opacity-50" />
+             <CaretDown className="h-3 w-3 opacity-50 rotate-180" />
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-[500px] p-0 gap-0 overflow-hidden" align="end" sideOffset={5}>
@@ -167,75 +163,6 @@ export function ShareMenu() {
            </div>
         </PopoverContent>
       </Popover>
-      
-      <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
-         <Star className="h-4 w-4" />
-      </Button>
-      
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
-             <DotsThree className="h-5 w-5" weight="bold" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
-          <div className="px-2 py-1.5 border-b mb-1">
-            <p className="text-xs font-medium line-clamp-2 mb-1">{documentTitle}</p>
-            <div className="flex justify-between text-[10px] text-muted-foreground">
-              <span>Created by castronauta (You)</span>
-            </div>
-            <div className="text-[10px] text-muted-foreground">
-              Last Updated June 22, 2025
-            </div>
-          </div>
-          
-          <DropdownMenuItem>
-            <Star className="mr-2 h-4 w-4" />
-            <span>Add Bookmark</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Plus className="mr-2 h-4 w-4" />
-            <span>Add to Space</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <PencilSimple className="mr-2 h-4 w-4" />
-            <span>Rename Thread</span>
-          </DropdownMenuItem>
-          
-          <DropdownMenuSeparator />
-          
-          <DropdownMenuItem>
-            <Copy className="mr-2 h-4 w-4" />
-            <span>Duplicate</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <ArrowRight className="mr-2 h-4 w-4" />
-            <span>Move</span>
-          </DropdownMenuItem>
-          
-          <DropdownMenuSeparator />
-          
-          <DropdownMenuItem>
-            <Export className="mr-2 h-4 w-4" />
-            <span>Export as PDF</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Export className="mr-2 h-4 w-4" />
-            <span>Export as Markdown</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <Export className="mr-2 h-4 w-4" />
-            <span>Export as DOCX</span>
-          </DropdownMenuItem>
-          
-          <DropdownMenuSeparator />
-          
-          <DropdownMenuItem className="text-red-600 focus:text-red-600">
-            <Trash className="mr-2 h-4 w-4" />
-            <span>Delete</span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
     </div>
   )
 }

@@ -132,7 +132,7 @@ export function SearchCommand({
             <Sun className="mr-2 h-4 w-4 text-foreground shrink-0" />
             <span className="truncate flex-1 min-w-0">Castro</span>
           </CommandItem>
-          <CommandItem value="Juliana Deputada">
+          <CommandItem value="Juliana">
             <FileText className="mr-2 h-4 w-4 text-muted-foreground shrink-0" />
             <span className="truncate flex-1 min-w-0">Juliana Deputada.</span>
             <CommandShortcut className="text-[10px] text-muted-foreground/60 border-0 ml-2">Castro / Dashboard</CommandShortcut>
