@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 import { useSetCurrentOrganization, useSetCurrentWorkspace } from "@/lib/stores/app.store"
 import {
   useOrganizations,
@@ -36,7 +37,7 @@ export function OrganizationsList() {
   const { mutateAsync: updateOrganization, isPending: updating, error: updateError } = useUpdateOrganization()
   const { mutateAsync: deleteOrganization, isPending: deleting, error: deleteError } = useDeleteOrganization()
 
-  const appName = process.env.NEXT_PUBLIC_APP_NAME || 'Scaffold'
+  const appName = process.env.NEXT_PUBLIC_APP_NAME || 'Redline'
 
   // Scroll indicator state
   const [showScrollIndicator, setShowScrollIndicator] = React.useState(true)
@@ -190,7 +191,10 @@ export function OrganizationsList() {
       <div className="@container/main flex flex-col gap-6 py-6 animate-in fade-in duration-500">
         <div>
           <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
-            {`Bem-vindo${displayName ? ` ao ${appName}, ${displayName}!` : ` ao ${appName}!`}`}
+            {displayName
+              ? <>Bem-vindo ao <span className="text-red-500">{appName}</span>, {displayName}!</>
+              : <>Bem-vindo ao <span className="text-red-500">{appName}</span>!</>
+            }
           </h1>
         </div>
 
@@ -208,7 +212,7 @@ export function OrganizationsList() {
             <div className="relative">
               <div
                 ref={scrollContainerRef}
-                className="flex flex-wrap gap-6 max-h-[calc(100vh-300px)] overflow-y-auto pb-8 pr-2 scroll-smooth scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/30"
+                className="flex flex-wrap gap-6 max-h-[calc(100vh-300px)] overflow-y-auto pt-1 pb-8 pr-2 scroll-smooth scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/30"
               >
                 {organizations?.map((org: OrganizationWithWorkspaces) => (
                   <OrganizationCard

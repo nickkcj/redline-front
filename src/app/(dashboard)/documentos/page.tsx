@@ -26,21 +26,21 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { cn } from '@/lib/utils'
 
-// Mock Data
-const initialFolders = [
-  { id: '1', name: 'Projetos', parentId: null },
-  { id: '2', name: 'Financeiro', parentId: null },
-  { id: '3', name: 'Marketing', parentId: null },
-  { id: '4', name: 'Q1 2024', parentId: '1' },
-  { id: '5', name: 'Campanhas', parentId: '3' },
-]
+// Types for folder and file data
+interface FolderType {
+  id: string
+  name: string
+  parentId: string | null
+}
 
-const initialFiles = [
-  { id: '1', name: 'Proposta.pdf', folderId: '1', type: 'pdf', size: '2.4 MB', date: '2024-03-10' },
-  { id: '2', name: 'Orçamento.xlsx', folderId: '2', type: 'xlsx', size: '1.2 MB', date: '2024-03-11' },
-  { id: '3', name: 'Briefing.docx', folderId: '3', type: 'docx', size: '500 KB', date: '2024-03-12' },
-  { id: '4', name: 'Cronograma.pdf', folderId: '4', type: 'pdf', size: '1.8 MB', date: '2024-03-13' },
-]
+interface FileType {
+  id: string
+  name: string
+  folderId: string
+  type: string
+  size: string
+  date: string
+}
 
 interface ContextMenuState {
   x: number
@@ -52,9 +52,17 @@ interface ContextMenuState {
 
 function DocumentosPage() {
   const [currentFolderId, setCurrentFolderId] = React.useState<string | null>(null)
-  const [folders, setFolders] = React.useState(initialFolders)
-  const [files, setFiles] = React.useState(initialFiles)
+  // TODO: Replace with API data fetching
+  const [folders, setFolders] = React.useState<FolderType[]>([])
+  const [files, setFiles] = React.useState<FileType[]>([])
+  const [isLoading, setIsLoading] = React.useState(true)
   const [contextMenu, setContextMenu] = React.useState<ContextMenuState>({ x: 0, y: 0, isOpen: false })
+
+  // Simulate loading state
+  React.useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 500)
+    return () => clearTimeout(timer)
+  }, [])
 
   // Filter items for current view
   const currentFolders = folders.filter(f => f.parentId === currentFolderId)
@@ -163,49 +171,76 @@ function DocumentosPage() {
 
         {/* Content Area */}
         <ScrollArea className="flex-1 p-4">
-          <div 
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
-          >
-            {/* Folders */}
-            {currentFolders.map(folder => (
-              <div
-                key={folder.id}
-                className="group relative flex flex-col items-center justify-center p-4 rounded-lg border bg-card hover:bg-accent/50 cursor-pointer transition-all"
-                onClick={() => setCurrentFolderId(folder.id)}
-                onContextMenu={(e) => handleContextMenu(e, folder.id, 'folder')}
-              >
-                <Folder className="h-12 w-12 text-blue-500 mb-2" />
-                <span className="text-sm font-medium text-center truncate w-full">{folder.name}</span>
+          {isLoading ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="w-6 h-6 border-2 border-muted-foreground border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : currentFolders.length === 0 && currentFiles.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-64 text-center">
+              <Folder className="h-12 w-12 text-muted-foreground/50 mb-4" />
+              <h3 className="text-lg font-medium mb-2">No files yet</h3>
+              <p className="text-sm text-muted-foreground mb-4">Upload your first file or create a folder to get started</p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const name = prompt("Nome da nova pasta:")
+                    if (name) {
+                      setFolders([...folders, { id: Date.now().toString(), name, parentId: currentFolderId }])
+                    }
+                  }}
+                >
+                  <FolderPlus className="h-4 w-4 mr-2" />
+                  Nova Pasta
+                </Button>
               </div>
-            ))}
-
-            {/* Files */}
-            {currentFiles.map(file => (
-              <div
-                key={file.id}
-                className="group relative flex flex-col items-center justify-center p-4 rounded-lg border bg-card hover:bg-accent/50 cursor-pointer transition-all"
-                onContextMenu={(e) => handleContextMenu(e, file.id, 'file')}
-              >
-                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-6 w-6">
-                        <DotsThreeVertical className="h-3 w-3" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>Download</DropdownMenuItem>
-                      <DropdownMenuItem>Renomear</DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">Excluir</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+            </div>
+          ) : (
+            <div
+              className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
+            >
+              {/* Folders */}
+              {currentFolders.map(folder => (
+                <div
+                  key={folder.id}
+                  className="group relative flex flex-col items-center justify-center p-4 rounded-lg border bg-card hover:bg-accent/50 cursor-pointer transition-all"
+                  onClick={() => setCurrentFolderId(folder.id)}
+                  onContextMenu={(e) => handleContextMenu(e, folder.id, 'folder')}
+                >
+                  <Folder className="h-12 w-12 text-red-500 mb-2" />
+                  <span className="text-sm font-medium text-center truncate w-full">{folder.name}</span>
                 </div>
-                <FileIcon type={file.type} className="h-12 w-12 mb-2" />
-                <span className="text-sm font-medium text-center truncate w-full">{file.name}</span>
-                <span className="text-xs text-muted-foreground">{file.size}</span>
-              </div>
-            ))}
-          </div>
+              ))}
+
+              {/* Files */}
+              {currentFiles.map(file => (
+                <div
+                  key={file.id}
+                  className="group relative flex flex-col items-center justify-center p-4 rounded-lg border bg-card hover:bg-accent/50 cursor-pointer transition-all"
+                  onContextMenu={(e) => handleContextMenu(e, file.id, 'file')}
+                >
+                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-6 w-6">
+                          <DotsThreeVertical className="h-3 w-3" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem>Download</DropdownMenuItem>
+                        <DropdownMenuItem>Renomear</DropdownMenuItem>
+                        <DropdownMenuItem className="text-destructive">Excluir</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                  <FileIcon type={file.type} className="h-12 w-12 mb-2" />
+                  <span className="text-sm font-medium text-center truncate w-full">{file.name}</span>
+                  <span className="text-xs text-muted-foreground">{file.size}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </ScrollArea>
       </div>
 
@@ -278,7 +313,7 @@ function FolderItem({ folder, allFolders, currentFolderId, onSelect, level = 0 }
           />
         )}
         {!hasChildren && <div className="w-3" />}
-        <Folder className="h-4 w-4 text-blue-500" />
+        <Folder className="h-4 w-4 text-red-500" />
         <span className="truncate">{folder.name}</span>
       </Button>
       {isOpen && hasChildren && (
@@ -304,7 +339,7 @@ function FileIcon({ type, className }: { type: string, className?: string }) {
   const colors: Record<string, string> = {
     pdf: "text-red-500",
     xlsx: "text-green-500",
-    docx: "text-blue-500",
+    docx: "text-red-500",
     txt: "text-gray-500"
   }
   return <FileText className={cn(colors[type] || "text-gray-500", className)} />

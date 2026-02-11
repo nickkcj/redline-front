@@ -27,7 +27,7 @@ export function OrganizationsHeader({ organizationCount, onCreateClick }: Organi
       </div>
       <Button
         onClick={onCreateClick}
-        className="w-full sm:w-auto transition-all cursor-pointer duration-200 hover:shadow-lg hover:scale-[1.02] bg-primary hover:bg-primary/90 text-white shadow-sm"
+        className="w-full sm:w-auto transition-all cursor-pointer duration-200 hover:shadow-lg hover:shadow-red-500/20 hover:scale-[1.02] bg-red-600 hover:bg-red-700 text-white shadow-sm"
       >
         <Plus className="size-4 mr-2" />
         <span className="sm:inline">Nova Organização</span>

@@ -55,6 +55,7 @@ const CloseButton = ({ onClick, className }: { onClick: (e: React.MouseEvent) =>
 )
 
 import { ChatsView } from './views/chats-view'
+import { FilesView } from './views/files-view'
 
 // ... existing imports ...
 
@@ -269,7 +270,7 @@ function WorkspaceLayoutContent() {
       case 'document':
         return <DocumentView tabId={tab.id} tabData={tab.data} />
       case 'files':
-        return <div className="p-4">Files view - TODO: criar componente separado</div>
+        return <FilesView />
       case 'spaces':
         return <div className="p-8">Spaces View Placeholder</div>
       case 'agents':

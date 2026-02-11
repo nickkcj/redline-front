@@ -16,11 +16,11 @@ const geistMono = Geist_Mono({
 });
 
 export function generateMetadata(): Metadata {
-  const appName = process.env.NEXT_PUBLIC_APP_NAME || "App Name";
-  
+  const appName = process.env.NEXT_PUBLIC_APP_NAME || "Redline";
+
   return {
-    title: `${appName} | DOOOR`,
-    description: "A Dooor product to start your Dooor product",
+    title: appName,
+    description: "Redline platform",
     icons: {
       icon: [
         { url: "/seloDooorBlack.png", media: "(prefers-color-scheme: light)" },

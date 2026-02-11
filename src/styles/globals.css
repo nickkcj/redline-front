@@ -94,7 +94,7 @@
   --popover: #ffffff;
   --popover-foreground: #1f2937;
   
-  --primary: #215E8D; /* Custom Blue Accent */
+  --primary: #dc2626; /* RedLine Red */
   --primary-foreground: #ffffff;
   
   --secondary: #f3f4f6; /* Gray 100 */
@@ -111,10 +111,10 @@
   
   --border: #e5e7eb; /* Gray 200 */
   --input: #e5e7eb;
-  --ring: #215E8D;
+  --ring: #dc2626;
 
-  /* Charts - Adjusted for Perplexity style */
-  --chart-1: #215E8D;
+  /* Charts */
+  --chart-1: #dc2626;
   --chart-2: #0f7b6c;
   --chart-3: #d9730d;
   --chart-4: #6940a5;
@@ -123,12 +123,12 @@
   /* Sidebar */
   --sidebar: #f9f9f9; /* Very light gray */
   --sidebar-foreground: #4b5563; /* Gray 600 */
-  --sidebar-primary: #215E8D;
+  --sidebar-primary: #dc2626;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #e5e7eb; /* Gray 200 */
   --sidebar-accent-foreground: #111827; /* Gray 900 */
   --sidebar-border: #e5e7eb;
-  --sidebar-ring: #215E8D;
+  --sidebar-ring: #dc2626;
 
   /* Notion Tag Colors - Light (Kept for compatibility) */
   --tag-red: #fbe4e4;
@@ -165,7 +165,7 @@
   --popover: #262626;
   --popover-foreground: #e5e7eb;
   
-  --primary: #559FD7; /* Custom Light Blue Accent */
+  --primary: #ef4444; /* RedLine Red Light */
   --primary-foreground: #ffffff;
   
   --secondary: #262626;
@@ -182,10 +182,10 @@
   
   --border: #333333;
   --input: #333333;
-  --ring: #559FD7;
+  --ring: #ef4444;
 
   /* Charts */
-  --chart-1: #559FD7;
+  --chart-1: #ef4444;
   --chart-2: #4dab9a;
   --chart-3: #d9730d;
   --chart-4: #9065c4;
@@ -194,12 +194,12 @@
   /* Sidebar */
   --sidebar: #131313; /* Darker sidebar */
   --sidebar-foreground: #9ca3af; /* Gray 400 */
-  --sidebar-primary: #559FD7;
+  --sidebar-primary: #ef4444;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #2d2d2d;
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: #262626;
-  --sidebar-ring: #559FD7;
+  --sidebar-ring: #ef4444;
 
   /* Notion Tag Colors - Dark (Kept for compatibility) */
   --tag-red: rgba(255, 115, 105, 0.2);

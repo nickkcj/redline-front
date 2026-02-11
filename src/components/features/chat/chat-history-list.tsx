@@ -43,48 +43,21 @@ export function ChatHistoryList({
     }
   };
 
-  // Mock data for demonstration when no real data exists
-  const mockChats = useMemo(() => {
-    if (chatsData?.chats && chatsData.chats.length > 0) return null;
-    
-    const now = new Date();
-    const yesterday = new Date(now);
-    yesterday.setDate(yesterday.getDate() - 1);
-    const lastWeek = new Date(now);
-    lastWeek.setDate(lastWeek.getDate() - 5);
-    const older = new Date(now);
-    older.setDate(older.getDate() - 10);
-
-    return [
-      { id: '1', title: 'Análise de Mercado Q1', createdAt: now.toISOString(), isActive: true },
-      { id: '2', title: 'Revisão de Código Frontend', createdAt: now.toISOString(), isActive: false },
-      { id: '3', title: 'Ideias para Campanha de Marketing', createdAt: now.toISOString(), isActive: false },
-      { id: '4', title: 'Planejamento Estratégico 2024', createdAt: yesterday.toISOString(), isActive: false },
-      { id: '5', title: 'Debug do Erro de Login', createdAt: yesterday.toISOString(), isActive: false },
-      { id: '6', title: 'Resumo da Reunião Semanal', createdAt: lastWeek.toISOString(), isActive: false },
-      { id: '7', title: 'Brainstorming de Features', createdAt: lastWeek.toISOString(), isActive: false },
-      { id: '8', title: 'Tradução do App para Espanhol', createdAt: lastWeek.toISOString(), isActive: false },
-      { id: '9', title: 'Otimização de Performance', createdAt: older.toISOString(), isActive: false },
-      { id: '10', title: 'Integração com Stripe', createdAt: older.toISOString(), isActive: false },
-    ];
-  }, [chatsData]);
+  // No mock data - use real API data only
+  const chats = chatsData?.chats || [];
 
   // Group chats by date periods
   const groupedChats = useMemo(() => {
-    const chatsToGroup = chatsData?.chats && chatsData.chats.length > 0 
-      ? chatsData.chats 
-      : (mockChats || []);
+    if (chats.length === 0) return {};
 
-    if (chatsToGroup.length === 0) return {};
-
-    const groups: Record<string, typeof chatsToGroup> = {
+    const groups: Record<string, typeof chats> = {
       'Hoje': [],
       'Ontem': [],
       'Esta semana': [],
       'Anteriormente': []
     };
 
-    chatsToGroup.forEach(chat => {
+    chats.forEach(chat => {
       const chatDate = new Date(chat.createdAt);
 
       if (isToday(chatDate)) {
@@ -101,7 +74,7 @@ export function ChatHistoryList({
     return Object.fromEntries(
       Object.entries(groups).filter(([_, chats]) => chats.length > 0)
     );
-  }, [chatsData, mockChats]);
+  }, [chats]);
 
   if (isLoading) {
     return (
@@ -111,13 +84,30 @@ export function ChatHistoryList({
     );
   }
 
-  if (!chatsData?.chats && !mockChats) {
+  if (chats.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-        <ChatCircle weight="fill" className="w-8 h-8 text-muted-foreground/50 mb-3" />
-        <p className="text-sm text-muted-foreground">
-          Nenhuma conversa iniciada
-        </p>
+      <div className="flex flex-col h-full">
+        <div className="flex items-center px-4 py-3 shrink-0">
+          <span className="text-sm font-medium">Chats</span>
+        </div>
+        <div className="px-2 pb-2 flex flex-col gap-1 shrink-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start h-9 px-2 text-xs font-normal text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/50"
+            title="New Chat"
+            onClick={() => onSelectChat?.('new')}
+          >
+            <Plus weight="bold" className="mr-2 h-4 w-4" />
+            <span>New Chat</span>
+          </Button>
+        </div>
+        <div className="flex flex-col items-center justify-center py-12 px-4 text-center flex-1">
+          <ChatCircle weight="fill" className="w-8 h-8 text-muted-foreground/50 mb-3" />
+          <p className="text-sm text-muted-foreground">
+            Nenhuma conversa iniciada
+          </p>
+        </div>
       </div>
     );
   }

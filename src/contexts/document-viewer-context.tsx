@@ -9,6 +9,8 @@ interface DocumentViewerState {
   isOpen: boolean
   documentId: string | null
   documentName: string | null
+  directUrl: string | null
+  highlightText: string | null
 }
 
 interface DocumentViewerContextType {
@@ -20,11 +22,13 @@ interface DocumentViewerContextType {
   // Data
   viewUrl: string | undefined
   fileName: string | null
+  highlightText: string | null
   isLoading: boolean
   error: Error | null
 
   // Actions
   openDocument: (documentId: string, documentName: string) => void
+  openDocumentByUrl: (url: string, fileName: string, highlightText?: string) => void
   closeDocument: () => void
 
   // Helpers
@@ -44,17 +48,22 @@ export function DocumentViewerProvider({ children }: { children: React.ReactNode
     isOpen: false,
     documentId: null,
     documentName: null,
+    directUrl: null,
+    highlightText: null,
   })
 
-  // Query to fetch document view URL when needed
+  // Query to fetch document view URL when needed (skip when using direct URL)
   const {
     data: documentData,
-    isLoading,
-    error
+    isLoading: fetchLoading,
+    error: fetchError
   } = useDocumentViewUrl(
     currentWorkspace?.id || '',
-    state.documentId || '',
+    state.directUrl ? '' : (state.documentId || ''),
   )
+
+  const isLoading = state.directUrl ? false : fetchLoading
+  const error = state.directUrl ? null : fetchError
 
   const openDocument = useCallback((documentId: string, documentName: string) => {
     if (!documentId) {
@@ -72,14 +81,29 @@ export function DocumentViewerProvider({ children }: { children: React.ReactNode
       isOpen: true,
       documentId,
       documentName,
+      directUrl: null,
+      highlightText: null,
     })
   }, [currentWorkspace])
+
+  const openDocumentByUrl = useCallback((url: string, fileName: string, highlightText?: string) => {
+    if (!url) return
+    setState({
+      isOpen: true,
+      documentId: 'direct-url',
+      documentName: fileName,
+      directUrl: url,
+      highlightText: highlightText || null,
+    })
+  }, [])
 
   const closeDocument = useCallback(() => {
     setState({
       isOpen: false,
       documentId: null,
       documentName: null,
+      directUrl: null,
+      highlightText: null,
     })
   }, [])
 
@@ -129,12 +153,17 @@ export function DocumentViewerProvider({ children }: { children: React.ReactNode
 
   // Transform HTTP → HTTPS using harbor proxy to avoid Mixed Content errors
   const transformedViewUrl = React.useMemo(() => {
+    // Direct URL takes priority (governance docs)
+    if (state.directUrl) {
+      return state.directUrl.replace(/http:\/\/35\.225\.43\.68(:\d+)?/, 'https://api.harbor.dooor.ai')
+    }
+
     const rawUrl = documentData?.viewUrl
     if (!rawUrl) return undefined
 
     // Transform http://35.225.43.68[:port] → https://api.harbor.dooor.ai
     return rawUrl.replace(/http:\/\/35\.225\.43\.68(:\d+)?/, 'https://api.harbor.dooor.ai')
-  }, [documentData?.viewUrl])
+  }, [state.directUrl, documentData?.viewUrl])
 
   const value: DocumentViewerContextType = {
     // State
@@ -145,11 +174,13 @@ export function DocumentViewerProvider({ children }: { children: React.ReactNode
     // Data
     viewUrl: transformedViewUrl,
     fileName: documentData?.filename || state.documentName,
+    highlightText: state.highlightText,
     isLoading,
     error,
 
     // Actions
     openDocument,
+    openDocumentByUrl,
     closeDocument,
 
     // Helpers

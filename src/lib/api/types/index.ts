@@ -8,4 +8,5 @@ export * from './document.types'
 export * from './permission.types'
 export * from './member.types'
 export * from './audit-log.types'
+export * from './governance.types'
 

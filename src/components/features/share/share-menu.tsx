@@ -27,7 +27,7 @@ import { useWorkspaceStore } from '@/store/workspace-store'
 const users = [
   { name: 'Lucas Ponce', time: '3 months ago', initial: 'L', color: 'bg-zinc-600', image: '/image 158.png' },
   { name: 'Peter Flag', time: '7 months ago', initial: 'P', color: 'bg-emerald-600', image: '/image 161.png' },
-  { name: 'Eduardo Boçon', time: '8 months ago', initial: 'E', color: 'bg-blue-600', image: '/image 162.png' },
+  { name: 'Eduardo Boçon', time: '8 months ago', initial: 'E', color: 'bg-red-600', image: '/image 162.png' },
 ]
 
 export function ShareMenu() {
@@ -53,7 +53,7 @@ export function ShareMenu() {
              </Avatar>
              <Avatar className="h-6 w-6 border-2 border-background">
                 <AvatarImage src="/image 162.png" />
-                <AvatarFallback className="bg-blue-600 text-white text-[9px]">EB</AvatarFallback>
+                <AvatarFallback className="bg-red-600 text-white text-[9px]">EB</AvatarFallback>
              </Avatar>
              <div className="h-6 w-6 rounded-full border-2 border-background bg-muted flex items-center justify-center text-[9px] font-medium text-muted-foreground">
                +12
@@ -105,7 +105,7 @@ export function ShareMenu() {
                     placeholder="Email or group, separated by commas" 
                     className="flex-1 rounded-r-none border-r-0 bg-muted/50 border-border focus-visible:ring-0 focus-visible:border-border placeholder:text-muted-foreground" 
                  />
-                 <Button className="rounded-l-none bg-blue-600 hover:bg-blue-700 text-white border border-blue-600">Invite</Button>
+                 <Button className="rounded-l-none bg-red-600 hover:bg-red-700 text-white border border-red-600">Invite</Button>
               </div>
               
               <div className="space-y-5">
@@ -117,7 +117,7 @@ export function ShareMenu() {
                        </Avatar>
                        <div>
                           <p className="text-sm font-medium text-foreground">Castro (You)</p>
-                          <p className="text-xs text-muted-foreground">castro@dooor.ai</p>
+                          <p className="text-xs text-muted-foreground">user@company.com</p>
                        </div>
                     </div>
                     <span className="text-xs text-muted-foreground">Can edit</span>
@@ -125,11 +125,11 @@ export function ShareMenu() {
                  
                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                       <div className="h-9 w-9 rounded-md bg-muted flex items-center justify-center text-blue-500 border border-border">
+                       <div className="h-9 w-9 rounded-md bg-muted flex items-center justify-center text-red-500 border border-border">
                           <Globe className="h-5 w-5" weight="fill" />
                        </div>
                        <div>
-                          <p className="text-sm font-medium text-foreground">People in Dooor Foundation HQ</p>
+                          <p className="text-sm font-medium text-foreground">People in Redline Team</p>
                           <p className="text-xs text-muted-foreground">Teamspace • 9 people</p>
                        </div>
                     </div>
@@ -142,7 +142,7 @@ export function ShareMenu() {
                           <Globe className="h-5 w-5" />
                        </div>
                        <div>
-                          <p className="text-sm font-medium text-foreground">Everyone at Dooor Foundation</p>
+                          <p className="text-sm font-medium text-foreground">Everyone in Organization</p>
                           <p className="text-xs text-muted-foreground">General access</p>
                        </div>
                     </div>

@@ -216,19 +216,9 @@ export const TiptapEditor = ({
       MentionExtension.configure({
         suggestion: {
           items: ({ query }: { query: string }): MentionItem[] => {
-            // Mock data - replace with real data from your API
-            const users: MentionItem[] = [
-              { id: '1', label: 'Nathan Castro', type: 'user' },
-              { id: '2', label: 'John Doe', type: 'user' },
-              { id: '3', label: 'Jane Smith', type: 'user' },
-            ]
-
-            const pages: MentionItem[] = [
-              { id: '4', label: 'Technical Specifications', type: 'page' },
-              { id: '5', label: 'Meeting Notes', type: 'page' },
-              { id: '6', label: 'Roadmap 2024', type: 'page' },
-            ]
-
+            // TODO: Replace with real data from API
+            const users: MentionItem[] = []
+            const pages: MentionItem[] = []
             const dates: MentionItem[] = [
               { id: 'today', label: 'Today', type: 'date' },
               { id: 'tomorrow', label: 'Tomorrow', type: 'date' },

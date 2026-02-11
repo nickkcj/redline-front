@@ -1,9 +1,8 @@
 'use client'
 
 import * as React from 'react'
-import { PaperPlaneTilt, Robot, User, Sparkle, Paperclip, CaretDown, CaretRight, SlackLogo, GithubLogo, FigmaLogo, EnvelopeSimple, Globe, ThumbsUp, ThumbsDown, Copy, PlusCircle, StopCircle, At, ArrowUp, CircleNotch, MagnifyingGlass, GridFour, Cpu, Microphone, Waveform, Baby, Heart, Airplane, Wrench, Translate, Question, ShoppingBag, Graph, MapPin, Star, ArrowRight } from '@phosphor-icons/react'
+import { PaperPlaneTilt, Robot, User, Sparkle, Paperclip, CaretDown, CaretRight, SlackLogo, GithubLogo, FigmaLogo, EnvelopeSimple, Globe, ThumbsUp, ThumbsDown, Copy, PlusCircle, StopCircle, At, ArrowUp, CircleNotch, MagnifyingGlass, GridFour, Cpu, Microphone, Waveform, Baby, Heart, Airplane, Wrench, Translate, Question, ShoppingBag, Graph, MapPin, Star, ArrowRight, ShieldCheck } from '@phosphor-icons/react'
 import { useStatusBar } from '@/hooks/use-status-bar'
-import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -11,6 +10,18 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible'
 import { cn } from '@/lib/utils'
+import { useQueryClient } from '@tanstack/react-query'
+import { useCurrentWorkspace } from '@/lib/stores/app.store'
+import {
+  useChatMessages,
+  useStreamChat,
+  useSendMessage,
+  useCreateChat
+} from '@/hooks/api/use-chat'
+import { MessageRole } from '@/lib/api/types/chat.types'
+import type { ChatMessageResponseDto } from '@/lib/api/types/chat.types'
+import { GovernanceService } from '@/lib/api/services/governance.service'
+import { parseSSEStream } from '@/lib/utils/streaming.utils'
 
 interface Message {
   id: string
@@ -19,193 +30,268 @@ interface Message {
   thought?: string
 }
 
-// Conversation Dictionary
-const conversations: Record<string, Message[]> = {
-  // Chat 1: Análise de requisitos
-  'chat-1': [
-    { id: '1', role: 'user', content: 'Quais são os requisitos funcionais para o novo módulo de login?' },
-    { id: '2', role: 'assistant', content: 'Com base nas reuniões anteriores e na documentação do projeto, os principais requisitos funcionais para o módulo de login são:\n\n1.  **Login Social:** O sistema deve permitir autenticação via Google e GitHub.\n2.  **Autenticação de Dois Fatores (2FA):** Obrigatória para administradores, opcional para usuários comuns.\n3.  **Recuperação de Senha:** Deve ser implementado um fluxo de "Esqueci minha senha" utilizando Magic Links enviados por e-mail.\n4.  **Validação de E-mail:** Novos cadastros devem exigir confirmação de e-mail antes do primeiro acesso.\n5.  **Limitação de Tentativas:** Bloqueio temporário da conta após 5 tentativas falhas consecutivas para prevenir força bruta.', thought: 'Consultando a documentação de requisitos v1.2...' }
-  ],
-  // Chat 2: Discussão arquitetura
-  'chat-2': [
-    { id: '1', role: 'user', content: 'Microphone weight="bold"roserviços vs Monolito para o MVP? O que você recomenda?' },
-    { id: '2', role: 'assistant', content: 'Para o estágio atual do projeto (MVP), minha recomendação é iniciar com um **Monolito Modular**.\n\n**Por que Monolito Modular?**\n*   **Velocidade de Desenvolvimento:** É mais rápido de configurar e iterar, pois não há overhead de rede ou orquestração complexa de deploy.\n*   **Simplicidade Operacional:** Deploy único, log único, monitoramento simplificado.\n*   **Refatoração Futura:** Se os módulos forem bem definidos (ex: Auth, Pagamentos, Core) dentro do monolito, a extração para microserviços futuros será muito mais fácil quando a escala exigir.\n\nMicrophone weight="bold"roserviços agora adicionariam uma complexidade de infraestrutura desnecessária para o volume de tráfego inicial esperado.', thought: 'Analisando trade-offs de arquitetura para startups em fase inicial...' }
-  ],
-  // Chat 3: Review de código
-  'chat-3': [
-    { id: '1', role: 'user', content: 'Pode analisar esse trecho de código?\n```typescript\nconst data = await fetch("/api/user");\nconsole.log(data);```' },
-    { id: '2', role: 'assistant', content: 'Claro! Analisando o trecho, identifiquei alguns pontos de atenção:\n\n1.  **Falta de Tratamento de Erro:** O `fetch` pode falhar (rede, 404, 500). É ideal envolver em um bloco `try/catch`.\n2.  **Conversão de Resposta:** O `fetch` retorna uma `Response`, não os dados JSON diretamente. Você precisa chamar `await data.json()`.\n3.  **Verificação de Status:** Mesmo que a requisição complete, o status pode não ser 200. Verifique `if (!data.ok)`.\n\nAqui está uma versão melhorada:\n```typescript\ntry {\n  const response = await fetch("/api/user");\n  if (!response.ok) throw new Error("Erro na requisição");\n  const data = await response.json();\n  console.log(data);\n} catch (error) {\n  console.error(error);\n}```' }
-  ],
-  // Chat 4: Airplane weight="bold"jamento Sprint
-  'chat-4': [
-    { id: '1', role: 'user', content: 'Quais itens devemos priorizar na próxima sprint?' },
-    { id: '2', role: 'assistant', content: 'Considerando o roadmap e os prazos, sugiro priorizar:\n\n*   **Finalização do Dashboard:** O cliente precisa visualizar as métricas principais até sexta-feira.\n*   **Correção de Bugs Críticos:** Os issues #45 e #89 relacionados ao checkout precisam ser resolvidos antes de qualquer nova feature.\n*   **Integração com Stripe:** Se sobrar tempo, iniciar a configuração do ambiente de teste.\n\nIsso garante a entrega de valor imediato e estabilidade do sistema atual.' }
-  ],
-  // Chat 5: Ideias de features
-  'chat-5': [
-    { id: '1', role: 'user', content: 'Alguma ideia para melhorar o engajamento no app?' },
-    { id: '2', role: 'assistant', content: 'Aqui estão algumas ideias baseadas em tendências de gamificação:\n\n1.  **Badges de Conquista:** Premie usuários por completar tarefas ou manter uma sequência de dias (streak).\n2.  **Modo Dark/Light Automático:** Melhora a usabilidade e conforto visual.\n3.  **Onboarding Interativo:** Um tour guiado que ensina as funcionalidades principais na prática.\n4.  **Notificações Inteligentes:** Avise apenas sobre o que realmente importa para o usuário, baseado no comportamento dele.' }
-  ],
-  // Default / Notion AI Welcome
-  'welcome': [
-    {
-      id: 'welcome-msg',
-      role: 'assistant',
-      content: `Hi Castro!
-
-I'm the new and improved Scaffold AI — built to help you learn, create, and get more done. Here are all the ways I can help:
-
-• **Databases:** I can build you new databases for tasks, projects, or habits, or jump into existing ones to add properties, filters, groups, and charts.
-• **Page editing:** I can help write or polish any page — whether it's drafting from scratch, rewriting for clarity, summarizing long text, or reorganizing content into a clean structure.
-• **Workspace search:** Ask me a question and I'll dig through Scaffold, SlackLogo weight="bold", Google Drive, and more to bring you the answer.
-• **Data analysis:** I'll crunch the numbers in your databases, run the queries, and lay out the insights in reports, tables, or charts.
-• **Web research:** Need the latest facts? I'll scan the web, compare sources, and give you a concise brief you can trust.
-• **File processing:** Share a PDF or image with me — I'll pull out the important bits and turn them into notes or databases you can use.
-
-Try this: Ask me to create a project tracker database, or search your workspace for something you need to find quickly.`,
-      thought: ''
-    }
-  ]
-}
-
 export function ChatView({ tabId, tabData }: { tabId: string; tabData?: any }) {
-  // Status bar hook
-  const { setLoading, setSuccess } = useStatusBar()
-  
-  // Determine if it's a new chat or an existing one from history
-  // If tabId is in our conversations map, load it. Otherwise, assume new or welcome.
-  
-  // Logic: 
-  // - If tabId starts with 'chat-' and is in dictionary, load it.
-  // - If it's "New Chat" (from sidebar button usually generates a unique ID, but for now we might receive 'New Chat' string or a timestamped ID). 
-  // - Let's treat 'New Chat' or unknown IDs as the "Welcome" state (Notion AI intro).
-  // - If tabData?.isEmpty is true, show empty state (no messages)
-  
-  const shouldShowEmpty = tabData?.isEmpty === true
-  const initialMessages = shouldShowEmpty ? [] : (conversations[tabId] || conversations['welcome'])
-  const [messages, setMessages] = React.useState<Message[]>(initialMessages)
-  const [inputValue, setInputValue] = React.useState('')
-  const [isThinking, setIsThinking] = React.useState(false)
-  const [thinkingText, setThinkingText] = React.useState('Thinking...')
-  const [suggestions, setSuggestions] = React.useState<string[]>([])
+  const queryClient = useQueryClient()
+  const { setLoading, setSuccess, setError } = useStatusBar()
 
-  // Reset messages when tabId changes
+  // Get workspace context
+  const currentWorkspace = useCurrentWorkspace()
+  const workspaceId = currentWorkspace?.id || ''
+
+  // Chat ID management
+  const initialChatId = tabData?.chatId && tabData.chatId !== 'new' ? tabData.chatId : null
+  const [chatId, setChatId] = React.useState<string | null>(initialChatId)
+
+  // Local state
+  const [messages, setMessages] = React.useState<Message[]>([])
+  const [inputValue, setInputValue] = React.useState('')
+  const [thinkingText, setThinkingText] = React.useState('Pensando...')
+  const [suggestions, setSuggestions] = React.useState<string[]>([])
+  const [governanceMode, setGovernanceMode] = React.useState(false)
+  const [isGovernanceStreaming, setIsGovernanceStreaming] = React.useState(false)
+  const [governanceStreamContent, setGovernanceStreamContent] = React.useState('')
+  const isSubmittingRef = React.useRef(false)
+
+  // API Hooks
+  const { data: messagesData, isLoading: isLoadingMessages } = useChatMessages(
+    workspaceId,
+    chatId || '',
+    { enabled: !!workspaceId && !!chatId }
+  )
+
+  const { mutate: createChat, isPending: isCreatingChat } = useCreateChat(workspaceId)
+  const { mutate: sendMessage, isPending: isSendingMessage } = useSendMessage(workspaceId, chatId || '')
+
+  const { isStreaming, streamingContent, startStream, clearStreamingContent } = useStreamChat({
+    onStreamEnd: () => {
+      // Refetch messages to get the complete AI response
+      if (chatId && workspaceId) {
+        queryClient.invalidateQueries({ queryKey: ['chat-messages', workspaceId, chatId] })
+        queryClient.invalidateQueries({ queryKey: ['chat', workspaceId, chatId] })
+        queryClient.invalidateQueries({ queryKey: ['chats', workspaceId] })
+      }
+      clearStreamingContent()
+      setSuccess('Resposta recebida')
+    },
+    onError: (error) => {
+      console.error('Stream error:', error)
+      setError('Erro ao processar resposta')
+    }
+  })
+
+  // Map API messages to local Message interface
   React.useEffect(() => {
-    if (tabData?.isEmpty === true) {
+    if (messagesData?.messages) {
+      const mappedMessages: Message[] = messagesData.messages.map((msg: ChatMessageResponseDto) => ({
+        id: msg.id,
+        role: msg.role === MessageRole.USER ? 'user' : 'assistant',
+        content: msg.content,
+        thought: msg.aiModel ? `Modelo: ${msg.aiModel}` : undefined
+      }))
+      setMessages(mappedMessages)
+    }
+  }, [messagesData])
+
+  // Reset when tab changes
+  React.useEffect(() => {
+    const newChatId = tabData?.chatId && tabData.chatId !== 'new' ? tabData.chatId : null
+    setChatId(newChatId)
+
+    if (!newChatId) {
       setMessages([])
-    } else {
-      setMessages(conversations[tabId] || conversations['welcome'])
     }
   }, [tabId, tabData])
 
-  // Update suggestions when input changes
-  React.useEffect(() => {
-    if (!inputValue.trim()) {
-      setSuggestions([])
-      return
-    }
-    
-    // Mock suggestions based on input
-    const baseSuggestions = [
-      `${inputValue} tutorial`,
-      `${inputValue} examples`,
-      `${inputValue} documentation`,
-      `how to use ${inputValue}`,
-      `best practices for ${inputValue}`
-    ]
-    setSuggestions(baseSuggestions)
-  }, [inputValue])
+  // Governance stream function - receives history explicitly to avoid closure issues
+  const startGovernanceStream = React.useCallback(async (
+    userMessage: string,
+    chatHistory: Array<{ role: 'user' | 'assistant'; content: string }>
+  ) => {
+    setIsGovernanceStreaming(true)
+    setGovernanceStreamContent('')
+    setLoading('Consultando documentos de governança...')
 
-  const handleSend = () => {
-    if (!inputValue.trim() || isThinking) return
-    const newMsg: Message = {
-      id: Date.now().toString(),
-      role: 'user',
-      content: inputValue
+    try {
+      const stream = await GovernanceService.streamGovernanceChat(
+        workspaceId,
+        userMessage,
+        undefined,
+        chatHistory.length > 0 ? chatHistory : undefined
+      )
+
+      let fullContent = ''
+      await parseSSEStream(stream, {
+        onContent: (chunk) => {
+          fullContent += chunk
+          setGovernanceStreamContent(fullContent)
+        },
+        onDone: () => {
+          setMessages((prev) => [
+            ...prev,
+            { id: `gov-${Date.now()}`, role: 'assistant', content: fullContent },
+          ])
+          setGovernanceStreamContent('')
+          setIsGovernanceStreaming(false)
+          isSubmittingRef.current = false
+          setSuccess('Resposta recebida')
+        },
+      })
+    } catch (error) {
+      console.error('Governance stream error:', error)
+      setMessages((prev) => [
+        ...prev,
+        { id: `gov-err-${Date.now()}`, role: 'assistant', content: 'Erro ao conectar com o assistente de governança. Tente novamente.' },
+      ])
+      setGovernanceStreamContent('')
+      setIsGovernanceStreaming(false)
+      isSubmittingRef.current = false
+      setError('Erro ao processar resposta')
     }
-    setMessages([...messages, newMsg])
-    setInputValue('')
-    setSuggestions([]) // Clear suggestions
-    
-    // Update status bar
-    setLoading('Processando mensagem...')
-    
-    // Show thinking animation
-    setIsThinking(true)
-    
-    // Rotate thinking text similar to Notion AI
-    const thinkingTexts = ['Thinking...', 'Organizing...', 'Crafting...']
+  }, [workspaceId, setLoading, setSuccess, setError])
+
+  // Thinking animation
+  React.useEffect(() => {
+    if (!isStreaming && !isGovernanceStreaming && !isCreatingChat && !isSendingMessage) return
+
+    const thinkingTexts = governanceMode
+      ? ['Buscando nos documentos...', 'Analisando governança...', 'Gerando resposta...']
+      : ['Pensando...', 'Organizando...', 'Criando...']
     let textIndex = 0
-    setThinkingText(thinkingTexts[0])
-    
-    const thinkingInterval = setInterval(() => {
+
+    const interval = setInterval(() => {
       textIndex = (textIndex + 1) % thinkingTexts.length
       setThinkingText(thinkingTexts[textIndex])
-    }, 600)
-    
-    // Show response after 2 seconds
-    setTimeout(() => {
-      clearInterval(thinkingInterval)
-      setIsThinking(false)
-      setMessages(prev => [...prev, {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: "I'm a demo bot. I can't really think yet!",
-        thought: "Processing user input..."
-      }])
-      setSuccess('Resposta recebida')
-    }, 2000)
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [isStreaming, isGovernanceStreaming, isCreatingChat, isSendingMessage, governanceMode])
+
+  // Clear suggestions when input changes
+  React.useEffect(() => {
+    setSuggestions([])
+  }, [inputValue])
+
+  const handleSend = async () => {
+    if (!inputValue.trim() || isStreaming || isGovernanceStreaming || isSubmittingRef.current || !workspaceId) return
+
+    const userMessage = inputValue.trim()
+
+    // Governance mode: skip regular chat flow, use governance RAG endpoint
+    if (governanceMode) {
+      // Set ref immediately to prevent double-submit (React state is async)
+      isSubmittingRef.current = true
+
+      // Capture history BEFORE adding optimistic message to avoid sending it as history
+      const chatHistory = messages.map(m => ({
+        role: m.role as 'user' | 'assistant',
+        content: m.content,
+      }))
+
+      setMessages(prev => [...prev, { id: `temp-${Date.now()}`, role: 'user', content: userMessage }])
+      setInputValue('')
+      setSuggestions([])
+
+      await startGovernanceStream(userMessage, chatHistory)
+      return
+    }
+
+    // Add user message optimistically
+    const optimisticMessage: Message = {
+      id: `temp-${Date.now()}`,
+      role: 'user',
+      content: userMessage
+    }
+    setMessages(prev => [...prev, optimisticMessage])
+    setInputValue('')
+    setSuggestions([])
+
+    setLoading('Processando mensagem...')
+
+    try {
+      if (!chatId) {
+        // Create new chat with initial message
+        createChat(
+          { initialMessage: userMessage },
+          {
+            onSuccess: async (newChat) => {
+              const newChatId = newChat.id
+              setChatId(newChatId)
+
+              // Start streaming the AI response
+              await startStream(workspaceId, newChatId, userMessage)
+            },
+            onError: (error) => {
+              console.error('Error creating chat:', error)
+              setError('Erro ao criar chat')
+              // Remove optimistic message
+              setMessages(prev => prev.filter(m => m.id !== optimisticMessage.id))
+            }
+          }
+        )
+      } else {
+        // Send message to existing chat
+        sendMessage(
+          { content: userMessage, role: MessageRole.USER },
+          {
+            onSuccess: async () => {
+              // Start streaming the AI response
+              await startStream(workspaceId, chatId, userMessage)
+            },
+            onError: (error) => {
+              console.error('Error sending message:', error)
+              setError('Erro ao enviar mensagem')
+              // Remove optimistic message
+              setMessages(prev => prev.filter(m => m.id !== optimisticMessage.id))
+            }
+          }
+        )
+      }
+    } catch (error) {
+      console.error('Error in handleSend:', error)
+      setError('Erro ao processar mensagem')
+      // Remove optimistic message
+      setMessages(prev => prev.filter(m => m.id !== optimisticMessage.id))
+    }
   }
 
-  // If we are in the "Welcome" state (only 1 message from assistant), show the specific layout
-  // Actually, the reference image shows the chat history view with the welcome message.
-  // The Empty State (logo centered) is for when there are ZERO messages. 
-  // Our 'welcome' conversation has 1 message.
-  
-  // However, the user might want the "Empty State" with the suggestions if it's TRULY a new blank chat.
-  // But the prompt asked to make the mocked chat look like the reference (which has text).
-  // Let's assume "New Chat" starts empty (suggestions), and "Notion AI" history item (if existed) would show the text.
-  // BUT, usually "New Chat" in Notion AI *starts* with the "What's our quest today?" screen.
-  // The text in the image looks like a specific "Onboarding" or "Update" message thread.
-  
-  // Let's keep the empty state for true "New Chat" (empty array) and use the 'welcome' text for a specific "What's new" chat 
-  // OR just default unknown chats to the Welcome text to satisfy "Deixe o Chat mocado mais parecido que esse".
-  
-  // I will make it so that if it's 'New Chat' tab, it shows empty state.
-  // If it's anything else unknown, it shows the Welcome text.
-  
-  if (messages.length === 0) {
-    return (
-      <div className="flex flex-col h-full items-center justify-center p-4 md:p-8 space-y-8 relative overflow-hidden bg-background">
-        <div className="text-center space-y-2 relative z-10 mb-4 flex flex-col items-center">
-           {/* Custom Logo */}
-           <div className="relative w-48 h-16 mb-4">
-             <Image 
-               src="/logoSaca_preta.png" 
-               alt="Scaffold Logo" 
-               fill
-               className="object-contain dark:hidden"
-               priority
-             />
-             <Image 
-               src="/logoSca_branca.png" 
-               alt="Scaffold Logo" 
-               fill
-               className="object-contain hidden dark:block"
-               priority
-             />
-           </div>
-        </div>
+  // Compute whether we're in a "thinking" state
+  const isThinking = isStreaming || isGovernanceStreaming || isCreatingChat || isSendingMessage
 
-        <div className="w-full max-w-2xl space-y-0 relative z-10">
+  // Display messages with streaming content
+  const displayMessages = React.useMemo(() => {
+    const msgs = [...messages]
+
+    // Add streaming content as a temporary assistant message
+    const activeStreamContent = isGovernanceStreaming ? governanceStreamContent : streamingContent
+    const activeIsStreaming = isStreaming || isGovernanceStreaming
+
+    if (activeIsStreaming && activeStreamContent) {
+      msgs.push({
+        id: 'streaming',
+        role: 'assistant',
+        content: activeStreamContent
+      })
+    }
+
+    return msgs
+  }, [messages, isStreaming, isGovernanceStreaming, streamingContent, governanceStreamContent])
+
+  // Empty state (no messages yet)
+  if (displayMessages.length === 0 && !isLoadingMessages) {
+    return (
+      <div className="flex flex-col h-full items-center relative overflow-hidden bg-background">
+        <div className="flex-1 flex items-center justify-center">
+          <h1 className="text-4xl font-semibold text-foreground">Como posso te ajudar hoje?</h1>
+        </div>
+        <div className="w-full max-w-2xl space-y-0 pb-12 px-4">
            <div className={cn(
              "relative rounded-xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md flex flex-col",
              suggestions.length > 0 ? "rounded-b-none border-b-0" : ""
            )}>
              <div className="p-3">
-               <Textarea 
-                 className="w-full border-0 shadow-none  bg-transparent px-2 text-sm placeholder:text-muted-foreground/50 h-auto min-h-[50px] resize-none focus-visible:ring-0 focus-visible:ring-offset-0" 
-                 placeholder="Ask anything..."
+               <Textarea
+                 className="w-full border-0 shadow-none  bg-transparent px-2 text-sm placeholder:text-muted-foreground/50 h-auto min-h-[50px] resize-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                 placeholder="Pergunte qualquer coisa..."
                  value={inputValue}
                  onChange={(e) => setInputValue(e.target.value)}
                  onKeyDown={(e) => {
@@ -216,23 +302,37 @@ export function ChatView({ tabId, tabData }: { tabId: string; tabData?: any }) {
                  }}
                  autoFocus
                />
-               
+
                <div className="flex items-center justify-between px-2 pt-2">
                  <div className="flex items-center gap-2">
                    <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-muted-foreground hover:text-foreground rounded-full bg-muted/50 hover:bg-muted text-xs font-medium">
                      <MagnifyingGlass weight="bold" className="h-3.5 w-3.5" />
-                     Focus
+                     Foco
                    </Button>
                    <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted text-xs font-medium">
                      <Paperclip weight="bold" className="h-3.5 w-3.5" />
-                     Attach
+                     Anexar
                    </Button>
                    <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted text-xs font-medium">
                      <Microphone weight="bold" className="h-3.5 w-3.5" />
-                     Voice
+                     Voz
+                   </Button>
+                   <Button
+                     variant="ghost"
+                     size="sm"
+                     className={cn(
+                       "h-7 gap-1.5 rounded-full text-xs font-medium transition-colors",
+                       governanceMode
+                         ? "bg-red-500/10 text-red-600 hover:bg-red-500/20 dark:text-red-400"
+                         : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                     )}
+                     onClick={() => setGovernanceMode(!governanceMode)}
+                   >
+                     <ShieldCheck weight={governanceMode ? "fill" : "bold"} className="h-3.5 w-3.5" />
+                     Governança
                    </Button>
                  </div>
-                 
+
                  <div className="flex items-center gap-3">
                    <div className="flex items-center gap-1.5">
                       <span className="text-[10px] text-muted-foreground font-medium">Pro</span>
@@ -240,16 +340,16 @@ export function ChatView({ tabId, tabData }: { tabId: string; tabData?: any }) {
                         <div className="absolute left-0.5 top-0.5 h-3 w-3 bg-background rounded-full shadow-sm"></div>
                       </div>
                    </div>
-                   <Button 
-                      size="icon" 
+                   <Button
+                      size="icon"
                       className={cn(
                         "h-8 w-8 rounded-full transition-all duration-200",
-                        inputValue.trim() 
-                          ? "bg-primary hover:bg-primary/90 text-primary-foreground" 
+                        inputValue.trim()
+                          ? "bg-primary hover:bg-primary/90 text-primary-foreground"
                           : "bg-muted text-muted-foreground cursor-not-allowed"
                       )}
                       onClick={inputValue.trim() ? handleSend : undefined}
-                      disabled={!inputValue.trim()}
+                      disabled={!inputValue.trim() || isThinking}
                    >
                       <ArrowRight weight="bold" className="h-4 w-4" />
                    </Button>
@@ -302,24 +402,20 @@ export function ChatView({ tabId, tabData }: { tabId: string; tabData?: any }) {
     <div className="flex flex-col h-full max-w-3xl mx-auto">
       {/* Date Header for the reference look */}
       <div className="flex justify-center py-4">
-         <span className="text-xs text-muted-foreground font-medium">Wednesday, Jan 14 • Scaffold AI</span>
+         <span className="text-xs text-muted-foreground font-medium">Wednesday, Jan 14 • Redline AI</span>
       </div>
 
       <ScrollArea className="flex-1 px-4">
         <div className="space-y-8 pb-4">
-          {messages.map((msg, index) => (
+          {displayMessages.map((msg, index) => (
             <div key={msg.id} className={`flex gap-4 group ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
               {msg.role !== 'user' && (
-                <div className="flex-shrink-0">
-                  <Avatar className="h-8 w-8 border border-background">
-                    <AvatarImage src="/iso_Aw.png" className="dark:hidden" />
-                    <AvatarImage src="/iso_Ad.png" className="hidden dark:block" />
-                    <AvatarFallback>AI</AvatarFallback>
-                  </Avatar>
+                <div className="flex-shrink-0 h-8 w-6 overflow-hidden">
+                  <img src="/logo-removebg-preview.png" alt="RedLine" className="h-full w-auto max-w-none dark:brightness-100 brightness-0" />
                 </div>
               )}
               <div className={`flex-1 space-y-2 min-w-0 ${msg.role === 'user' ? 'flex flex-col items-end' : ''}`}>
-                
+
                 {/* Thought Process (Collapsible) */}
                 {msg.thought && (
                   <Collapsible>
@@ -339,7 +435,7 @@ export function ChatView({ tabId, tabData }: { tabId: string; tabData?: any }) {
 
                 {/* Message Content */}
                 <div className={`text-sm leading-7 whitespace-pre-wrap ${msg.role === 'user' ? 'bg-muted/50 px-4 py-2 rounded-2xl rounded-tr-sm text-right max-w-[80%]' : 'text-foreground/90'}`}>
-                  {msg.content.split('**').map((part, i) => 
+                  {msg.content.split('**').map((part, i) =>
                       i % 2 === 1 ? <strong key={i} className="font-semibold text-foreground">{part}</strong> : part
                   )}
                 </div>
@@ -361,25 +457,25 @@ export function ChatView({ tabId, tabData }: { tabId: string; tabData?: any }) {
               </div>
             </div>
           ))}
-          
+
           {/* Thinking Animation */}
-          {isThinking && (
+          {isThinking && !streamingContent && !governanceStreamContent && (
             <div className="flex gap-4 group">
               <div className="flex-1 space-y-2 min-w-0">
                 <div className="flex items-center gap-2">
-                  <svg 
-                    className="h-4 w-4 animate-spin text-muted-foreground" 
-                    viewBox="0 0 16 16" 
-                    fill="none" 
+                  <svg
+                    className="h-4 w-4 animate-spin text-muted-foreground"
+                    viewBox="0 0 16 16"
+                    fill="none"
                     xmlns="http://www.w3.org/2000/svg"
                   >
-                    <path 
-                      d="M8 0C3.6 0 0 3.6 0 8C0 12.4 3.6 16 8 16C12.4 16 16 12.4 16 8C16 3.6 12.4 0 8 0ZM8 14C4.7 14 2 11.3 2 8C2 4.7 4.7 2 8 2C11.3 2 14 4.7 14 8C14 11.3 11.3 14 8 14Z" 
+                    <path
+                      d="M8 0C3.6 0 0 3.6 0 8C0 12.4 3.6 16 8 16C12.4 16 16 12.4 16 8C16 3.6 12.4 0 8 0ZM8 14C4.7 14 2 11.3 2 8C2 4.7 4.7 2 8 2C11.3 2 14 4.7 14 8C14 11.3 11.3 14 8 14Z"
                       fill="currentColor"
                       fillOpacity="0.4"
                     />
-                    <path 
-                      d="M8 2C9.5 2 10.8 2.5 11.8 3.3L13.2 1.9C11.8 0.7 10 0 8 0V2Z" 
+                    <path
+                      d="M8 2C9.5 2 10.8 2.5 11.8 3.3L13.2 1.9C11.8 0.7 10 0 8 0V2Z"
                       fill="currentColor"
                     />
                   </svg>
@@ -394,9 +490,9 @@ export function ChatView({ tabId, tabData }: { tabId: string; tabData?: any }) {
       <div className="p-4 pb-6">
         <div className="relative bg-card rounded-xl border border-border shadow-sm flex flex-col">
            <div className="p-3">
-             <Textarea 
-               className="w-full border-0 shadow-none bg-transparent px-2 text-sm placeholder:text-sm placeholder:text-muted-foreground/50 h-auto min-h-[50px] max-h-[200px] resize-none focus-visible:ring-0 focus-visible:ring-offset-0" 
-               placeholder="Ask anything..."
+             <Textarea
+               className="w-full border-0 shadow-none bg-transparent px-2 text-sm placeholder:text-sm placeholder:text-muted-foreground/50 h-auto min-h-[50px] max-h-[200px] resize-none focus-visible:ring-0 focus-visible:ring-offset-0"
+               placeholder="Pergunte qualquer coisa..."
                value={inputValue}
                onChange={(e) => setInputValue(e.target.value)}
                onKeyDown={(e) => {
@@ -405,24 +501,25 @@ export function ChatView({ tabId, tabData }: { tabId: string; tabData?: any }) {
                    handleSend()
                  }
                }}
+               disabled={isThinking}
              />
-             
+
              <div className="flex items-center justify-between px-2 pt-2">
                <div className="flex items-center gap-2">
                  <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted text-xs font-medium">
                    <MagnifyingGlass weight="bold" className="h-3.5 w-3.5" />
-                   Focus
+                   Foco
                  </Button>
                  <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted text-xs font-medium">
                    <Paperclip weight="bold" className="h-3.5 w-3.5" />
-                   Attach
+                   Anexar
                  </Button>
                  <Button variant="ghost" size="sm" className="h-7 gap-1.5 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted text-xs font-medium">
                    <Microphone weight="bold" className="h-3.5 w-3.5" />
-                   Voice
+                   Voz
                  </Button>
                </div>
-               
+
                <div className="flex items-center gap-3">
                  <div className="flex items-center gap-1.5">
                     <span className="text-[10px] text-muted-foreground font-medium">Pro</span>
@@ -430,16 +527,16 @@ export function ChatView({ tabId, tabData }: { tabId: string; tabData?: any }) {
                       <div className="absolute left-0.5 top-0.5 h-3 w-3 bg-background rounded-full shadow-sm"></div>
                     </div>
                  </div>
-                 <Button 
-                    size="icon" 
+                 <Button
+                    size="icon"
                     className={cn(
                       "h-8 w-8 rounded-full transition-all duration-200",
-                      inputValue.trim() 
-                        ? "bg-primary hover:bg-primary/90 text-primary-foreground" 
+                      inputValue.trim() && !isThinking
+                        ? "bg-primary hover:bg-primary/90 text-primary-foreground"
                         : "bg-muted text-muted-foreground cursor-not-allowed"
                     )}
                     onClick={inputValue.trim() ? handleSend : undefined}
-                    disabled={!inputValue.trim()}
+                    disabled={!inputValue.trim() || isThinking}
                  >
                     <ArrowRight weight="bold" className="h-4 w-4" />
                  </Button>

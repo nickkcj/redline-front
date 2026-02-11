@@ -122,18 +122,18 @@ export function PendingInvitesBanner() {
 
   return (
     <>
-      <Card className="border-dashed border-2 hover:border-primary/50 transition-colors">
+      <Card className="border-dashed border-2 border-zinc-700 hover:border-red-500/40 transition-colors">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
-            <Mail className="h-5 w-5" />
+            <EnvelopeSimple className="h-5 w-5 text-red-400" />
             Recebeu um Convite?
           </CardTitle>
           <CardDescription>
             Se você recebeu um convite por email para participar de um workspace, clique abaixo para aceitar
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Button onClick={() => setDialogOpen(true)} variant="outline" className="w-full sm:w-auto">
+        <CardContent className="pb-6">
+          <Button onClick={() => setDialogOpen(true)} variant="outline" className="w-full sm:w-auto border-red-500/30 text-red-400 hover:bg-red-500/10 hover:text-red-300">
             Aceitar Convite
           </Button>
         </CardContent>
@@ -187,7 +187,7 @@ export function PendingInvitesBanner() {
 
             {error && (
               <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
+                <WarningCircle className="h-4 w-4" />
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
@@ -207,12 +207,12 @@ export function PendingInvitesBanner() {
             <Button onClick={handleAcceptInvite} disabled={isAccepting || !code.trim()}>
               {isAccepting ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <CircleNotch className="mr-2 h-4 w-4 animate-spin" />
                   Aceitando...
                 </>
               ) : (
                 <>
-                  <CheckCircle2 className="mr-2 h-4 w-4" />
+                  <CheckCircle className="mr-2 h-4 w-4" />
                   Aceitar Convite
                 </>
               )}

@@ -33,6 +33,7 @@ export function DocumentViewerPanel({ className }: DocumentViewerPanelProps) {
     documentId,
     documentName,
     viewUrl,
+    highlightText,
     isLoading,
     error,
     isPdfFile,
@@ -109,7 +110,7 @@ export function DocumentViewerPanel({ className }: DocumentViewerPanelProps) {
                   onClick={zoomOut}
                   disabled={scale <= 0.5 || isLoading}
                 >
-                  <ZoomOut className="h-4 w-4" />
+                  <MagnifyingGlassMinus className="h-4 w-4" />
                 </Button>
 
                 <span className="text-sm font-mono min-w-[50px] text-center">
@@ -122,7 +123,7 @@ export function DocumentViewerPanel({ className }: DocumentViewerPanelProps) {
                   onClick={zoomIn}
                   disabled={scale >= 3.0 || isLoading}
                 >
-                  <ZoomIn className="h-4 w-4" />
+                  <MagnifyingGlassPlus className="h-4 w-4" />
                 </Button>
               </>
             )}
@@ -140,18 +141,26 @@ export function DocumentViewerPanel({ className }: DocumentViewerPanelProps) {
         </div>
       </div>
 
+      {/* Highlight banner */}
+      {highlightText && (
+        <div className="flex-shrink-0 border-b bg-yellow-50 dark:bg-yellow-950/30 px-3 py-2">
+          <p className="text-[11px] font-medium text-yellow-800 dark:text-yellow-300 mb-0.5">Cláusula violada:</p>
+          <p className="text-[11px] text-yellow-700 dark:text-yellow-400 line-clamp-3 leading-relaxed">{highlightText}</p>
+        </div>
+      )}
+
       {/* Content */}
       <div className="flex-1 min-h-0 overflow-hidden">
         {isLoading && (
           <div className="flex flex-col items-center justify-center h-full">
-            <Loader2 className="h-8 w-8 animate-spin mb-4" />
+            <CircleNotch weight="bold" className="h-8 w-8 animate-spin mb-4" />
             <p className="text-sm text-muted-foreground">Carregando documento...</p>
           </div>
         )}
 
         {error && (
           <div className="flex flex-col items-center justify-center h-full text-center p-6">
-            <AlertCircle className="h-12 w-12 text-destructive mb-4" />
+            <WarningCircle className="h-12 w-12 text-destructive mb-4" />
             <p className="text-lg font-medium mb-2">Erro ao carregar documento</p>
             <p className="text-sm text-muted-foreground mb-4">
               {error.message || 'Não foi possível carregar o documento. Tente novamente.'}
@@ -170,6 +179,7 @@ export function DocumentViewerPanel({ className }: DocumentViewerPanelProps) {
                 className="h-full"
                 scale={scale}
                 onLoadSuccess={handlePdfLoad}
+                highlightText={highlightText || undefined}
               />
             ) : isMarkdownFile(documentName) ? (
               <MarkdownViewer url={viewUrl} className="h-full" />

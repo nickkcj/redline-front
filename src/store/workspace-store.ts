@@ -68,16 +68,13 @@ interface WorkspaceState {
   addTabWithSplitChoice: (type: TabType, title: string, data?: any) => void
 }
 
-const defaultWorkspaces: Workspace[] = [
-  { id: 'ws-1', name: "Castro's Space", icon: 'CN', plan: 'Free Plan' },
-  { id: 'ws-2', name: "Dooor Foundation", icon: 'DF', plan: 'Enterprise' },
-  { id: 'ws-3', name: "Nathan Castro's Space", icon: 'NC', plan: 'Pro' },
-]
+// Empty workspaces - will be populated from API
+const defaultWorkspaces: Workspace[] = []
 
 export const useWorkspaceStore = create<WorkspaceState>((set, get) => ({
-  // Workspace Defaults
+  // Workspace Defaults - empty until loaded from API
   workspaces: defaultWorkspaces,
-  activeWorkspaceId: defaultWorkspaces[0].id,
+  activeWorkspaceId: null as unknown as string,
   setActiveWorkspace: (id) => set({ activeWorkspaceId: id }),
 
   // Tab Defaults

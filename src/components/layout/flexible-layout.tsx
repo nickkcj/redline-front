@@ -80,8 +80,8 @@ export function FlexibleLayout({
                 <span className="text-sm font-bold">S</span>
               </div>
               <div className="flex flex-col">
-                <span className="text-sm font-semibold">Scaffold</span>
-                <span className="text-xs text-muted-foreground">DOOOR</span>
+                <span className="text-sm font-semibold">Redline</span>
+                <span className="text-xs text-muted-foreground">Platform</span>
               </div>
             </div>
           </SidebarHeader>

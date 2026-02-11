@@ -18,7 +18,7 @@ const PDFViewer = dynamic(
     ssr: false,
     loading: () => (
       <div className="flex flex-col items-center justify-center h-96">
-        <Loader2 className="h-12 w-12 animate-spin mb-4 text-primary" />
+        <CircleNotch weight="bold" className="h-12 w-12 animate-spin mb-4 text-primary" />
         <p className="text-sm text-muted-foreground">Carregando visualizador PDF...</p>
       </div>
     ),
@@ -54,7 +54,7 @@ export function UnifiedDocumentViewer() {
     if (isLoading) {
       return (
         <div className="flex flex-col items-center justify-center h-96">
-          <Loader2 className="h-12 w-12 animate-spin mb-4 text-primary" />
+          <CircleNotch weight="bold" className="h-12 w-12 animate-spin mb-4 text-primary" />
           <p className="text-sm text-muted-foreground">Carregando documento...</p>
         </div>
       )
@@ -63,7 +63,7 @@ export function UnifiedDocumentViewer() {
     if (error) {
       return (
         <div className="flex flex-col items-center justify-center h-96 text-center p-6">
-          <AlertCircle className="h-16 w-16 text-destructive mb-4" />
+          <WarningCircle className="h-16 w-16 text-destructive mb-4" />
           <h3 className="text-lg font-semibold mb-2">Erro ao carregar documento</h3>
           <p className="text-sm text-muted-foreground mb-4">
             {error.message || "Não foi possível carregar o documento"}
@@ -76,7 +76,7 @@ export function UnifiedDocumentViewer() {
     if (!viewUrl || !fileName) {
       return (
         <div className="flex flex-col items-center justify-center h-96">
-          <Loader2 className="h-12 w-12 animate-spin mb-4 text-primary" />
+          <CircleNotch weight="bold" className="h-12 w-12 animate-spin mb-4 text-primary" />
           <p className="text-sm text-muted-foreground">Preparando documento...</p>
         </div>
       )
@@ -106,7 +106,7 @@ export function UnifiedDocumentViewer() {
     // Fallback for unsupported file types
     return (
       <div className="flex flex-col items-center justify-center h-96 text-center p-6">
-        <AlertCircle className="h-16 w-16 text-muted-foreground mb-4" />
+        <WarningCircle className="h-16 w-16 text-muted-foreground mb-4" />
         <h3 className="text-lg font-semibold mb-2">Tipo de arquivo não suportado</h3>
         <p className="text-sm text-muted-foreground mb-4">
           Este tipo de arquivo não pode ser visualizado diretamente.
@@ -135,7 +135,7 @@ export function UnifiedDocumentViewer() {
                   onClick={handleDownload}
                   title="Abrir em nova aba"
                 >
-                  <ExternalLink className="h-4 w-4" />
+                  <ArrowSquareOut className="h-4 w-4" />
                 </Button>
               )}
               <Button

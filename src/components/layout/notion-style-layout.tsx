@@ -31,9 +31,9 @@ interface NotionStyleLayoutProps {
 }
 
 const workspaces = [
-  { id: 1, name: "Castro's Space", icon: 'CN', active: true },
-  { id: 2, name: 'Dooor Foundation', icon: 'DF', active: false },
-  { id: 3, name: "Nathan Castro's Space", icon: 'NC', active: false },
+  { id: 1, name: "My Workspace", icon: 'MW', active: true },
+  { id: 2, name: 'Redline Team', icon: 'RT', active: false },
+  { id: 3, name: "Compliance Dept", icon: 'CD', active: false },
 ]
 
 const chatHistory = [

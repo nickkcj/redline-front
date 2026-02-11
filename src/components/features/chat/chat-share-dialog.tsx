@@ -44,11 +44,8 @@ export function ChatShareDialog({ children }: { children: React.ReactNode }) {
   const [inviteEmail, setInviteEmail] = React.useState("")
   const [generalAccess, setGeneralAccess] = React.useState<'restricted' | 'workspace' | 'public'>('restricted')
   
-  // Mock members data
-  const [members, setMembers] = React.useState<ChatMember[]>([
-    { id: '1', name: 'Castro', email: 'castro@dooor.ai', role: 'owner', avatar: '/image 161.png' },
-    { id: '2', name: 'Lucas Ponce', email: 'ponce@dooor.ai', role: 'can_edit', isGuest: true, avatar: '/image 36.png' },
-  ])
+  // TODO: Fetch members from API based on current user/chat
+  const [members, setMembers] = React.useState<ChatMember[]>([])
 
   const handleInvite = () => {
     if (!inviteEmail) return
@@ -176,7 +173,7 @@ export function ChatShareDialog({ children }: { children: React.ReactNode }) {
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="sm" className="h-auto p-0 hover:bg-transparent justify-start gap-1 font-medium">
                         {generalAccess === 'restricted' && "Only people invited"}
-                        {generalAccess === 'workspace' && "Everyone at Dooor Foundation"}
+                        {generalAccess === 'workspace' && "Everyone at Organization"}
                         {generalAccess === 'public' && "Anyone on the web with link"}
                         <CaretDown className="h-3 w-3 text-muted-foreground" />
                       </Button>
@@ -189,7 +186,7 @@ export function ChatShareDialog({ children }: { children: React.ReactNode }) {
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => setGeneralAccess('workspace')}>
                         <Users className="h-4 w-4 mr-2" />
-                        Everyone at Dooor Foundation
+                        Everyone at Organization
                         {generalAccess === 'workspace' && <Check className="h-3.5 w-3.5 ml-auto" />}
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => setGeneralAccess('public')}>

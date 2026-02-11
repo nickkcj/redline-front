@@ -106,81 +106,102 @@ export function LoginPage() {
 
   return (
     <div className="min-h-screen w-full lg:grid lg:grid-cols-2">
-      {/* Left Side - Image with Logo */}
-      <div className="hidden lg:block relative bg-muted overflow-hidden">
-        <Image
-          src="/bglogin.png"
-          alt="Background"
-          fill
-          className="object-cover animate-zoom-in"
-          priority
-          quality={100}
-        />
-        {/* Dark overlay */}
-        <div className="absolute inset-0 bg-black/40 z-10" />
-        
-        {/* Logo centered */}
-        <div className="absolute inset-0 flex items-center justify-center p-12 z-20">
-          <div className="relative w-full max-w-sm h-20">
+      {/* Left Side - Brand & CTA */}
+      <div className="hidden lg:flex relative bg-zinc-950 overflow-hidden flex-col items-center justify-center p-12">
+        {/* Subtle gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 via-zinc-950 to-black" />
+
+        {/* Decorative elements */}
+        <div className="absolute top-0 left-0 w-96 h-96 bg-red-500/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-red-500/5 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
+
+        {/* Content */}
+        <div className="relative z-10 flex flex-col items-center text-center max-w-md space-y-6">
+          {/* Logo */}
+          <div className="relative w-72 h-24">
             <Image
-              src="/logoSca_branca.png"
-              alt="Scaffold"
+              src="/logo-removebg-preview.png"
+              alt="Redline"
               fill
               className="object-contain"
               priority
             />
           </div>
+
+          {/* Tagline */}
+          <div className="space-y-3">
+            <h2 className="text-2xl font-bold text-white tracking-tight">
+              Governança e compliance potencializados por IA
+            </h2>
+            <p className="text-zinc-400 text-base leading-relaxed">
+              Processos automatizados, conformidade monitorada e documentos centralizados em um só lugar.
+            </p>
+          </div>
+
+          {/* Features */}
+          <div className="grid grid-cols-2 gap-5 pt-2 w-full">
+            <div className="flex items-center gap-3 text-left">
+              <div className="h-10 w-10 rounded-lg bg-red-500/10 flex items-center justify-center shrink-0">
+                <svg className="h-5 w-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <span className="text-sm text-zinc-300">Gestão documental inteligente</span>
+            </div>
+            <div className="flex items-center gap-3 text-left">
+              <div className="h-10 w-10 rounded-lg bg-red-500/10 flex items-center justify-center shrink-0">
+                <svg className="h-5 w-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <span className="text-sm text-zinc-300">Compliance automatizado</span>
+            </div>
+            <div className="flex items-center gap-3 text-left">
+              <div className="h-10 w-10 rounded-lg bg-red-500/10 flex items-center justify-center shrink-0">
+                <svg className="h-5 w-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <span className="text-sm text-zinc-300">Dados protegidos e seguros</span>
+            </div>
+            <div className="flex items-center gap-3 text-left">
+              <div className="h-10 w-10 rounded-lg bg-red-500/10 flex items-center justify-center shrink-0">
+                <svg className="h-5 w-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              <span className="text-sm text-zinc-300">Equipe conectada em tempo real</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <style jsx global>{`
-        @keyframes zoom-in {
-          0% {
-            transform: scale(1);
-          }
-          100% {
-            transform: scale(1.1);
-          }
-        }
-
-        .animate-zoom-in {
-          animation: zoom-in 8s ease-out forwards;
-        }
-      `}</style>
-
       {/* Right Side - Form */}
-      <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="w-full max-w-sm space-y-8">
+      <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-zinc-950">
+        <div className="w-full max-w-sm space-y-10">
           {/* Title */}
-          <div className="flex flex-col items-center text-center space-y-2">
-            {/* Mobile/Form Logo */}
-            <div className="relative w-48 h-12 mb-4 lg:hidden">
-              <Image 
-                src="/logoSaca_preta.png" 
-                alt="Scaffold" 
+          <div className="flex flex-col items-center text-center space-y-3">
+            {/* Mobile Logo */}
+            <div className="relative w-56 h-16 mb-4 lg:hidden">
+              <Image
+                src="/logo-removebg-preview.png"
+                alt="Redline"
                 fill
-                className="object-contain dark:hidden"
-                priority
-              />
-              <Image 
-                src="/logoSca_branca.png" 
-                alt="Scaffold" 
-                fill
-                className="object-contain hidden dark:block"
+                className="object-contain dark:invert"
                 priority
               />
             </div>
 
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-              Criar uma conta
+            <h1 className="text-2xl font-semibold tracking-tight text-white">
+              Bem-vindo ao RedLine
             </h1>
-            <p className="text-sm text-muted-foreground">
-              Digite seu email abaixo para criar sua conta
+            <p className="text-sm text-zinc-400">
+              Digite seu email para acessar a plataforma
             </p>
           </div>
 
           {/* Forms */}
-          <div className="space-y-4">
+          <div className="space-y-6">
             {!magicLinkSent ? (
               <>
                 <LoginForm
@@ -188,12 +209,12 @@ export function LoginPage() {
                   isMagicLinkLoading={isMagicLinkLoading}
                 />
 
-                <div className="relative">
+                <div className="relative py-1">
                   <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-border" />
+                    <span className="w-full border-t border-zinc-800" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-background px-2 text-muted-foreground">
+                    <span className="bg-zinc-950 px-2 text-zinc-500">
                       Ou continue com
                     </span>
                   </div>
@@ -204,13 +225,13 @@ export function LoginPage() {
                   isGoogleLoading={isGoogleLoading}
                 />
 
-                <p className="text-center text-xs text-muted-foreground">
+                <p className="text-center text-xs text-zinc-500 pt-2">
                   Ao clicar em continuar, você concorda com nossos{' '}
-                  <a href="#" className="underline underline-offset-4 hover:text-foreground">
+                  <a href="#" className="underline underline-offset-4 hover:text-zinc-300">
                     Termos de Serviço
                   </a>{' '}
                   e{' '}
-                  <a href="#" className="underline underline-offset-4 hover:text-foreground">
+                  <a href="#" className="underline underline-offset-4 hover:text-zinc-300">
                     Política de Privacidade
                   </a>
                   .

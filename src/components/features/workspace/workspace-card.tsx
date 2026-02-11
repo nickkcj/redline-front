@@ -30,11 +30,11 @@ export function WorkspaceCard({
 }: WorkspaceCardProps) {
   return (
     <div
-      className="group relative bg-background border border-border rounded-lg p-4 cursor-pointer transition-all hover:bg-accent/30 w-full sm:w-[280px]"
+      className="group relative bg-background/90 backdrop-blur-sm border border-border rounded-xl p-6 cursor-pointer transition-all duration-200 hover:shadow-lg hover:shadow-red-500/10 hover:border-red-500/30 hover:-translate-y-0.5 w-full sm:w-[calc(50%-12px)] sm:min-w-[320px] sm:max-w-[480px] shadow-sm"
       onClick={onEnter}
     >
       {/* Menu Button - Always visible on hover */}
-      <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -77,11 +77,11 @@ export function WorkspaceCard({
 
       {/* Content */}
       <div className="pr-8">
-        <h3 className="text-base font-medium text-foreground mb-1 truncate">
+        <h3 className="text-2xl font-semibold text-foreground mb-2 break-words group-hover:text-foreground transition-colors">
           {workspace.name}
         </h3>
-        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-          {workspace.description || 'Sem descrição'}
+        <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
+          {workspace.description || <span className="italic">Sem descrição</span>}
         </p>
         {workspace.createdAt && (
           <p className="text-xs text-muted-foreground">

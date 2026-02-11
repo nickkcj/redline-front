@@ -37,23 +37,21 @@ export function WorkspacesHeader({
       </div>
 
       {/* Page Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-foreground tracking-tight">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex-1">
+          <h1 className="text-2xl sm:text-3xl font-semibold text-foreground tracking-tight">
             Projetos
           </h1>
-          <p className="text-muted-foreground mt-1 text-sm">
+          <p className="text-muted-foreground mt-1.5 text-sm sm:text-base">
             Gerencie seus projetos de trabalho
           </p>
         </div>
         {canCreateWorkspace && (
           <Button
             onClick={onCreateClick}
-            variant="default"
-            size="sm"
-            className="gap-1.5 h-8 px-3 bg-ring hover:bg-ring/90 text-white rounded-md"
+            className="w-full sm:w-auto transition-all cursor-pointer duration-200 hover:shadow-lg hover:shadow-red-500/20 hover:scale-[1.02] bg-red-600 hover:bg-red-700 text-white shadow-sm"
           >
-            <Plus weight="bold" className="size-4" />
+            <Plus weight="bold" className="size-4 mr-2" />
             Novo Projeto
           </Button>
         )}

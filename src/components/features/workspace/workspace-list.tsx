@@ -168,8 +168,8 @@ export function WorkspaceList() {
 
   if (isLoading) {
     return (
-      <div className="max-w-5xl mx-auto px-6">
-        <div className="flex flex-col gap-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="@container/main flex flex-col gap-6 py-6">
           <div className="space-y-2">
             <Skeleton className="h-5 w-48" />
           </div>
@@ -188,8 +188,8 @@ export function WorkspaceList() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-6">
-      <div className="flex flex-col gap-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="@container/main flex flex-col gap-6 py-6 animate-in fade-in duration-500">
         <WorkspacesHeader
           organizationName={currentOrganization?.name || 'Organização'}
           canCreateWorkspace={canManageWorkspaces}
@@ -199,7 +199,7 @@ export function WorkspaceList() {
 
         <div>
           {workspaces.length === 0 ? (
-            <div className="text-center py-12 border border-dashed border-border rounded-lg">
+            <div className="text-center py-12 border-2 border-dashed border-zinc-700 rounded-xl">
               <p className="text-muted-foreground">Nenhum projeto disponível.</p>
               {canManageWorkspaces && (
                 <p className="text-sm text-muted-foreground mt-1">
@@ -208,7 +208,7 @@ export function WorkspaceList() {
               )}
             </div>
           ) : (
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-6 pt-1">
               {workspaces.map((workspace) => (
                 <WorkspaceCard
                   key={workspace.id}

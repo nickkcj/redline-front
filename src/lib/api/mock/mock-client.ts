@@ -21,7 +21,7 @@ import type { DocumentResponseDto } from '../types/document.types'
 const mockDelay = () => new Promise(resolve => setTimeout(resolve, Math.random() * 300 + 200))
 
 // Flag para ativar/desativar o modo mock
-export const MOCK_MODE = true
+export const MOCK_MODE = false // Disabled - using real API
 
 class MockApiClient {
   private isAuthenticated = false

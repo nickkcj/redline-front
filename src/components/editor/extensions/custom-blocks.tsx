@@ -30,7 +30,7 @@ export const Callout = Node.create({
     const type = HTMLAttributes['data-type'] || 'info'
     
     const colorClasses: Record<string, string> = {
-      info: 'border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-950/20',
+      info: 'border-l-4 border-red-500 bg-red-50 dark:bg-red-950/20',
       warning: 'border-l-4 border-yellow-500 bg-yellow-50 dark:bg-yellow-950/20',
       success: 'border-l-4 border-green-500 bg-green-50 dark:bg-green-950/20',
       error: 'border-l-4 border-red-500 bg-red-50 dark:bg-red-950/20',

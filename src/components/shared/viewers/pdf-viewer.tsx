@@ -31,14 +31,31 @@ interface PDFViewerProps {
   url: string
   className?: string
   scale?: number
+  highlightText?: string
   onLoadSuccess?: (numPages: number) => void
   onLoadStart?: () => void
+}
+
+function escapeRegex(str: string) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+function buildHighlightWords(text: string): string[] {
+  // Extract significant words (>3 chars) from the highlight text
+  return text
+    .replace(/[^\w\sàáâãéêíóôõúç]/gi, ' ')
+    .split(/\s+/)
+    .filter(w => w.length > 3)
+    .map(w => w.toLowerCase())
+    // Deduplicate
+    .filter((w, i, arr) => arr.indexOf(w) === i)
 }
 
 export function PDFViewer({
   url,
   className,
   scale = 1.0,
+  highlightText,
   onLoadSuccess,
   onLoadStart
 }: PDFViewerProps) {
@@ -47,6 +64,50 @@ export function PDFViewer({
   const [error, setError] = useState<string | null>(null)
   const [pagesToRender, setPagesToRender] = useState<number>(10) // Initially render only 10 pages
   const containerRef = useRef<HTMLDivElement>(null)
+  const hasScrolledToHighlight = useRef(false)
+
+  // Build highlight words from the ruleExcerpt
+  const highlightWords = React.useMemo(
+    () => highlightText ? buildHighlightWords(highlightText) : [],
+    [highlightText]
+  )
+
+  // DOM-based highlight: after a page renders, find matching spans and apply highlight
+  const applyHighlightToPage = useCallback(() => {
+    if (highlightWords.length === 0 || !containerRef.current) return
+    const spans = containerRef.current.querySelectorAll('.react-pdf__Page__textContent span')
+    spans.forEach((span) => {
+      const text = span.textContent || ''
+      const lowerText = text.toLowerCase()
+      if (highlightWords.some(w => lowerText.includes(w))) {
+        const el = span as HTMLElement
+        el.style.backgroundColor = '#fde047'
+        el.style.color = '#000'
+        el.style.borderRadius = '2px'
+        el.style.opacity = '0.8'
+        el.setAttribute('data-hl', '1')
+      }
+    })
+  }, [highlightWords])
+
+  // Auto-scroll to first highlight after render
+  useEffect(() => {
+    if (!highlightText || hasScrolledToHighlight.current || loading) return
+    const timer = setTimeout(() => {
+      applyHighlightToPage()
+      const mark = containerRef.current?.querySelector('[data-hl="1"]')
+      if (mark) {
+        mark.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        hasScrolledToHighlight.current = true
+      }
+    }, 2000) // Wait for pages to render
+    return () => clearTimeout(timer)
+  }, [highlightText, loading, pagesToRender, applyHighlightToPage])
+
+  // Reset scroll flag when highlight text changes
+  useEffect(() => {
+    hasScrolledToHighlight.current = false
+  }, [highlightText])
 
   // Configure PDF.js worker only on client side
   useEffect(() => {
@@ -263,6 +324,9 @@ export function PDFViewer({
                     renderTextLayer={true}
                     onRenderSuccess={() => {
                       console.log(`📄 [PDF-VIEWER] Page ${index + 1}/${numPages} rendered successfully`)
+                      if (highlightWords.length > 0) {
+                        setTimeout(applyHighlightToPage, 300)
+                      }
                     }}
                     onRenderError={(error) => {
                       console.error(`❌ [PDF-VIEWER] Page ${index + 1}/${numPages} render error:`, {

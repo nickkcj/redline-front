@@ -109,7 +109,7 @@ export function StatusBar({
   const getStatusIcon = () => {
     switch (statusType) {
       case 'loading':
-        return <CircleNotch weight="bold" className="h-3.5 w-3.5 animate-spin text-blue-500" />
+        return <CircleNotch weight="bold" className="h-3.5 w-3.5 animate-spin text-red-500" />
       case 'success':
         return <CheckCircle weight="fill" className="h-3.5 w-3.5 text-green-500" />
       case 'error':

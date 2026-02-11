@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, dev }) => {
     if (!isServer) {
       // Configure PDF.js worker
       config.resolve.alias = {
@@ -14,6 +14,15 @@ const nextConfig: NextConfig = {
         test: /\.mjs$/,
         include: /node_modules/,
         type: 'javascript/auto',
+      });
+    }
+
+    // Fix: pdfjs-dist 5.4.x ESM + webpack eval-source-map bug
+    // https://github.com/vercel/next.js/issues/89177
+    if (dev) {
+      Object.defineProperty(config, 'devtool', {
+        get() { return 'source-map' },
+        set() {},
       });
     }
 

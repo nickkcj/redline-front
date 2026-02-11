@@ -30,7 +30,7 @@ export function OrganizationCard({
 
   return (
     <div
-      className="bg-background/90 backdrop-blur-sm border border-border rounded-xl p-6 cursor-pointer relative group w-full sm:w-[calc(50%-12px)] sm:min-w-[320px] sm:max-w-[480px] shadow-sm hover:shadow-lg hover:border-border transition-all duration-200 hover:-translate-y-0.5"
+      className="bg-background/90 backdrop-blur-sm border border-border rounded-xl p-6 cursor-pointer relative group w-full sm:w-[calc(50%-12px)] sm:min-w-[320px] sm:max-w-[480px] shadow-sm hover:shadow-lg hover:shadow-red-500/10 hover:border-red-500/30 transition-all duration-200 hover:-translate-y-0.5"
       onClick={onEnter}
     >
       {/* Header */}
@@ -47,7 +47,7 @@ export function OrganizationCard({
         <div className="flex items-center gap-2 flex-shrink-0">
           {/* Show owner/member badge */}
           {isOwner ? (
-            <Badge variant="default" className="text-xs bg-blue-50 text-blue-700 border-blue-200 font-medium">
+            <Badge variant="default" className="text-xs bg-red-500/10 text-red-400 border-red-500/20 font-medium">
               Proprietário
             </Badge>
           ) : (
