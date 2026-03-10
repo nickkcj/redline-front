@@ -1,6 +1,6 @@
 # Como Usar o Editor Tiptap - Guia Rápido
 
-## Acessando o Editor
+## Acessando o Editorr
 
 ### Opção 1: Criar Novo Documento
 1. Navegue para `/documentos`
