@@ -137,7 +137,7 @@ export const getSlashCommands = (editor: any): SlashCommandItem[] => [
   {
     title: 'Heading 1',
     description: 'Large section heading',
-    icon: Heading1,
+    icon: TextHOne,
     command: ({ editor, range }: any) => {
       editor.chain().focus().deleteRange(range).setHeading({ level: 1 }).run()
     },
@@ -146,7 +146,7 @@ export const getSlashCommands = (editor: any): SlashCommandItem[] => [
   {
     title: 'Heading 2',
     description: 'Medium section heading',
-    icon: Heading2,
+    icon: TextHTwo,
     command: ({ editor, range }: any) => {
       editor.chain().focus().deleteRange(range).setHeading({ level: 2 }).run()
     },
@@ -155,7 +155,7 @@ export const getSlashCommands = (editor: any): SlashCommandItem[] => [
   {
     title: 'Heading 3',
     description: 'Small section heading',
-    icon: Heading3,
+    icon: TextHThree,
     command: ({ editor, range }: any) => {
       editor.chain().focus().deleteRange(range).setHeading({ level: 3 }).run()
     },
@@ -164,7 +164,7 @@ export const getSlashCommands = (editor: any): SlashCommandItem[] => [
   {
     title: 'Bulleted List',
     description: 'Create a simple list',
-    icon: List,
+    icon: ListBullets,
     command: ({ editor, range }: any) => {
       editor.chain().focus().deleteRange(range).toggleBulletList().run()
     },
@@ -173,7 +173,7 @@ export const getSlashCommands = (editor: any): SlashCommandItem[] => [
   {
     title: 'Numbered List',
     description: 'Create a numbered list',
-    icon: ListOrdered,
+    icon: ListNumbers,
     command: ({ editor, range }: any) => {
       editor.chain().focus().deleteRange(range).toggleOrderedList().run()
     },
@@ -191,7 +191,7 @@ export const getSlashCommands = (editor: any): SlashCommandItem[] => [
   {
     title: 'Quote',
     description: 'Capture a quote',
-    icon: Quote,
+    icon: Quotes,
     command: ({ editor, range }: any) => {
       editor.chain().focus().deleteRange(range).toggleBlockquote().run()
     },

@@ -311,7 +311,7 @@ export const TiptapEditor = ({
     // Only set initial content if editor is empty
     if (editor.isEmpty && content) {
       isUpdatingFromPropsRef.current = true
-      editor.commands.setContent(content, false)
+      editor.commands.setContent(content, { emitUpdate: false })
       setTimeout(() => {
         isUpdatingFromPropsRef.current = false
       }, 0)
@@ -330,7 +330,7 @@ export const TiptapEditor = ({
       
       const currentContent = contentRef.current
       if (currentContent) {
-        editor.commands.setContent(currentContent, false)
+        editor.commands.setContent(currentContent, { emitUpdate: false })
       } else {
         editor.commands.clearContent(false)
       }

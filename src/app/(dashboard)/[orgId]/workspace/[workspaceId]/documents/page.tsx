@@ -17,6 +17,7 @@ import {
   CheckCircle,
   Funnel,
 } from "@phosphor-icons/react"
+import type { Icon } from "@phosphor-icons/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
@@ -68,7 +69,7 @@ function formatFileSize(bytes: number): string {
  * Returns the appropriate icon and color for a file type
  */
 function getFileIcon(contentType: string): {
-  icon: React.ComponentType<{ className?: string; weight?: string }>
+  icon: Icon
   color: string
   label: string
 } {

@@ -13,7 +13,7 @@ import {
   mockChatMessages,
 } from './mock-data'
 import type { UserDTO } from '../types/user.types'
-import type { OrganizationWithWorkspaces, CreateOrganizationDto, UpdateOrganizationDto } from '../types/organization.types'
+import type { OrganizationWithWorkspaces, CreateOrganizationDto, UpdateOrganizationDto, WorkspaceSummary } from '../types/organization.types'
 import type { WorkspaceResponseDto, CreateWorkspaceDto, UpdateWorkspaceDto } from '../types/workspace.types'
 import type { DocumentResponseDto } from '../types/document.types'
 
@@ -136,15 +136,15 @@ class MockApiClient {
       name: data.name,
       description: data.description || '',
       organizationId,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
     }
     this.workspaces.push(newWorkspace)
     
     // Adiciona ao organization também
     const org = this.organizations.find(o => o.id === organizationId)
     if (org) {
-      org.workspaces.push(newWorkspace)
+      org.workspaces?.push(newWorkspace as unknown as WorkspaceSummary)
     }
     
     return newWorkspace
@@ -155,7 +155,7 @@ class MockApiClient {
     console.log('[MOCK] Update Workspace:', id, data)
     const workspace = this.workspaces.find(w => w.id === id)
     if (!workspace) throw new Error('Workspace not found')
-    Object.assign(workspace, data, { updatedAt: new Date().toISOString() })
+    Object.assign(workspace, data, { updatedAt: new Date() })
     return workspace
   }
 
@@ -166,7 +166,7 @@ class MockApiClient {
     
     // Remove do organization também
     this.organizations.forEach(org => {
-      org.workspaces = org.workspaces.filter(w => w.id !== id)
+      org.workspaces = org.workspaces?.filter(w => w.id !== id)
     })
   }
 
@@ -184,11 +184,14 @@ class MockApiClient {
       id: 'doc-' + Date.now(),
       name: file.name,
       description: '',
-      mimeType: file.type,
-      size: file.size,
-      url: URL.createObjectURL(file),
+      contentType: file.type,
+      sizeBytes: file.size,
+      checksum: '',
+      cortexdbRecordId: '',
+      cortexdbCollection: '',
+      isProcessed: false,
       workspaceId,
-      uploadedById: mockUser.id,
+      userId: mockUser.id,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     }
@@ -224,7 +227,7 @@ class MockApiClient {
       id: 'msg-' + Date.now(),
       role: 'assistant',
       content: 'Esta é uma resposta mockada. O backend não está conectado.',
-      timestamp: new Date().toISOString(),
+      timestamp: new Date(),
     }
   }
 

@@ -76,7 +76,7 @@ function DocumentosPage() {
     let current = folders.find(f => f.id === currentFolderId)
     while (current) {
       path.unshift(current)
-      current = folders.find(f => f.id === current.parentId)
+      current = folders.find(f => f.id === current!.parentId)
     }
     return [{ id: null, name: 'Files' }, ...path]
   }

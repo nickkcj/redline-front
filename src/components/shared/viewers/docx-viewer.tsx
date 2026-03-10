@@ -61,7 +61,7 @@ export function DocxViewer({ url, className }: DocxViewerProps) {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin mb-2" />
+        <CircleNotch className="h-8 w-8 animate-spin mb-2" />
         <p className="text-sm text-muted-foreground">Carregando documento DOCX...</p>
       </div>
     )
@@ -70,7 +70,7 @@ export function DocxViewer({ url, className }: DocxViewerProps) {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
-        <AlertCircle className="h-12 w-12 text-destructive mb-4" />
+        <WarningCircle className="h-12 w-12 text-destructive mb-4" />
         <p className="text-lg font-medium mb-2">Erro ao carregar documento DOCX</p>
         <p className="text-sm text-muted-foreground">{error}</p>
       </div>

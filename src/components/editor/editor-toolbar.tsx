@@ -260,9 +260,9 @@ export const EditorToolbar = ({ editor, onExport }: EditorToolbarProps) => {
 
         <Separator orientation="vertical" className="h-6" />
 
-        {/* ListBullets weight="bold"s */}
+        {/* Lists */}
         <Button
-          variant={editor.isActive('bulletListBullets weight="bold"') ? 'secondary' : 'ghost'}
+          variant={editor.isActive('bulletList') ? 'secondary' : 'ghost'}
           size="icon"
           className="h-8 w-8"
           onClick={() => editor.chain().focus().toggleBulletList().run()}
@@ -270,15 +270,15 @@ export const EditorToolbar = ({ editor, onExport }: EditorToolbarProps) => {
           <ListBullets weight="bold" className="h-4 w-4" />
         </Button>
         <Button
-          variant={editor.isActive('orderedListBullets weight="bold"') ? 'secondary' : 'ghost'}
+          variant={editor.isActive('orderedList') ? 'secondary' : 'ghost'}
           size="icon"
           className="h-8 w-8"
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
         >
-          <ListBullets weight="bold"Ordered className="h-4 w-4" />
+          <ListNumbers weight="bold" className="h-4 w-4" />
         </Button>
         <Button
-          variant={editor.isActive('taskListBullets weight="bold"') ? 'secondary' : 'ghost'}
+          variant={editor.isActive('taskList') ? 'secondary' : 'ghost'}
           size="icon"
           className="h-8 w-8"
           onClick={() => editor.chain().focus().toggleTaskList().run()}
@@ -352,7 +352,7 @@ export const EditorToolbar = ({ editor, onExport }: EditorToolbarProps) => {
 
         <Separator orientation="vertical" className="h-6" />
 
-        {/* ArrowCounterClockwise weight="bold"/ArrowClockwise weight="bold" */}
+        {/* Undo/Redo */}
         <Button
           variant="ghost"
           size="icon"

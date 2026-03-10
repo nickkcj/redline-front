@@ -91,7 +91,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             >
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors group-hover:bg-sidebar-accent">
                 <Avatar className="h-7 w-7">
-                  {user?.avatar && <AvatarImage src={user.avatar} alt="Account" />}
+                  {user?.image && <AvatarImage src={user.image} alt="Account" />}
                   <AvatarFallback className="bg-primary text-primary-foreground text-xs">
                     {userInitials}
                   </AvatarFallback>

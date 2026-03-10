@@ -46,7 +46,7 @@ export function TextViewer({ url, className }: TextViewerProps) {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin mb-2" />
+        <CircleNotch className="h-8 w-8 animate-spin mb-2" />
         <p className="text-sm text-muted-foreground">Carregando arquivo...</p>
       </div>
     )
@@ -55,7 +55,7 @@ export function TextViewer({ url, className }: TextViewerProps) {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
-        <AlertCircle className="h-12 w-12 text-destructive mb-4" />
+        <WarningCircle className="h-12 w-12 text-destructive mb-4" />
         <p className="text-lg font-medium mb-2">Erro ao carregar arquivo</p>
         <p className="text-sm text-muted-foreground">{error}</p>
       </div>

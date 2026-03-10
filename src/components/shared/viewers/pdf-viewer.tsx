@@ -23,7 +23,9 @@ const Page = dynamic(() => import('react-pdf').then(mod => mod.Page), {
 
 // Import CSS only on client side
 if (typeof window !== 'undefined') {
+  // @ts-expect-error -- CSS imports lack type declarations
   import('react-pdf/dist/Page/AnnotationLayer.css')
+  // @ts-expect-error -- CSS imports lack type declarations
   import('react-pdf/dist/Page/TextLayer.css')
 }
 

@@ -84,7 +84,7 @@ export function AccountSettingsMenu({ children }: AccountSettingsMenuProps) {
           {/* User Profile Header */}
           <div className="flex items-center gap-3 px-2 py-2 mb-1">
             <Avatar className="h-9 w-9">
-              {user?.avatar && <AvatarImage src={user.avatar} alt={userName} />}
+              {user?.image && <AvatarImage src={user.image} alt={userName} />}
               <AvatarFallback className="bg-primary text-primary-foreground text-sm">
                 {userInitials}
               </AvatarFallback>

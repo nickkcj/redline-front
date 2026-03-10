@@ -13,10 +13,12 @@ import type { DocumentResponseDto } from '../types/document.types'
 export const mockUser: UserDTO = {
   id: '',
   email: '',
+  google_id: null,
   name: '',
-  avatar: null,
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
+  image: null,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  workspaces: [],
 }
 
 // Empty arrays - real data comes from API
